@@ -1,0 +1,9 @@
+﻿{% if patients_list %}
+    <ul>
+    {% for patient in patients_list %}
+        <li><a href="/patients/{{ patient.id }}/">{{ patient.family }}{{ patient.name }}{{ patient.sname }}</a></li>
+    {% endfor %}
+    </ul>
+{% else %}
+    <p>Список пациентов пуст.</p>
+{% endif %}
