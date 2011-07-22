@@ -6,6 +6,8 @@ from pansionat.models import Item
 from pansionat.models import DietItems
 from pansionat.models import MedicalLocation
 from pansionat.models import MedicalRole
+from pansionat.models import Room
+from pansionat.models import BookIt 
 
 from django.contrib import admin
 
@@ -28,3 +30,5 @@ admin.site.register(Diet, DietAdmin)
 admin.site.register(Item)
 admin.site.register(MedicalLocation)
 admin.site.register(MedicalRole)
+admin.site.register(Room)
+admin.site.register(BookIt)

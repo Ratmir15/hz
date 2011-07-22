@@ -56,4 +56,20 @@ class Busy(models.Model):
 	patient = models.ForeignKey(Patient)
 	start_date = models.DateTimeField('date started')
 	end_date = models.DateTimeField('date finished')
-	
+
+# Room book service
+ROOM_TYPE = (
+    ("L", "Lux"),
+    ("D", "Default"),
+)
+class Room (models.Model):
+    name = models.CharField(max_length = 50) # it can be room number or name of room
+    type = models.CharField(max_length = 1, choices = ROOM_TYPE)
+    description = models.CharField(max_length = 65535)
+
+class BookIt (models.Model):
+    room = models.ForeignKey(Room)
+    patient = models.ForeignKey(Patient)
+    start_date = models.DateTimeField("Start book date")
+    end_date = models.DateTimeField("End book date")
+    description = models.CharField(max_length = 65535)
