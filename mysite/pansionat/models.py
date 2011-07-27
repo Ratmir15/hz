@@ -7,10 +7,12 @@ class Employer(models.Model):
 	sname = models.CharField(max_length=50)
 
 class Patient(models.Model):
-	family = models.CharField(max_length=50)
-	name = models.CharField(max_length=50)
-	sname = models.CharField(max_length=50)
-	
+    family = models.CharField(max_length=50)
+    name = models.CharField(max_length=50)
+    sname = models.CharField(max_length=50)
+    birth_date = models.DateField()
+    grade = models.CharField()
+
 class Role(models.Model):
 	name = models.CharField(max_length=50)
 	
@@ -57,19 +59,51 @@ class Busy(models.Model):
 	start_date = models.DateTimeField('date started')
 	end_date = models.DateTimeField('date finished')
 
+class Order(models.Model):
+    id = models.CharField(max_length = 10)
+    patient = models.ForeignKey(Patient)
+    customer = models.ForeignKey(Customer)
+    start_date = models.DateField('date started')
+    end_date = models.DateField('date finished')
+    price = models.DecimalField(decimal_places = 2)
+    is_with_child = models.BooleanField
+
+class Customer(models.Model):
+    id = models.CharField(max_length = 50)
+    is_show = models.BooleanField
+
 # Room book service
-ROOM_TYPE = (
-    ("L", "Lux"),
-    ("D", "Default"),
-)
+#ROOM_TYPE = (
+#    ("L", "Lux"),
+#    ("D", "Default"),
+#)
+    
+class RoomType(models.Model):
+    name = models.CharField(max_length = 50)
+    places = models.IntegerField()
+    price = models.DecimalField(decimal_places = 2)
+    is_additional_people_available = models.BooleanField
+    is_blocked_for_single = models.BooleanField
+
+
 class Room (models.Model):
     name = models.CharField(max_length = 50) # it can be room number or name of room
-    type = models.CharField(max_length = 1, choices = ROOM_TYPE)
+    type = models.ForeignKey(RoomType)
     description = models.CharField(max_length = 65535)
 
 class BookIt (models.Model):
+    order = models.ForeignKey(Order)
     room = models.ForeignKey(Room)
-    patient = models.ForeignKey(Patient)
     start_date = models.DateTimeField("Start book date")
     end_date = models.DateTimeField("End book date")
     description = models.CharField(max_length = 65535)
+
+class Book(models.Model):
+    room = models.ForeignKey(Room)
+    room_type = models.ForeignKey(RoomType)
+    start_date = models.DateTimeField("Start book date")
+    end_date = models.DateTimeField("End book date")
+    name = models.CharField(max_length = 65535)
+    phone = models.CharField(max_length = 11)
+    description = models.CharField(max_length = 65535)
+
