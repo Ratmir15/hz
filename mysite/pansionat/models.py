@@ -10,8 +10,8 @@ class Patient(models.Model):
     family = models.CharField(max_length=50)
     name = models.CharField(max_length=50)
     sname = models.CharField(max_length=50)
-    birth_date = models.DateField()
-    grade = models.CharField()
+#    birth_date = models.DateField()
+#    grade = models.CharField(max_length = 30)
 
 class Role(models.Model):
 	name = models.CharField(max_length=50)
@@ -59,18 +59,18 @@ class Busy(models.Model):
 	start_date = models.DateTimeField('date started')
 	end_date = models.DateTimeField('date finished')
 
+class Customer(models.Model):
+    name = models.CharField(max_length = 50)
+    is_show = models.BooleanField()
+
 class Order(models.Model):
-    id = models.CharField(max_length = 10)
+    number = models.CharField(max_length = 10)
     patient = models.ForeignKey(Patient)
     customer = models.ForeignKey(Customer)
     start_date = models.DateField('date started')
     end_date = models.DateField('date finished')
-    price = models.DecimalField(decimal_places = 2)
-    is_with_child = models.BooleanField
-
-class Customer(models.Model):
-    id = models.CharField(max_length = 50)
-    is_show = models.BooleanField
+    price = models.DecimalField(max_digits = 10,decimal_places = 2)
+    is_with_child = models.BooleanField()
 
 # Room book service
 #ROOM_TYPE = (
@@ -81,9 +81,9 @@ class Customer(models.Model):
 class RoomType(models.Model):
     name = models.CharField(max_length = 50)
     places = models.IntegerField()
-    price = models.DecimalField(decimal_places = 2)
-    is_additional_people_available = models.BooleanField
-    is_blocked_for_single = models.BooleanField
+    price = models.DecimalField(max_digits = 10,decimal_places = 2)
+    is_additional_people_available = models.BooleanField()
+    is_blocked_for_single = models.BooleanField()
 
 
 class Room (models.Model):

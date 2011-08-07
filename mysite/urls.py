@@ -15,6 +15,8 @@ admin.autodiscover()
 urlpatterns = patterns('',
     (r'^patients/$', 'pansionat.views.index'),
     (r'^patients/(?P<patient_id>\d+)/$', 'pansionat.views.detail'),
+    (r'^test/(?P<test_id>\d+)/$', 'pansionat.views.test'),
+    (r'^xt/$', 'pansionat.views.xt'),
     (r'^bookit/$', 'pansionat.views.bookit'),
     (r'^admin/', include(admin.site.urls)),
 )
