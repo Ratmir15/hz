@@ -10,6 +10,7 @@ from pansionat.models import Room
 from pansionat.models import BookIt 
 
 from django.contrib import admin
+from mysite.pansionat.models import Order, Customer
 
 class DietInline(admin.TabularInline):
     model = DietItems
@@ -32,3 +33,5 @@ admin.site.register(MedicalLocation)
 admin.site.register(MedicalRole)
 admin.site.register(Room)
 admin.site.register(BookIt)
+admin.site.register(Order)
+admin.site.register(Customer)

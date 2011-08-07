@@ -12,6 +12,7 @@ from xlrd import open_workbook
 import re
 import logging
 from xlwt import *
+from mysite.pansionat.models import Order
 
 logger = logging.getLogger(__name__)
 ch = logging.StreamHandler()
@@ -106,6 +107,16 @@ def index(request):
 	})
 	return HttpResponse(t.render(c))
 
+def orders(request):
+    orders_list = Order.objects.all()
+    logger.error('trying to render order  '+ str(orders_list))
+    t = loader.get_template('pansionat/orders.html')
+    c = Context({
+    'orders_list': orders_list,
+    })
+    return HttpResponse(t.render(c))
+
+
 def detail(request, patient_id):
     return HttpResponse("You're looking at patient %s." % patient_id)
 	
@@ -114,23 +125,143 @@ def bookit(request):
     room_list = Room.objects.all()
     return render_to_response('pansionat/bookit.html', {'rooms':room_list})
 
+def write_and_clone_cell(wtsheet, merged_cell_top_left_map, value, style, rdrowx, rdcolx, wtrowx, wtcolx,nrows_to_clone):
+    if nrows_to_clone > 0:
+        for j in xrange(nrows_to_clone):
+            write_cell(wtsheet, merged_cell_top_left_map, value, style, rdrowx, rdcolx, wtrowx + j - 1, wtcolx)
+    else:
+        write_cell(wtsheet, merged_cell_top_left_map, value, style, rdrowx, rdcolx, wtrowx, wtcolx)
+
+def write_cell(wtsheet, merged_cell_top_left_map, value, style, rdrowx, rdcolx, wtrowx, wtcolx):
+    rdcoords2d = (rdrowx, rdcolx)
+    if rdcoords2d in merged_cell_top_left_map:
+    # The cell is the governing cell of a group of
+    # merged cells.
+        rlo, rhi, clo, chi = merged_cell_top_left_map[rdcoords2d]
+        wtsheet.write_merge(
+            wtrowx, wtrowx + rhi - rlo - 1,
+            wtcolx, wtcolx + chi - clo - 1,
+            value, style)
+    else:
+        wtsheet.write(wtrowx, wtcolx, value, style)
+
+def nakl(request, order_id):
+    order = Order.objects.get(id=order_id)
+    template_filename = '/Users/rpanov/Downloads/tov_nakl1.xls'
+    tel = {'PIZDEZ': 'HZ', 'NUMBER': order.number, 'DATE':order.start_date, 'QTYSUM':1, 'AMOUNTSUM':order.price, 'AMOUNTNDSSUM':order.price, 'ALLAMOUNTSUM':order.price,
+           'TOVAR': [{'ROWINDEX':1,'NAME':'TOVAR1','QTY':1,'PRICE':order.price,'AMOUNT':order.price,
+                      'PNDS':0,'AMOUNTNDS':'-','ALLAMOUNT':order.price},
+           {'ROWINDEX':1,'NAME':'TOVAR1','QTY':1,'PRICE':order.price,'AMOUNT':order.price,
+                      'PNDS':0,'AMOUNTNDS':'-','ALLAMOUNT':order.price}]}
+    return fill_excel_template(template_filename, tel)
+
 def xt(request):
-#    rb = open_workbook('/Users/rpanov/Documents/w1.xls',formatting_info=True)
-    tel = {'PIZDEZ': 'HZ', 'NUMBER': 535, 'TOVAR': [{'NAME':'TOVAR1','QTY':2},{'NAME':'TOVAR2','QTY':3}]}
-    rb = open_workbook('/Users/rpanov/Downloads/tov_nakl1.xls',formatting_info=True)
+    tel = {'PIZDEZ': 'HZ', 'NUMBER': 1236, 'DATE':'26.07.11', 'QTYSUM':3, 'AMOUNTSUM':17810, 'AMOUNTNDSSUM':17810, 'ALLAMOUNTSUM':17810,
+           'TOVAR': [{'ROWINDEX':1,'NAME':'TOVAR1','QTY':1,'PRICE':17810,'AMOUNT':17810,
+                      'PNDS':0,'AMOUNTNDS':'-','ALLAMOUNT':17810},
+                   {'ROWINDEX':2,'NAME':'TOVAR2','QTY':2,'PRICE':17810,'AMOUNT':17810,
+                      'PNDS':0,'AMOUNTNDS':'-','ALLAMOUNT':17810}]}
+    template_filename = '/Users/rpanov/Downloads/tov_nakl1.xls'
+    return fill_excel_template(template_filename, tel)
+
+def fill_excel_template(template_filename, tel):
+    rb = open_workbook(template_filename,formatting_info=True)
     rsh = rb.sheet_by_index(0)
-    w = copy(rb)
-    sh = w.get_sheet(0)
+    w = xlwt.Workbook(style_compression=2)
+    wtsheet = w.add_sheet('Shit', cell_overwrite_ok=True)
+    rdsheet = rsh
+    #
+    # MERGEDCELLS
+    #
+    mc_map = {}
+    mc_nfa = set()
+    for crange in rdsheet.merged_cells:
+        rlo, rhi, clo, chi = crange
+        mc_map[(rlo, clo)] = crange
+        for rowx in xrange(rlo, rhi):
+            for colx in xrange(clo, chi):
+                mc_nfa.add((rowx, colx))
+
+    #self.merged_cell_top_left_map = mc_map
+    #self.merged_cell_already_set = mc_nfa
+    if not rdsheet.formatting_info:
+        return
+    #
+    # default column width: STANDARDWIDTH, DEFCOLWIDTH
+    #
+    if rdsheet.standardwidth is not None:
+        # STANDARDWIDTH is expressed in units of 1/256 of a
+        # character-width, but DEFCOLWIDTH is expressed in units of
+        # character-width; we lose precision by rounding to
+        # the higher whole number of characters.
+        #### XXXX TODO: implement STANDARDWIDTH record in xlwt.
+        wtsheet.col_default_width = \
+            (rdsheet.standardwidth + 255) // 256
+    elif rdsheet.defcolwidth is not None:
+        wtsheet.col_default_width = rdsheet.defcolwidth
+    #
+    # WINDOW2
+    #
+    wtsheet.show_formulas = rdsheet.show_formulas
+    wtsheet.show_grid = rdsheet.show_grid_lines
+    wtsheet.show_headers = rdsheet.show_sheet_headers
+    wtsheet.panes_frozen = rdsheet.panes_are_frozen
+    wtsheet.show_zero_values = rdsheet.show_zero_values
+    wtsheet.auto_colour_grid = rdsheet.automatic_grid_line_colour
+    wtsheet.cols_right_to_left = rdsheet.columns_from_right_to_left
+    wtsheet.show_outline = rdsheet.show_outline_symbols
+    wtsheet.remove_splits = rdsheet.remove_splits_if_pane_freeze_is_removed
+    wtsheet.selected = rdsheet.sheet_selected
+    # xlrd doesn't read WINDOW1 records, so we have to make a best
+    # guess at which the active sheet should be:
+    # (at a guess, only one sheet should be marked as visible)
+   # if not self.sheet_visible and rdsheet.sheet_visible:
+   #     self.wtbook.active_sheet = self.wtsheet_index
+    wtsheet.sheet_visible = 1
+    #self.wtsheet_index +=1
+
+    wtsheet.page_preview = rdsheet.show_in_page_break_preview
+    wtsheet.first_visible_row = rdsheet.first_visible_rowx
+    wtsheet.first_visible_col = rdsheet.first_visible_colx
+    wtsheet.grid_colour = rdsheet.gridline_colour_index
+    wtsheet.preview_magn = rdsheet.cached_page_break_preview_mag_factor
+    wtsheet.normal_magn = rdsheet.cached_normal_view_mag_factor
+    #
+    # DEFAULTROWHEIGHT
+    #
+    wtsheet.row_default_height =          rdsheet.default_row_height
+    wtsheet.row_default_height_mismatch = rdsheet.default_row_height_mismatch
+    wtsheet.row_default_hidden =          rdsheet.default_row_hidden
+    wtsheet.row_default_space_above =     rdsheet.default_additional_space_above
+    wtsheet.row_default_space_below =     rdsheet.default_additional_space_below
+
     res = re.compile("\{\{\{([A-Za-z]*)\.?([A-Za-z]*)\}\}\}")
-    #rb = open_workbook('/Users/rpanov/Downloads/tov_nakl1.xls',formatting_info=True)
+    style_list = get_xlwt_style_list(rb)
+    ymargin = 0
+    wtcols = set()
+    for wtcolx in xrange(rsh.ncols):
+        rdcolx = wtcolx
+        if wtcolx not in wtcols and rdcolx in rsh.colinfo_map:
+            rdcol = rsh.colinfo_map[rdcolx]
+            wtcol = wtsheet.col(wtcolx)
+            wtcol.width = rdcol.width
+            #wtcol.set_style(self.style_list[rdcol.xf_index])
+            wtcol.hidden = rdcol.hidden
+            wtcol.level = rdcol.outline_level
+            wtcol.collapsed = rdcol.collapsed
+            wtcols.add(wtcolx)
+
+
+    cloned_rows = set()
+
     for rrowx in xrange(rsh.nrows):
-        #rrowvalues = sh.row_values(rrowx)
+        i = 0
         for col in xrange(rsh.ncols):
             v = rsh.cell_value(rrowx,col)
             st = rsh.cell_xf_index(rrowx,col)
+            style=style_list[rsh.cell_xf_index(rrowx, col)]
             if isinstance(v, str) or isinstance(v,unicode):
                 list = res.findall(v)
-#                if v.startswith("{{{"):
                 if len(list)>0:
                     match = list[0]
                     logger.error('found '+str(list) + ' in '+v)
@@ -142,27 +273,24 @@ def xt(request):
                         i = 0
                         for zx in vl:
                             value = zx[secondkey]
-                            sh.write(rrowx+i,col,value)
+                            write_cell(wtsheet, mc_map, value, style, rrowx, col, rrowx + i, col)
                             i = i + 1
+                            if not rrowx in cloned_rows:
+                                ymargin = ymargin + 1
+                        if not rrowx in cloned_rows:
+                            ymargin = ymargin-1
+                            for k in xrange(col-1):
+                                write_and_clone_cell(wtsheet, mc_map, rsh.cell_value(rrox,k), style_list[rsh.cell_xf_index(rrowx,k)], rrowx, k, rrowx , k, i)
+                        cloned_rows.add(rrowx)
                     else:
                         key = match[0]
                         value = tel[key]
-                        logger.error('trying to write '+ str(value))
-                        xf = rb.xf_list[st]
-                        #style1 = XFStyle()
-                        #style1.font  = rb.font_list[xf.font_index]
-                        style_list = get_xlwt_style_list(rb)
-                        #ws.write(rx, cx, sh.cell_value(rowx=rx, colx=cx), style=style_list[sh.cell_xf_index(rx, cx)])
-                        sh.write(rrowx,col,value,style=style_list[rsh.cell_xf_index(rrowx, col)])
-                        logger.error('successfully wrote '+ str(value))
-#                else:
-#                    sh.write(rrowx,col,str(rrowx)+'_'+str(col)+'_zhopa')
-#            else:
-#                sh.write(rrowx,col,str(type(v)))
+                        write_and_clone_cell(wtsheet, mc_map, value, style, rrowx, col, rrowx + ymargin, col, i)
+                else:
+                    write_and_clone_cell(wtsheet, mc_map, v, style, rrowx, col, rrowx + ymargin, col, i)
+            else:
+                write_and_clone_cell(wtsheet, mc_map, v, style, rrowx, col, rrowx + ymargin, col, i)
 
-
-    #w.get_sheet(0).write(9,1,"PIZDEZZZZ")
-    #w.get_sheet(0).write(8,1,"ZHOPA")
     response = HttpResponse(mimetype='application/vnd.ms-excel')
     response['Content-Disposition'] = 'attachment; filename=report.xls'
     w.save(response)
