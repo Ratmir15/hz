@@ -1,5 +1,7 @@
 # Create your views here.
 # coding: utf-8
+from datetime import date
+import datetime
 
 from django.template import Context, loader
 from pansionat.models import Patient
@@ -126,7 +128,7 @@ def bookit(request):
     return render_to_response('pansionat/bookit.html', {'rooms':room_list})
 
 def write_and_clone_cell(wtsheet, merged_cell_top_left_map, value, style, rdrowx, rdcolx, wtrowx, wtcolx,nrows_to_clone):
-    if nrows_to_clone > 0:
+    if nrows_to_clone > 1:
         for j in xrange(nrows_to_clone):
             write_cell(wtsheet, merged_cell_top_left_map, value, style, rdrowx, rdcolx, wtrowx + j - 1, wtcolx)
     else:
@@ -145,14 +147,36 @@ def write_cell(wtsheet, merged_cell_top_left_map, value, style, rdrowx, rdcolx, 
     else:
         wtsheet.write(wtrowx, wtcolx, value, style)
 
+def reestr(request, year, month):
+    sd = datetime.date(int(year),int(month),1)
+    orders = Order.objects.all(sd <= start_date)
+    template_filename = '/Users/rpanov/Downloads/registrydiary.xls'
+    map = {'MONTH':month}
+    l = []
+    i = 0
+    for order in orders:
+        i = i + 1
+        innermap = dict()
+        innermap['NUMBER'] = i
+        innermap['NUMBERYEAR'] = i
+        innermap['FIO'] = order.patient.name
+        innermap['PRICE'] = order.price
+        innermap['DATEIN'] = order.start_date
+        innermap['SROK'] = str(order.start_date)+' - '+str(order.end_date)
+        l.append(innermap)
+
+    map['T'] = l
+    return fill_excel_template(template_filename, map)
+
+
 def nakl(request, order_id):
     order = Order.objects.get(id=order_id)
     template_filename = '/Users/rpanov/Downloads/tov_nakl1.xls'
     tel = {'PIZDEZ': 'HZ', 'NUMBER': order.number, 'DATE':order.start_date, 'QTYSUM':1, 'AMOUNTSUM':order.price, 'AMOUNTNDSSUM':order.price, 'ALLAMOUNTSUM':order.price,
            'TOVAR': [{'ROWINDEX':1,'NAME':'TOVAR1','QTY':1,'PRICE':order.price,'AMOUNT':order.price,
-                      'PNDS':0,'AMOUNTNDS':'-','ALLAMOUNT':order.price},
-           {'ROWINDEX':1,'NAME':'TOVAR1','QTY':1,'PRICE':order.price,'AMOUNT':order.price,
                       'PNDS':0,'AMOUNTNDS':'-','ALLAMOUNT':order.price}]}
+    #       {'ROWINDEX':1,'NAME':'TOVAR1','QTY':1,'PRICE':order.price,'AMOUNT':order.price,
+    #                 'PNDS':0,'AMOUNTNDS':'-','ALLAMOUNT':order.price}]}
     return fill_excel_template(template_filename, tel)
 
 def xt(request):
@@ -268,11 +292,11 @@ def fill_excel_template(template_filename, tel):
                     if len(match[1]) > 0:
                         mainkey=match[0]
                         secondkey = match[1]
-                        vl = tel[mainkey]
+                        vl = tel.get(mainkey,'')
                         logger.error('trying to write '+ str(vl))
                         i = 0
                         for zx in vl:
-                            value = zx[secondkey]
+                            value = zx.get(secondkey,'')
                             write_cell(wtsheet, mc_map, value, style, rrowx, col, rrowx + i, col)
                             i = i + 1
                             if not rrowx in cloned_rows:
@@ -284,7 +308,7 @@ def fill_excel_template(template_filename, tel):
                         cloned_rows.add(rrowx)
                     else:
                         key = match[0]
-                        value = tel[key]
+                        value = tel.get(key,'')
                         write_and_clone_cell(wtsheet, mc_map, value, style, rrowx, col, rrowx + ymargin, col, i)
                 else:
                     write_and_clone_cell(wtsheet, mc_map, v, style, rrowx, col, rrowx + ymargin, col, i)

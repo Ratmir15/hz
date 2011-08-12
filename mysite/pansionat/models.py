@@ -10,6 +10,9 @@ class Patient(models.Model):
     family = models.CharField(max_length=50)
     name = models.CharField(max_length=50)
     sname = models.CharField(max_length=50)
+    def __unicode__(self):
+        return self.family+' '+self.name+' '+self.sname
+
 #    birth_date = models.DateField()
 #    grade = models.CharField(max_length = 30)
 
