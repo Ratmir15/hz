@@ -1,0 +1,8 @@
+*.swp
+*.*.swp
+*.pyc
+*.*.pyc
+*/*.pyc
+**/**.pyc
+*/*.swp
+**/**.swp
