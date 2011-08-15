@@ -7,7 +7,13 @@ from pansionat.models import DietItems
 from pansionat.models import MedicalLocation
 from pansionat.models import MedicalRole
 from pansionat.models import Room
-from pansionat.models import BookIt 
+from pansionat.models import RoomType 
+from pansionat.models import Occupied
+from pansionat.models import Book
+from pansionat.models import RoomBook
+from pansionat.models import TypeBook
+from pansionat.models import Order 
+from pansionat.models import Customer 
 
 from django.contrib import admin
 from mysite.pansionat.models import Order, Customer
@@ -32,6 +38,10 @@ admin.site.register(Item)
 admin.site.register(MedicalLocation)
 admin.site.register(MedicalRole)
 admin.site.register(Room)
-admin.site.register(BookIt)
+admin.site.register(RoomType)
+admin.site.register(Occupied)
+admin.site.register(Book)
+admin.site.register(RoomBook)
+admin.site.register(TypeBook)
 admin.site.register(Order)
 admin.site.register(Customer)

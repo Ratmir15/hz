@@ -14,7 +14,11 @@ from xlrd import open_workbook
 import re
 import logging
 from xlwt import *
-from mysite.pansionat.models import Order
+from mysite.pansionat.models import Order, Customer, Occupied
+import datetime
+
+from django.db import connection
+
 
 logger = logging.getLogger(__name__)
 ch = logging.StreamHandler()
@@ -125,7 +129,13 @@ def detail(request, patient_id):
 	
 def bookit(request):
     room_list = Room.objects.all()
-    return render_to_response('pansionat/bookit.html', {'rooms':room_list})
+    now = datetime.now()
+    book_list= [(room, room.occupied_set.filter(start_date__gte = now))
+                for room in room_list]    
+
+    print book_list
+    print connection.queries
+    return render_to_response('pansionat/bookit.html', {'book_list': book_list})
 
 def write_and_clone_cell(wtsheet, merged_cell_top_left_map, value, style, rdrowx, rdcolx, wtrowx, wtcolx,nrows_to_clone):
     if nrows_to_clone > 1:
@@ -147,22 +157,67 @@ def write_cell(wtsheet, merged_cell_top_left_map, value, style, rdrowx, rdcolx, 
     else:
         wtsheet.write(wtrowx, wtcolx, value, style)
 
+def nextmonthfirstday(year, month):
+    if month==12:
+        newmonth = 1
+        newyear = year + 1
+    else:
+        newmonth = month + 1
+        newyear = year
+    return datetime.date(int(newyear), int(newmonth), 1)
+
+def init(doit):
+    if not doit:
+        return
+    p = Patient(family = 'Харитонова',name = 'Ульяна', sname = 'Яковлевна',
+                birth_date=datetime.date(1964,8,21),grade='Доярка',
+                passport_whom = 'ОВД ОКТ Р-НА',passport_number='63 04 658348',
+                address = 'г. Пенза, ул. Кулибина 61-39')
+    p.save()
+    p = Patient(family = 'Ленин',name = 'Владимир', sname = 'Ильич',
+                birth_date=datetime.date(1870,4,22),grade='Лидер',
+                passport_whom = 'ОВД ФРУНЗ Р-НА',passport_number='63 04 611148',
+                address = 'г. Пенза, ул. Маяковского 61-39')
+    p.save()
+    c = Customer(name = 'Кожвендиспансер')
+    c.save()
+    #o = Order(code = 'X1', startdate=datetime.date(2007,7,1),enddate=datetime.date(2007,7,15))
+    #o.save()
+
+
 def reestr(request, year, month):
-    sd = datetime.date(int(year),int(month),1)
-    orders = Order.objects.all(sd <= start_date)
+    init(0)
+    intyear = int(year)
+    intmonth = int(month)
+    sd = datetime.date(intyear , intmonth , 1)
+    fd = nextmonthfirstday(intyear, intmonth)
+#    orders = Order.objects.filter(start_date__lte=sd, start_date__rt=fd)
+    occupieds = Occupied.objects.filter(start_date__year=intyear, start_date__month=intmonth)
     template_filename = '/Users/rpanov/Downloads/registrydiary.xls'
     map = {'MONTH':month}
     l = []
     i = 0
-    for order in orders:
-        i = i + 1
+    print len(occupieds)
+    for occupied in occupieds:
+        order = occupied.order
+        i += 1
         innermap = dict()
         innermap['NUMBER'] = i
         innermap['NUMBERYEAR'] = i
-        innermap['FIO'] = order.patient.name
-        innermap['PRICE'] = order.price
-        innermap['DATEIN'] = order.start_date
+        innermap['FIO'] = order.patient.__unicode__()
+        innermap['AMOUNT'] = order.price
+        innermap['DATEIN'] = str(order.start_date)
+        innermap['DATEOUT'] = str(order.end_date)
         innermap['SROK'] = str(order.start_date)+' - '+str(order.end_date)
+        innermap['ORDERNUMBER'] = order.code
+        innermap['WHOIS'] = order.patient.grade
+        innermap['WHOM'] = order.directive.name
+        innermap['TIME'] = str(order.start_date)
+        innermap['WORK'] = order.customer.name
+        innermap['BIRTHDATE'] = str(order.patient.birth_date)
+        innermap['PASSPORT'] = order.patient.passport_number+' '+order.patient.passport_whom
+        innermap['ADDRESS'] = order.patient.address
+        innermap['ROOM'] = occupied.room.name
         l.append(innermap)
 
     map['T'] = l

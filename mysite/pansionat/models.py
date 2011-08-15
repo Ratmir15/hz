@@ -10,6 +10,11 @@ class Patient(models.Model):
     family = models.CharField(max_length=50)
     name = models.CharField(max_length=50)
     sname = models.CharField(max_length=50)
+    birth_date = models.DateField()
+    grade = models.CharField(max_length=50)
+    passport_number = models.CharField(max_length=20)
+    passport_whom = models.CharField(max_length=30)
+    address = models.CharField(max_length=200)
     def __unicode__(self):
         return self.family+' '+self.name+' '+self.sname
 
@@ -67,13 +72,15 @@ class Customer(models.Model):
     is_show = models.BooleanField()
 
 class Order(models.Model):
-    number = models.CharField(max_length = 10)
+    code = models.CharField(max_length = 10)
     patient = models.ForeignKey(Patient)
     customer = models.ForeignKey(Customer)
+    directive = models.ForeignKey(Customer, related_name='dir')
     start_date = models.DateField('date started')
     end_date = models.DateField('date finished')
-    price = models.DecimalField(max_digits = 10,decimal_places = 2)
+    price = models.DecimalField(decimal_places = 2,max_digits=8)
     is_with_child = models.BooleanField()
+
 
 # Room book service
 #ROOM_TYPE = (
@@ -84,17 +91,17 @@ class Order(models.Model):
 class RoomType(models.Model):
     name = models.CharField(max_length = 50)
     places = models.IntegerField()
-    price = models.DecimalField(max_digits = 10,decimal_places = 2)
+    price = models.DecimalField(decimal_places=2,max_digits=8)
     is_additional_people_available = models.BooleanField()
     is_blocked_for_single = models.BooleanField()
 
 
 class Room (models.Model):
     name = models.CharField(max_length = 50) # it can be room number or name of room
-    type = models.ForeignKey(RoomType)
+    room_type = models.ForeignKey(RoomType)
     description = models.CharField(max_length = 65535)
 
-class BookIt (models.Model):
+class Occupied(models.Model):
     order = models.ForeignKey(Order)
     room = models.ForeignKey(Room)
     start_date = models.DateTimeField("Start book date")
@@ -102,11 +109,17 @@ class BookIt (models.Model):
     description = models.CharField(max_length = 65535)
 
 class Book(models.Model):
-    room = models.ForeignKey(Room)
-    room_type = models.ForeignKey(RoomType)
     start_date = models.DateTimeField("Start book date")
     end_date = models.DateTimeField("End book date")
     name = models.CharField(max_length = 65535)
     phone = models.CharField(max_length = 11)
     description = models.CharField(max_length = 65535)
 
+class RoomBook(models.Model):
+    room = models.ForeignKey(Room)
+    book = models.ForeignKey(Book)
+
+class TypeBook(models.Model):
+    room_type = models.ForeignKey(RoomType)
+    amount = models.IntegerField()
+    book = models.ForeignKey(Book)
