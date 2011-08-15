@@ -116,11 +116,11 @@ def index(request):
 	return HttpResponse(t.render(c))
 
 def orders(request):
-    orders_list = Order.objects.all()
-    logger.error('trying to render order  '+ str(orders_list))
+    occupied_list = Occupied.objects.all()
+    logger.error('trying to render order  '+ str(occupied_list))
     t = loader.get_template('pansionat/orders.html')
     c = Context({
-    'orders_list': orders_list,
+    'occupied_list': occupied_list,
     })
     return HttpResponse(t.render(c))
 
@@ -130,7 +130,7 @@ def detail(request, patient_id):
 
 def bookit(request):
     room_list = Room.objects.all()
-    now = datetime.now()
+    now = datetime.datetime.now()
     book_list= [(room, room.occupied_set.filter(start_date__gte = now))
                 for room in room_list]
 
@@ -225,11 +225,88 @@ def reestr(request, year, month):
     return fill_excel_template(template_filename, map)
 
 
-def nakl(request, order_id):
-    order = Order.objects.get(id=order_id)
+def nakl(request, occupied_id):
+    occupied = Occupied.objects.get(id=occupied_id)
+    order = occupied.order
     template_filename = '/Users/rpanov/Downloads/tov_nakl1.xls'
-    tel = {'PIZDEZ': 'HZ', 'NUMBER': order.number, 'DATE':order.start_date, 'QTYSUM':1, 'AMOUNTSUM':order.price, 'AMOUNTNDSSUM':order.price, 'ALLAMOUNTSUM':order.price,
-           'TOVAR': [{'ROWINDEX':1,'NAME':'TOVAR1','QTY':1,'PRICE':order.price,'AMOUNT':order.price,
+    fullname = 'ООО санаторий "Хопровские зори"'
+    vendor = 'КПП 581701001 '+ fullname + ' Пензенская обл., п.Колышлей, ул.Лесная 1а'
+    client  = order.patient.fio()+','+order.patient.address
+    delt = order.end_date - order.start_date
+    days = delt.days + 1
+    tovar = 'Пут. сан.-кур. на '+str(days)+' дней c '+str(order.start_date)+' по '+str(order.end_date) + '№ '+ str(order.code)
+    tel = {'PIZDEZ': fullname, 'NUMBER': order.code,
+           'CLIENT': client, 'VENDOR': vendor,
+           'DIRECTOR': 'Киселев В.И.',
+           'GBUH': 'Абрамова Н.Г.',
+           'KASSIR': 'Кузьмина В.В.',
+           'SP': order.price,
+           'DATE':order.start_date, 'QTYSUM':1, 'AMOUNTSUM':order.price, 'AMOUNTNDSSUM':order.price, 'ALLAMOUNTSUM':order.price,
+           'TOVAR': [{'ROWINDEX':1,'NAME':tovar,'QTY':1,'PRICE':order.price,'AMOUNT':order.price,
+                      'PNDS':0,'AMOUNTNDS':'-','ALLAMOUNT':order.price}]}
+    return fill_excel_template(template_filename, tel)
+
+def pko(request, occupied_id):
+    occupied = Occupied.objects.get(id=occupied_id)
+    order = occupied.order
+    template_filename = '/Users/rpanov/Downloads/prih_order1.xls'
+    fullname = 'ООО санаторий "Хопровские зори"'
+    client  = order.patient.fio()
+    delt = order.end_date - order.start_date
+    days = delt.days + 1
+    tovar = 'Пут. сан.-кур. на '+str(days)+' дней c '+str(order.start_date)+' по '+str(order.end_date) + '№ '+ str(order.code)
+    tel = {'FULLNAME': fullname, 'NUMBER': order.code,
+           'CLIENT': client,
+           'GBUH': 'Абрамова Н.Г.',
+           'KASSIR': 'Кузьмина В.В.',
+           'PRICE': order.price,
+           'DATE':order.start_date,
+           'DESCRIPTION':tovar}
+    return fill_excel_template(template_filename, tel)
+
+def zayava(request, occupied_id):
+    occupied = Occupied.objects.get(id=occupied_id)
+    order = occupied.order
+    template_filename = '/Users/rpanov/Downloads/zayava.xls'
+    fullname = 'ООО санаторий "Хопровские зори"'
+    clientaddress = order.patient.address
+    clientio = order.patient.name + ' ' + order.patient.sname
+    delt = order.end_date - order.start_date
+    days = delt.days + 1
+    tel = {'FULLNAME': fullname, 'CODE': order.code,
+           'ROOM': occupied.room.name,
+           'CLIENTFAMILY': order.patient.family,
+           'CLIENTIO': clientio,
+           'CLIENTADDRESS': clientaddress,
+           'DIRECTOR': 'Киселев В.И.',
+           'AMOUNT': order.price,
+           'DAYS': days,
+           'STARTDATE': str(order.start_date),
+           'ENDDATE': str(order.end_date),
+           'DATE':order.start_date, 'QTYSUM':1, 'AMOUNTSUM':order.price, 'AMOUNTNDSSUM':order.price, 'ALLAMOUNTSUM':order.price}
+    return fill_excel_template(template_filename, tel)
+
+def schetfactura(request, occupied_id):
+    occupied = Occupied.objects.get(id=occupied_id)
+    order = occupied.order
+    template_filename = '/Users/rpanov/Downloads/sch_fakt1.xls'
+    fullname = 'ООО санаторий "Хопровские зори"'
+    saleaddress = 'Пензенская обл., п.Колышлей, ул.Лесная 1а'
+    vendor = fullname + ' ' + saleaddress
+    client  = order.patient.fio()+','+order.patient.address
+    delt = order.end_date - order.start_date
+    days = delt.days + 1
+    tovar = 'Пут. сан.-кур. на '+str(days)+' дней c '+str(order.start_date)+' по '+str(order.end_date) + '№ '+ str(order.code)
+    tel = {'SALER': fullname, 'NUMBER': order.code,
+           'CLIENT': order.patient.fio(), 'CLIENTADDRESS': order.patient.address,
+           'CLIENTALL': client, 'VENDOR': vendor,
+           'DIRECTOR': 'Киселев В.И.',
+           'GBUH': 'Абрамова Н.Г.',
+           'KASSIR': 'Кузьмина В.В.',
+           'INN': '5817000430',
+           'SALEADDRESS': saleaddress,
+           'DATE':order.start_date, 'QTYSUM':1, 'AMOUNTSUM':order.price, 'AMOUNTNDSSUM':order.price, 'ALLAMOUNTSUM':order.price,
+           'TOVAR': [{'ROWINDEX':1,'NAME':tovar,'QTY':1,'PRICE':order.price,'AMOUNT':order.price,
                       'PNDS':0,'AMOUNTNDS':'-','ALLAMOUNT':order.price}]}
     #       {'ROWINDEX':1,'NAME':'TOVAR1','QTY':1,'PRICE':order.price,'AMOUNT':order.price,
     #                 'PNDS':0,'AMOUNTNDS':'-','ALLAMOUNT':order.price}]}
@@ -247,7 +324,7 @@ def xt(request):
 def fill_excel_template(template_filename, tel):
     rb = open_workbook(template_filename,formatting_info=True)
     rsh = rb.sheet_by_index(0)
-    w = xlwt.Workbook(style_compression=2)
+    w = xlwt.Workbook(encoding="utf-8", style_compression=2)
     wtsheet = w.add_sheet('Shit', cell_overwrite_ok=True)
     rdsheet = rsh
     #

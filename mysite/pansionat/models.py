@@ -20,6 +20,8 @@ class Patient(models.Model):
     passport_number = models.CharField(max_length=20, verbose_name = 'Серия и номер паспорта')
     passport_whom = models.CharField(max_length=30, verbose_name = 'Кем выдан паспорт')
     address = models.CharField(max_length=200, verbose_name = 'Адрес')
+    def fio(self):
+        return self.family+' '+self.name+' '+self.sname
     def __unicode__(self):
         return self.family+' '+self.name+' '+self.sname
 
