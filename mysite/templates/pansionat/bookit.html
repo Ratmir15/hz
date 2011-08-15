@@ -1,11 +1,10 @@
 <html>
     <head>
         <meta http-equiv="content-type" content="text/html; charset=utf-8">
-        <style type="text/css"> 
-            @import "/static/dataTables/media/css/demo_page.css";
-            @import "/static/dataTables/media/css/demo_table.css";
-            @import "/static/jquery-ui/themes/base/jquery.ui.all.css";
-        </style> 
+        <link href="/static/dataTables/media/css/demo_table.css" rel="stylesheet" type="text/css" />
+        <link href="/static/jquery-ui/themes/base/jquery.ui.all.css" rel="stylesheet" type="text/css" />
+        <link href="/static/main.css" rel="stylesheet" type="text/css" />
+
         <script src="/static/dataTables/media/js/jquery.js"></script>
         <script src="/static/dataTables/media/js/jquery.dataTables.js"></script>
         <script src="/static/jquery-ui/ui/jquery.ui.core.js"></script> 
@@ -15,8 +14,6 @@
         <script src="/static/jquery-ui/ui/jquery.ui.button.js"></script>
         <script type="text/javascript">
             $(document).ready(function() {
-                var currentDate = new Date()
-                $('#rooms').dataTable();
                 $.datepicker.setDefaults($.datepicker.regional['ru']);
                 $('.datepicker').datepicker();
                 $('input:submit').button()
@@ -27,75 +24,29 @@
         
     </head>
     <body>
-        <form method="POST"> 
-            {% csrf_token %}
-            <table border="0">
-                <tr>
-                    <td>Start date:</td>
-                    <td><input type="text" name="start_date" class = "datepicker"></td>
-                </tr>
-                <tr>
-                    <td>End date:</td>
-                    <td><input type="text" name="end_date" class = "datepicker"></td>
-                </tr>
-                <tr>
-                    <td>Is Booked:</td>
-                    <td>
-                        <select name="typeSelect" id="typeSelect">
-                            <option value="All" selected>All</option>
-                            <option value="Booked">Booked</option>
-                            <option value="NotBooked">Not booked</option>
-                        </select>
-                    </td>
-                <tr>
-                <tr>
-                    <td>Select type:</td>
-                    <td>    
-                        <table border = "0">
-                            {% for type in types%}
-                                   <tr> 
-                                        <td>
-                                            <input type = "checkbox" name = "type" value = "{{ type.name }}">{{ type.name }}</input>
-                                        </td>
-                                   </tr>
-                            {% endfor %}
-                        </table>
-                    </td>
-                </tr>
-            </table>
-            <input type="submit" value="filter" class = "filter">
-        </form>
-        <form method="POST">
+        You choose the next rooms:
             <table border="1" id = "rooms" class = "display">
                 <thead>
                     <tr>
-                        <th>&nbsp;<th>
                         <th>Name</th>
                         <th>Type</th>
                         <th>Description</th>
-                        <th>Places</th>
-                        <th>Users</th>
                     </tr>
                 </thead>
                 <tbody>
-                    {% for room, occupied_set in book_list%}
+                    {% for room in rooms%}
                         <tr>
-                            <td> <input type="checkbox" name="{{ room.id }}" value="{{ room.id }}"/></td>
                             <td> {{ room.name  }} </td>
                             <td> {{ room.type.name}} </td>
                             <td> {{ room.description }} </td>
-                            <td> {{ room.type.places }} </td>
-                            <td>
-                                {% for occupied in occupied_set %}
-                                    <a href="/patient/{{ occupied.order.patient.id }}"> {{ occupied.order.patient.name  }} </a> &nbsp;
-                                {% endfor %}
-                                &nbsp;
-                            </td>
                         </tr>
                     {% endfor %}
                 </tbody>
             </table>
-            <input type="submit" value="Book"/>
+        <form action="/bookit/save/" method="post">
+            {% csrf_token %}
+            {{ book_form.as_p }}
+            <input type="submit" value="Submit" />
         </form>
     </body>
 </html>

@@ -18,6 +18,8 @@ from xlwt import *
 from mysite.pansionat.models import Order, Customer, Occupied
 import datetime
 from django import forms
+from django.core.context_processors import csrf
+from django.db.models import Q
 
 from django.db import connection
 
@@ -493,9 +495,10 @@ def rooms(request):
     now = datetime.now()
     book_list = room_with_occupied(now, now)  
     types = RoomType.objects.all()
+    values = {'book_list': book_list, 'types': types}
+    values.update(csrf(request))
 #    print connection.queries
-    return render_to_response('pansionat/rooms.html', {'book_list': book_list,\
-                        'types': types})
+    return render_to_response('pansionat/rooms.html', values)
 
 def room_with_occupied(start_date, end_date): 
     room_list = Room.objects.all()
@@ -503,17 +506,29 @@ def room_with_occupied(start_date, end_date):
                 end_date__gte = end_date))
                 for room in room_list]
 
-#class BookForm(forms.Form):
-#    start_date = forms.DateTimeField()
-#    end_date = forms.DateTimeField()
-#    name = forms.CharField(max_length = 65535)
-#    phone = forms.CharField(max_length = 11)
-#    description = forms.CharFiled(max_lehgth = 65535)
+class BookForm(forms.Form):
+    start_date = forms.DateTimeField(label = 'Start Date')
+    end_date = forms.DateTimeField(label = 'End date')
+    name = forms.CharField(label = 'Name', max_length = 65535)
+    phone = forms.CharField(label = 'Phone', max_length = 11)
+    description = forms.CharField(label = 'Description', max_length = 65535)
 
-#def bookit(request):
+def bookit(request):
     # Add handler here
-#    book_form = BookForm()
-#    return render_to_response('pansionat/bookit.html', {
-#        'book_form': book_form,
-#    })
+    rooms = request.POST.getlist('rooms')
+    query = None
+    for room in rooms:
+        if not query is None:
+            query |= Q(id = room)
+        else:
+            query = Q(id = room)
+    book_form = BookForm()
+    values = {'rooms' : Room.objects.filter(query), "book_form" : book_form}
+    values.update(csrf(request))
 
+    return render_to_response('pansionat/bookit.html', values)
+
+def bookit_save(request):
+    if request.method == 'POST':
+        form = BookForm(request.POST)
+        print form

@@ -1,0 +1,84 @@
+.ui-draggable, .ui-droppable {
+    background-position: top left;
+}
+
+.left-nav .demos-nav {
+    padding-right: 10px;
+}
+body {
+    font-size: 62.5%;
+}
+
+table {
+    font-size: 1em;
+}
+
+/* Site
+   -------------------------------- */
+
+body {
+    font-family: "Trebuchet MS", "Helvetica", "Arial",  "Verdana", "sans-serif";
+}
+
+/* Layout
+   -------------------------------- */
+
+.layout-grid {
+    width: 960px;
+}
+
+.layout-grid td {
+    vertical-align: top;
+}
+
+.layout-grid td.left-nav {
+    width: 140px;
+}
+
+.layout-grid td.normal {
+    border-left: 1px solid #eee;
+    padding: 20px 24px;
+    font-family: "Trebuchet MS", "Helvetica", "Arial",  "Verdana", "sans-serif";
+}
+
+.layout-grid td.demos {
+    background: url('/images/demos_bg.jpg') no-repeat;
+    height: 337px;
+    overflow: hidden;
+}
+
+/* Normal
+   -------------------------------- */
+
+.normal h3,
+.normal h4 {
+    margin: 0;
+    font-weight: normal;
+}
+
+.normal h3 {
+    padding: 0 0 9px;
+    font-size: 1.8em;
+}
+
+.normal h4 {
+    padding-bottom: 21px;
+    border-bottom: 1px dashed #999;
+    font-size: 1.2em;
+    font-weight: bold;
+}
+
+.normal p {
+    font-size: 1.2em;
+}
+
+/* new styles for demo pages, added by Filament 12.29.08
+eventually we should convert the font sizes to ems -- using px for now to minimize style conflicts
+*/
+
+.normal h3.demo-header { font-size:32px; padding:0 0 5px; border-bottom:1px solid #eee; text-transform: capitalize; }
+.normal h4.demo-subheader { font-size:10px; text-transform: uppercase; color:#999; padding:8px 0 3px; border:0; margin:0; }
+.normal a:link,
+.normal a:visited { color:#1b75bb; text-decoration:none; }
+.normal a:hover,
+.normal a:active { color:#0b559b; }

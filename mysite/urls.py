@@ -25,5 +25,6 @@ urlpatterns = patterns('',
     (r'^orders/reestr/(?P<year>\d+)/(?P<month>\d+)/$', 'pansionat.views.reestr'),
     (r'^xt/$', 'pansionat.views.xt'),
     (r'^bookit/$', 'pansionat.views.bookit'),
+    (r'^bookit/save/$', 'pansionat.views.bookit_save'),
     (r'^admin/', include(admin.site.urls)),
 )
