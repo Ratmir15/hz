@@ -1,40 +1,61 @@
+# coding: utf-8
 from django.db import models
 
 # Create your models here.
 class Employer(models.Model):
-	family = models.CharField(max_length=50)
-	name = models.CharField(max_length=50)
-	sname = models.CharField(max_length=50)
+    family = models.CharField(max_length=50, verbose_name = 'Фамилия')
+    name = models.CharField(max_length=50, verbose_name = 'Имя')
+    sname = models.CharField(max_length=50, verbose_name = 'Отчество')
+
+    class Meta:
+        verbose_name = 'Сотрудник'
+        verbose_name_plural = 'Сотрудники'
 
 class Patient(models.Model):
-    family = models.CharField(max_length=50)
-    name = models.CharField(max_length=50)
-    sname = models.CharField(max_length=50)
-    birth_date = models.DateField()
-    grade = models.CharField(max_length=50)
-    passport_number = models.CharField(max_length=20)
-    passport_whom = models.CharField(max_length=30)
-    address = models.CharField(max_length=200)
+    family = models.CharField(max_length=50, verbose_name = 'Фамилия')
+    name = models.CharField(max_length=50, verbose_name = 'Имя')
+    sname = models.CharField(max_length=50, verbose_name = 'Отчество')
+    birth_date = models.DateField(verbose_name = 'Дата рождения')
+    grade = models.CharField(max_length=50, verbose_name = 'Должность')
+    passport_number = models.CharField(max_length=20, verbose_name = 'Серия и номер паспорта')
+    passport_whom = models.CharField(max_length=30, verbose_name = 'Кем выдан паспорт')
+    address = models.CharField(max_length=200, verbose_name = 'Адрес')
     def __unicode__(self):
         return self.family+' '+self.name+' '+self.sname
+
+    class Meta:
+        verbose_name = 'Пациент'
+        verbose_name_plural = 'Пациенты'
 
 #    birth_date = models.DateField()
 #    grade = models.CharField(max_length = 30)
 
 class Role(models.Model):
-	name = models.CharField(max_length=50)
-	
+    name = models.CharField(max_length=50, verbose_name = 'Название')
+
+    class Meta:
+        verbose_name = 'Должность'
+        verbose_name_plural = 'Должности'
+
 class EmployerRoleHistory(models.Model):
-	employer = models.ForeignKey(Employer)
-	role = models.ForeignKey(Role)
-	start_date = models.DateTimeField('date started')
-	end_date = models.DateTimeField('date finished')
+    employer = models.ForeignKey(Employer)
+    role = models.ForeignKey(Role)
+    start_date = models.DateTimeField('date started')
+    end_date = models.DateTimeField('date finished')
 
 class Diet(models.Model):
-	name = models.CharField(max_length=50)
-	
+    name = models.CharField(max_length=50)
+
+    class Meta:
+        verbose_name = 'Диета'
+        verbose_name_plural = 'Диеты'
+
 class Item(models.Model):
-	name = models.CharField(max_length=50)
+    name = models.CharField(max_length=50)
+
+    class Meta:
+        verbose_name = 'Продукт'
+        verbose_name_plural = 'Продукты'
 
 class ItemPrices(models.Model):
 	item = models.ForeignKey(Item)
@@ -49,10 +70,18 @@ class DietItems(models.Model):
 	end_date = models.DateTimeField('date finished')
 
 class MedicalLocation(models.Model):
-	name = models.CharField(max_length=50)
+    name = models.CharField(max_length=50)
+
+    class Meta:
+        verbose_name = 'Кабинет'
+        verbose_name_plural = 'Кабинеты'
 
 class MedicalRole(models.Model):
-	name = models.CharField(max_length=50)
+    name = models.CharField(max_length=50)
+
+    class Meta:
+        verbose_name = 'Должность'
+        verbose_name_plural = 'Должности'
 
 class MedicalLocationRoles(models.Model):
 	location = models.ForeignKey(MedicalLocation)
@@ -68,8 +97,13 @@ class Busy(models.Model):
 	end_date = models.DateTimeField('date finished')
 
 class Customer(models.Model):
-    name = models.CharField(max_length = 50)
-    is_show = models.BooleanField()
+    name = models.CharField(max_length = 50, verbose_name = 'Название')
+    is_show = models.BooleanField(verbose_name = 'Показывать в отчетах')
+
+    class Meta:
+        verbose_name = 'Клиент'
+        verbose_name_plural = 'Клиенты'
+
 
 class Order(models.Model):
     code = models.CharField(max_length = 10)
@@ -95,11 +129,19 @@ class RoomType(models.Model):
     is_additional_people_available = models.BooleanField()
     is_blocked_for_single = models.BooleanField()
 
+    class Meta:
+        verbose_name = 'Тип номеров'
+        verbose_name_plural = 'Типы номеров'
+
 
 class Room (models.Model):
     name = models.CharField(max_length = 50) # it can be room number or name of room
     room_type = models.ForeignKey(RoomType)
     description = models.CharField(max_length = 65535)
+
+    class Meta:
+        verbose_name = 'Комната'
+        verbose_name_plural = 'Комнаты'
 
 class Occupied(models.Model):
     order = models.ForeignKey(Order)
@@ -107,6 +149,10 @@ class Occupied(models.Model):
     start_date = models.DateTimeField("Start book date")
     end_date = models.DateTimeField("End book date")
     description = models.CharField(max_length = 65535)
+
+    class Meta:
+        verbose_name = 'Бронь'
+        verbose_name_plural = 'Брони'
 
 class Book(models.Model):
     start_date = models.DateTimeField("Start book date")
