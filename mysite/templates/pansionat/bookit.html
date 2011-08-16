@@ -15,7 +15,8 @@
         <script type="text/javascript">
             $(document).ready(function() {
                 $.datepicker.setDefaults($.datepicker.regional['ru']);
-                $('.datepicker').datepicker();
+                $('#id_start_date').datepicker();
+                $('#id_end_date').datepicker();
                 $('input:submit').button()
                 } );
         </script> 
@@ -25,7 +26,7 @@
     </head>
     <body>
         You choose the next rooms:
-            <table border="1" id = "rooms" class = "display">
+            <table border="1" id = "rooms">
                 <thead>
                     <tr>
                         <th>Name</th>
@@ -45,7 +46,9 @@
             </table>
         <form action="/bookit/save/" method="post">
             {% csrf_token %}
-            {{ book_form.as_p }}
+            <table border = "0">
+                {{ book_form.as_table }}
+            </table>
             <input type="submit" value="Submit" />
         </form>
     </body>

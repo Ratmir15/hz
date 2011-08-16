@@ -8,8 +8,11 @@ from django.template import Context, loader
 from pansionat.models import Patient
 from pansionat.models import RoomType
 from pansionat.models import Room
+from pansionat.models import Book
+from pansionat.models import RoomBook
 from django.http import HttpResponse
 from django.shortcuts import render_to_response
+from django.shortcuts import redirect 
 from django_excel_templates import *
 from xlutils.copy import copy
 from xlrd import open_workbook
@@ -641,12 +644,14 @@ def room_with_occupied(start_date, end_date):
                 for room in room_list]
 
 class BookForm(forms.Form):
-    start_date = forms.DateTimeField(label = 'Start Date')
-    end_date = forms.DateTimeField(label = 'End date')
+    start_date = forms.DateField(label = 'Start Date', input_formats = ('%d.%m.%Y',))
+    end_date = forms.DateField(label = 'End date', input_formats  = ('%d.%m.%Y',))
     name = forms.CharField(label = 'Name', max_length = 65535)
     phone = forms.CharField(label = 'Phone', max_length = 11)
     description = forms.CharField(label = 'Description', max_length = 65535)
+    is_type = forms.BooleanField(label = "Book by category", required = False)
 
+#TODO: use django form with multiselect field
 def bookit(request):
     # Add handler here
     rooms = request.POST.getlist('rooms')
@@ -657,7 +662,8 @@ def bookit(request):
         else:
             query = Q(id = room)
     book_form = BookForm()
-    values = {'rooms' : Room.objects.filter(query), "book_form" : book_form}
+    request.session['rooms'] = Room.objects.filter(query) 
+    values = {'rooms' : request.session['rooms'], 'book_form' : book_form}
     values.update(csrf(request))
 
     return render_to_response('pansionat/bookit.html', values)
@@ -665,4 +671,27 @@ def bookit(request):
 def bookit_save(request):
     if request.method == 'POST':
         form = BookForm(request.POST)
-        print form
+        print dir(form)
+        print form.is_valid()
+        print form.errors
+#TODO: add form validation
+ #       if form.is_valid():
+            #TODO: use ModelFrom instead of simple form
+        book = Book()
+        book.start_date = form.cleaned_data['start_date']
+        book.end_date = form.cleaned_data['end_date']
+        book.name = form.cleaned_data['name']
+        book.phone = form.cleaned_data['phone']
+        book.description = form.cleaned_data['description']
+        book.save()
+        #TODO: handle type flag
+        for room in request.session['rooms']:
+            room_book = RoomBook()
+            room_book.room = room
+            room_book.book = book
+            room_book.save()
+#        else:
+#            values = {'rooms' : request.session['rooms'], 'book_form' : form}
+#            return render_to_response('pansionat/bookit.html', values)
+    # anyway redirect to rooms
+    return redirect('/rooms')            
