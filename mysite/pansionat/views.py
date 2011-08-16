@@ -637,10 +637,13 @@ def rooms(request):
 #    print connection.queries
     return render_to_response('pansionat/rooms.html', values)
 
-def room_with_occupied(start_date, end_date): 
+def room_with_occupied(start_date, end_date):
+#    print dir(Room) 
     room_list = Room.objects.all()
     return [(room, room.occupied_set.filter(start_date__lte = start_date,\
-                end_date__gte = end_date))
+                end_date__gte = end_date),\
+                room.roombook_set.filter(book__start_date__lte = start_date,\
+                book__end_date__gte = end_date))
                 for room in room_list]
 
 class BookForm(forms.Form):
@@ -671,7 +674,7 @@ def bookit(request):
 def bookit_save(request):
     if request.method == 'POST':
         form = BookForm(request.POST)
-        print dir(form)
+#        print dir(form)
         print form.is_valid()
         print form.errors
 #TODO: add form validation

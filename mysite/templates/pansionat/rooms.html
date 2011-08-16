@@ -66,11 +66,12 @@
                         <th>Type</th>
                         <th>Description</th>
                         <th>Places</th>
-                        <th>Users</th>
+                        <th>Occupied</th>
+                        <th>Book users</th>
                     </tr>
                 </thead>
                 <tbody>
-                    {% for room, occupied_set in book_list%}
+                    {% for room, occupied_set, roombook_set in book_list%}
                         <tr>
                             <td> <input type="checkbox" name="rooms" value="{{ room.id }}"/></td>
                             <td> {{ room.name  }} </td>
@@ -80,6 +81,12 @@
                             <td>
                                 {% for occupied in occupied_set %}
                                     <a href="/patients/{{ occupied.order.patient.id }}/"> {{ occupied.order.patient.name  }} </a> &nbsp;
+                                {% endfor %}
+                                &nbsp;
+                            </td>
+                            <td>
+                                {% for roombook in roombook_set %}
+                                    {{ roombook.book.name }} &nbsp;
                                 {% endfor %}
                                 &nbsp;
                             </td>
