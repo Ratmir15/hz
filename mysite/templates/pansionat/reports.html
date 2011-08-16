@@ -34,7 +34,7 @@
 
 <link rel="stylesheet" href="/static/Refresh.css" type="text/css" />
 
-<title>Бронирования</title>
+<title>Отчеты</title>
 
 
 </head>
@@ -64,9 +64,9 @@
 				<li><a href="index.html">Главная</a></li>
 				<li><a href="index.html">Пациенты</a></li>
 				<li><a href="index.html">Персонал</a></li>
-                <li><a href="/rooms">Номера</a></li>
-                <li id="current"><a href="/orders">Путевки</a></li>
-                <li><a href="/reports">Отчеты</a></li>
+				<li><a href="/rooms">Номера</a></li>
+				<li><a href="/orders">Путевки</a></li>
+				<li id="current"><a href="/reports">Отчеты</a></li>
 			</ul>
 		</div>
 
@@ -119,30 +119,20 @@
 			<div id="main">
 
 				<a name="TemplateInfo"></a>
-				<h1>Список брони</h1>
+				<h1>Периоды отчетности</h1>
                 <table border="0" id = "occupied" class = "display">
-                <thead>
-                <th>Код</th>
-                </thead>
-                        {% for occupied in occupied_list %}
+                <thead><th>Год</th><th>Месяц</th></thead>
+                        {% for t in t_list %}
                             <tr>
                             <td>
-                                {{ occupied.order.code }}
+                                {{ t.year }}
                             </td>
                             <td>
-                                {{ occupied.order.customer.name }}
+                                {{ t.month }}
                             </td>
                             <td>
-                                {{ occupied.order.patient.fio }}
-                            </td>
-                            <td>
-                                {{ occupied.order.price }}
-                            </td>
-                            <td>
-                                <a href="nakl/{{ occupied.id }}/">Накладная</a>/
-                                    <a href="sf/{{ occupied.id }}/">Счет-фактура</a>/
-                                    <a href="pko/{{ occupied.id }}/">ПКО</a>/
-                                    <a href="zayava/{{ occupied.id }}/">Заявление</a>
+                                <a href="/reestr/{{ t.year }}/{{ t.month }}/">Реестр</a>&nbsp;/
+                                <a href="/moves/{{ t.year }}/{{ t.month }}/">Движения</a>
                                 </td>
                             </tr>
                         {% endfor %}

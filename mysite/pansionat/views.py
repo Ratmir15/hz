@@ -2,6 +2,7 @@
 # coding: utf-8
 from datetime import date
 import datetime
+from django.db.models.aggregates import Count, Sum
 
 from django.template import Context, loader
 from pansionat.models import Patient
@@ -126,6 +127,14 @@ def orders(request):
     })
     return HttpResponse(t.render(c))
 
+def reports(request):
+    t_list = Occupied.objects.dates('start_date','month', order='DESC')
+    logger.error('trying to render order  '+ str(t_list))
+    t = loader.get_template('pansionat/reports.html')
+    c = Context({
+    't_list': t_list,
+    })
+    return HttpResponse(t.render(c))
 
 def detail(request, patient_id):
     return HttpResponse("You're looking at patient %s." % patient_id)
@@ -275,7 +284,8 @@ def reestr(request, year, month):
     print intmonth
     occupieds = Occupied.objects.filter(start_date__year=intyear, start_date__month=intmonth)
     template_filename = '/Users/rpanov/Downloads/registrydiary.xls'
-    map = {'MONTH': monthlabel(intmonth)+' '+str(intyear)+' год'}
+    map = {'MONTH': monthlabel(intmonth)+' '+str(intyear)+' год',
+           'FILENAME': 'reestr-'+year+'-'+month}
     l = []
     i = 0
     print len(occupieds)
@@ -305,6 +315,37 @@ def reestr(request, year, month):
     return fill_excel_template(template_filename, map)
 
 
+def moves(request, year, month):
+    init(0)
+    intyear = int(year)
+    intmonth = int(month)
+    fd = nextmonthfirstday(intyear, intmonth)
+    occupieds = Occupied.objects.filter(start_date__year=intyear).values('order__customer__name').annotate(cnt=Count('order__customer__name'),sm=Sum('order__price'))
+    template_filename = '/Users/rpanov/Downloads/moves.xls'
+    map = {'MONTH': monthlabel(intmonth)+' '+str(intyear)+' год',
+           'M':monthlabel(intmonth),
+           'MNEXT':monthlabel(fd.month),
+           'FILENAME': 'moves-'+year+'-'+month,
+           'MARKETING': 'Зитев С.А.'}
+    l = []
+    i = 0
+    print len(occupieds)
+    print connection.queries
+    for occupied in occupieds:
+        i += 1
+        print occupied
+        innermap = dict()
+        innermap['IDX'] = i
+        innermap['NAME'] = occupied['order__customer__name']
+        innermap['QTY'] = occupied['cnt']
+        innermap['M'] = occupied['sm']
+        innermap['MNEXT'] = occupied['sm']
+        l.append(innermap)
+
+    map['T'] = l
+    return fill_excel_template(template_filename, map)
+
+
 def nakl(request, occupied_id):
     occupied = Occupied.objects.get(id=occupied_id)
     order = occupied.order
@@ -316,6 +357,7 @@ def nakl(request, occupied_id):
     days = delt.days + 1
     tovar = 'Пут. сан.-кур. на '+str(days)+' дней c '+str(order.start_date)+' по '+str(order.end_date) + '№ '+ str(order.code)
     tel = {'PIZDEZ': fullname, 'NUMBER': order.code,
+           'FILENAME': 'nakladnaya-'+order.code,
            'CLIENT': client, 'VENDOR': vendor,
            'DIRECTOR': 'Киселев В.И.',
            'GBUH': 'Абрамова Н.Г.',
@@ -336,6 +378,7 @@ def pko(request, occupied_id):
     days = delt.days + 1
     tovar = 'Пут. сан.-кур. на '+str(days)+' дней c '+str(order.start_date)+' по '+str(order.end_date) + '№ '+ str(order.code)
     tel = {'FULLNAME': fullname, 'NUMBER': order.code,
+           'FILENAME': 'pko-'+order.code,
            'CLIENT': client,
            'GBUH': 'Абрамова Н.Г.',
            'KASSIR': 'Кузьмина В.В.',
@@ -354,6 +397,7 @@ def zayava(request, occupied_id):
     delt = order.end_date - order.start_date
     days = delt.days + 1
     tel = {'FULLNAME': fullname, 'CODE': order.code,
+           'FILENAME': 'zayavlenie-'+order.code,
            'ROOM': occupied.room.name,
            'CLIENTFAMILY': order.patient.family,
            'CLIENTIO': clientio,
@@ -378,6 +422,7 @@ def schetfactura(request, occupied_id):
     days = delt.days + 1
     tovar = 'Пут. сан.-кур. на '+str(days)+' дней c '+str(order.start_date)+' по '+str(order.end_date) + '№ '+ str(order.code)
     tel = {'SALER': fullname, 'NUMBER': order.code,
+           'FILENAME': 'schetfaktura-'+order.code,
            'CLIENT': order.patient.fio(), 'CLIENTADDRESS': order.patient.address,
            'CLIENTALL': client, 'VENDOR': vendor,
            'DIRECTOR': 'Киселев В.И.',
@@ -539,7 +584,8 @@ def fill_excel_template(template_filename, tel):
                 write_and_clone_cell(wtsheet, mc_map, v, style, rrowx, col, rrowx + ymargin, col, i)
 
     response = HttpResponse(mimetype='application/vnd.ms-excel')
-    response['Content-Disposition'] = 'attachment; filename=report.xls'
+    filename = tel.get('FILENAME','report')
+    response['Content-Disposition'] = 'attachment; filename=' + filename + '.xls'
     w.save(response)
     return response
 
