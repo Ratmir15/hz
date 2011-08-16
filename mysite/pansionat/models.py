@@ -101,6 +101,8 @@ class Busy(models.Model):
 class Customer(models.Model):
     name = models.CharField(max_length = 50, verbose_name = 'Название')
     is_show = models.BooleanField(verbose_name = 'Показывать в отчетах')
+    def __unicode__(self):
+        return self.name
 
     class Meta:
         verbose_name = 'Клиент'
@@ -116,6 +118,8 @@ class Order(models.Model):
     end_date = models.DateField('date finished')
     price = models.DecimalField(decimal_places = 2,max_digits=8)
     is_with_child = models.BooleanField()
+    def __unicode__(self):
+        return self.code
 
 
 # Room book service
@@ -130,6 +134,8 @@ class RoomType(models.Model):
     price = models.DecimalField(decimal_places=2,max_digits=8)
     is_additional_people_available = models.BooleanField()
     is_blocked_for_single = models.BooleanField()
+    def __unicode__(self):
+        return self.name
 
     class Meta:
         verbose_name = 'Тип номеров'
@@ -140,6 +146,8 @@ class Room (models.Model):
     name = models.CharField(max_length = 50) # it can be room number or name of room
     room_type = models.ForeignKey(RoomType)
     description = models.CharField(max_length = 65535)
+    def __unicode__(self):
+        return self.name
 
     class Meta:
         verbose_name = 'Комната'
@@ -148,9 +156,11 @@ class Room (models.Model):
 class Occupied(models.Model):
     order = models.ForeignKey(Order)
     room = models.ForeignKey(Room)
-    start_date = models.DateTimeField("Start book date")
-    end_date = models.DateTimeField("End book date")
+    start_date = models.DateField("Start book date")
+    end_date = models.DateField("End book date")
     description = models.CharField(max_length = 65535)
+    def __unicode__(self):
+        return self.order.code
 
     class Meta:
         verbose_name = 'Бронь'

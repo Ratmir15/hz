@@ -130,20 +130,21 @@ def orders(request):
 def detail(request, patient_id):
     return HttpResponse("You're looking at patient %s." % patient_id)
 
-def bookit(request):
-    room_list = Room.objects.all()
-    now = datetime.datetime.now()
-    book_list= [(room, room.occupied_set.filter(start_date__gte = now))
-                for room in room_list]
-
-    print book_list
-    print connection.queries
-    return render_to_response('pansionat/bookit.html', {'book_list': book_list})
+#def bookit(request):
+#    room_list = Room.objects.all()
+#    now = datetime.datetime.now()
+#    book_list= [(room, room.occupied_set.filter(start_date__gte = now))
+#                for room in room_list]
+#
+#    print book_list
+#    print connection.queries
+#    return render_to_response('pansionat/bookit.html', {'book_list': book_list})
 
 def write_and_clone_cell(wtsheet, merged_cell_top_left_map, value, style, rdrowx, rdcolx, wtrowx, wtcolx,nrows_to_clone):
     if nrows_to_clone > 1:
+        #print 'Клонирование ячейки '+str(rdrowx)+'/'+str(rdcolx)+'/'+str(wtrowx)+'/'+str(wtcolx)+':'+str(nrows_to_clone)
         for j in xrange(nrows_to_clone):
-            write_cell(wtsheet, merged_cell_top_left_map, value, style, rdrowx, rdcolx, wtrowx + j - 1, wtcolx)
+            write_cell(wtsheet, merged_cell_top_left_map, value, style, rdrowx, rdcolx, wtrowx + j, wtcolx)
     else:
         write_cell(wtsheet, merged_cell_top_left_map, value, style, rdrowx, rdcolx, wtrowx, wtcolx)
 
@@ -172,20 +173,96 @@ def nextmonthfirstday(year, month):
 def init(doit):
     if not doit:
         return
-    p = Patient(family = 'Харитонова',name = 'Ульяна', sname = 'Яковлевна',
+    p1 = Patient(family = 'Харитонова',name = 'Ульяна', sname = 'Яковлевна',
                 birth_date=datetime.date(1964,8,21),grade='Доярка',
                 passport_whom = 'ОВД ОКТ Р-НА',passport_number='63 04 658348',
                 address = 'г. Пенза, ул. Кулибина 61-39')
-    p.save()
-    p = Patient(family = 'Ленин',name = 'Владимир', sname = 'Ильич',
+    p1.save()
+    p2 = Patient(family = 'Ленин',name = 'Владимир', sname = 'Ильич',
                 birth_date=datetime.date(1870,4,22),grade='Лидер',
                 passport_whom = 'ОВД ФРУНЗ Р-НА',passport_number='63 04 611148',
                 address = 'г. Пенза, ул. Маяковского 61-39')
-    p.save()
-    c = Customer(name = 'Кожвендиспансер')
-    c.save()
-    #o = Order(code = 'X1', startdate=datetime.date(2007,7,1),enddate=datetime.date(2007,7,15))
-    #o.save()
+    p2.save()
+    p3 = Patient(family = 'Комарова',name = 'Ирина', sname = 'Викторовна',
+                birth_date=datetime.date(1964,8,21),grade='Зав сект',
+                passport_whom = 'ОВД ОКТ Р-НА',passport_number='56 09 876408',
+                address = 'Г.ПЕНЗА УЛ.КУЛИБИНА 11-39 71-55-45')
+    p3.save()
+    p4 = Patient(family = 'Бурмистрова',name = 'Валентина', sname = 'Ивановна',
+                birth_date=datetime.date(1963,2,15),grade='Бухгалтер',
+                passport_whom = 'ОВД ШЕМЫШЕЙКА',passport_number='56 07 736141',
+                address = 'ШЕМЫШ.Р-Н С.МАЧКАССЫ УЛ.МОЛОДЕЖНАЯ 5. 28-1-34Д.Т.')
+    p4.save()
+    c1 = Customer(name = 'Кожвендиспансер')
+    c1.save()
+    c2 = Customer(name = 'Администрация окт. р-на')
+    c2.save()
+    c3 = Customer(name = 'Администрация каржиманского c/c')
+    c3.save()
+    c4 = Customer(name = 'МОУ СОШ№35')
+    c4.save()
+    c5 = Customer(name = 'Атмис-сахар')
+    c5.save()
+    c6 = Customer(name = 'ХЗ')
+    c6.save()
+    c7 = Customer(name = 'ЦРБ')
+    c7.save()
+    o1 = Order(code = '1266', start_date=datetime.date(2007,7,1),end_date=datetime.date(2007,7,15), patient = p1, customer = c1, directive = c5, price = 12345)
+    o1.save()
+    o2 = Order(code = '1267', start_date=datetime.date(2007,7,2),end_date=datetime.date(2007,7,15), patient = p2, customer = c2, directive = c5, price = 11000)
+    o2.save()
+    o3 = Order(code = '1268', start_date=datetime.date(2007,7,3),end_date=datetime.date(2007,7,15), patient = p3, customer = c3, directive = c6, price = 19000)
+    o3.save()
+    o4 = Order(code = '1269', start_date=datetime.date(2007,7,4),end_date=datetime.date(2007,7,15), patient = p4, customer = c4, directive = c6, price = 12000)
+    o4.save()
+    rt1 = RoomType(name = 'Люкс', places = 2, price=2000)
+    rt1.save()
+    rt2 = RoomType(name = 'Полулюкс', places = 3, price=1500)
+    rt2.save()
+    r1 = Room(name='1СК',room_type=rt1)
+    r1.save()
+    r2 = Room(name='1Д',room_type=rt2)
+    r2.save()
+    r3 = Room(name='33Б',room_type=rt2)
+    r3.save()
+    r4 = Room(name='3НК',room_type=rt1)
+    r4.save()
+    oc1 = Occupied(order = o1, room = r1, start_date=datetime.date(2007,7,1),end_date=datetime.date(2007,7,15), description = 'первый')
+    oc1.save()
+    oc2 = Occupied(order = o2, room = r2, start_date=datetime.date(2007,7,2),end_date=datetime.date(2007,7,15), description = 'второй')
+    oc2.save()
+    oc3 = Occupied(order = o3, room = r3, start_date=datetime.date(2007,7,3),end_date=datetime.date(2007,7,15), description = 'третий')
+    oc3.save()
+    oc4 = Occupied(order = o4, room = r4, start_date=datetime.date(2007,7,4),end_date=datetime.date(2007,7,15), description = 'четвертый')
+    oc4.save()
+
+def monthlabel(month):
+    if month==1:
+        return 'Январь'
+    if month==2:
+        return 'Февраль'
+    if month==3:
+        return 'Март'
+    if month==4:
+        return 'Апрель'
+    if month==5:
+        return 'Май'
+    if month==6:
+        return 'Июнь'
+    if month==7:
+        return 'Июль'
+    if month==8:
+        return 'Август'
+    if month==9:
+        return 'Сентябрь'
+    if month==10:
+        return 'Октябрь'
+    if month==11:
+        return 'Ноябрь'
+    if month==12:
+        return 'Декабрь'
+    return 'Ну типа this should never accured'
+
 
 
 def reestr(request, year, month):
@@ -194,10 +271,11 @@ def reestr(request, year, month):
     intmonth = int(month)
     sd = datetime.date(intyear , intmonth , 1)
     fd = nextmonthfirstday(intyear, intmonth)
-#    orders = Order.objects.filter(start_date__lte=sd, start_date__rt=fd)
+    print intyear
+    print intmonth
     occupieds = Occupied.objects.filter(start_date__year=intyear, start_date__month=intmonth)
     template_filename = '/Users/rpanov/Downloads/registrydiary.xls'
-    map = {'MONTH':month}
+    map = {'MONTH': monthlabel(intmonth)+' '+str(intyear)+' год'}
     l = []
     i = 0
     print len(occupieds)
@@ -423,31 +501,41 @@ def fill_excel_template(template_filename, tel):
                 list = res.findall(v)
                 if len(list)>0:
                     match = list[0]
-                    logger.error('found '+str(list) + ' in '+v)
+                    #logger.error('found '+str(list) + ' in '+v)
                     if len(match[1]) > 0:
                         mainkey=match[0]
                         secondkey = match[1]
                         vl = tel.get(mainkey,'')
-                        logger.error('trying to write '+ str(vl))
+                        #logger.error('trying to write '+ str(vl))
                         i = 0
                         for zx in vl:
                             value = zx.get(secondkey,'')
                             write_cell(wtsheet, mc_map, value, style, rrowx, col, rrowx + i, col)
-                            i = i + 1
+                            i += 1
                             if not rrowx in cloned_rows:
-                                ymargin = ymargin + 1
+                                ymargin += 1
+                                print ymargin
                         if not rrowx in cloned_rows:
-                            ymargin = ymargin-1
+                            ymargin -= 1
+                            print ymargin
                             for k in xrange(col-1):
+                                #print 'Копирование ячейки '+str(k)
                                 write_and_clone_cell(wtsheet, mc_map, rsh.cell_value(rrox,k), style_list[rsh.cell_xf_index(rrowx,k)], rrowx, k, rrowx , k, i)
                         cloned_rows.add(rrowx)
+                        #print 'Клонирована строка '+str(rrowx)
                     else:
                         key = match[0]
                         value = tel.get(key,'')
                         write_and_clone_cell(wtsheet, mc_map, value, style, rrowx, col, rrowx + ymargin, col, i)
                 else:
-                    write_and_clone_cell(wtsheet, mc_map, v, style, rrowx, col, rrowx + ymargin, col, i)
+                    #print 'Копирование ячейки 1 '+str(i)
+                    if i>0:
+                        ym = ymargin - i + 1
+                    else:
+                        ym = ymargin
+                    write_and_clone_cell(wtsheet, mc_map, v, style, rrowx, col, rrowx + ym, col, i)
             else:
+                #print 'Копирование ячейки 2'+str(i)
                 write_and_clone_cell(wtsheet, mc_map, v, style, rrowx, col, rrowx + ymargin, col, i)
 
     response = HttpResponse(mimetype='application/vnd.ms-excel')
@@ -460,7 +548,7 @@ def test(request, test_id):
     report = ExcelReport()
     report.addSheet("TestBasic")
     testobj = Patient.objects.all()
-#    report.addQuerySet(testobj, REPORT_HORZ, addheader=True)
+    #    report.addQuerySet(testobj, REPORT_HORZ, addheader=True)
     report.addSheet("TestStyle")
     style = ExcelStyle()
     style.set_alignment(horz=3, wrap=1)
@@ -471,7 +559,7 @@ def test(request, test_id):
     formatter.addBodyStyle(style=style)
     report.addFormatter(formatter)
     report.addQuerySet(testobj, orientation=REPORT_HORZ, addheader=True)
-#    report.addSheet("TestStyle2")
+    #    report.addSheet("TestStyle2")
 #    headerstyle = ExcelStyle(font_color='00FF00', shadow=True, underline=True,
 #    		      		 pattern_color='000000', pattern=1, border_style=5,
 #				 border_color='FFFFFF')
@@ -492,7 +580,7 @@ def test(request, test_id):
 
 	
 def rooms(request):
-    now = datetime.now()
+    now = datetime.datetime.now()
     book_list = room_with_occupied(now, now)  
     types = RoomType.objects.all()
     values = {'book_list': book_list, 'types': types}
