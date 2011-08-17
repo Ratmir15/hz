@@ -1,31 +1,42 @@
-<html>
-    <head>
-        <meta http-equiv="content-type" content="text/html; charset=utf-8">
-        <link href="/static/dataTables/media/css/demo_table.css" rel="stylesheet" type="text/css" />
-        <link href="/static/jquery-ui/themes/base/jquery.ui.all.css" rel="stylesheet" type="text/css" />
-        <link href="/static/main.css" rel="stylesheet" type="text/css" />
+{% extends "pansionat/index.html" %}
 
-        <script src="/static/dataTables/media/js/jquery.js"></script>
-        <script src="/static/dataTables/media/js/jquery.dataTables.js"></script>
-        <script src="/static/jquery-ui/ui/jquery.ui.core.js"></script> 
-        <script src="/static/jquery-ui/ui/jquery.ui.widget.js"></script> 
-        <script src="/static/jquery-ui/ui/jquery.ui.datepicker.js"></script> 
-        <script src="/static/jquery-ui/ui/i18n/jquery.ui.datepicker-ru.js"></script>
-        <script src="/static/jquery-ui/ui/jquery.ui.button.js"></script>
-        <script type="text/javascript">
-            $(document).ready(function() {
-                $('#rooms').dataTable();
-                $.datepicker.setDefaults($.datepicker.regional['ru']);
-                $('.datepicker').datepicker();
-                $('input:submit').button()
-                } );
-        </script> 
+{% block title %} Номера {%  endblock  %}
 
-        <title>Rooms</title>
-        
-    </head>
-    <body>
-        <form method="POST"> 
+{% block head %}
+    <link href="/static/dataTables/media/css/demo_table.css" rel="stylesheet" type="text/css" />
+    <link href="/static/jquery-ui/themes/base/jquery.ui.all.css" rel="stylesheet" type="text/css" />
+    <link href="/static/main.css" rel="stylesheet" type="text/css" />
+
+    <script src="/static/dataTables/media/js/jquery.js"></script>
+    <script src="/static/dataTables/media/js/jquery.dataTables.js"></script>
+    <script src="/static/jquery-ui/ui/jquery.ui.core.js"></script>
+    <script src="/static/jquery-ui/ui/jquery.ui.widget.js"></script>
+    <script src="/static/jquery-ui/ui/jquery.ui.datepicker.js"></script>
+    <script src="/static/jquery-ui/ui/i18n/jquery.ui.datepicker-ru.js"></script>
+    <script src="/static/jquery-ui/ui/jquery.ui.button.js"></script>
+    <script type="text/javascript">
+        $(document).ready(function() {
+            $('#rooms').dataTable();
+            $.datepicker.setDefaults($.datepicker.regional['ru']);
+            $('.datepicker').datepicker();
+            $('input:submit').button()
+            } );
+    </script>
+ {%  endblock  %}
+
+{% block mainmenu %}
+    <ul>
+        <li><a href="index.html">Главная</a></li>
+        <li><a href="index.html">Пациенты</a></li>
+        <li><a href="index.html">Персонал</a></li>
+        <li id="current"><a href="/rooms">Номера</a></li>
+        <li><a href="/orders">Путевки</a></li>
+        <li><a href="/reports">Отчеты</a></li>
+    </ul>
+ {%  endblock  %}
+
+{% block content %}
+        <form method="POST">
             {% csrf_token %}
             <table border="0">
                 <tr>
@@ -96,5 +107,4 @@
             </table>
             <input type="submit" value="Book"/>
         </form>
-    </body>
-</html>
+{%  endblock  %}
