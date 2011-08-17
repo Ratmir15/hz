@@ -12,6 +12,7 @@ from django.http import HttpResponse
 from django.shortcuts import render_to_response
 from django.shortcuts import redirect 
 import logging
+from mysite import settings
 from mysite.pansionat.models import Order, Customer, Occupied
 import datetime
 from django import forms
@@ -164,10 +165,8 @@ def reestr(request, year, month):
     init(0)
     intyear = int(year)
     intmonth = int(month)
-    print intyear
-    print intmonth
     occupieds = Occupied.objects.filter(start_date__year=intyear, start_date__month=intmonth)
-    template_filename = '/Users/rpanov/Downloads/registrydiary.xls'
+    template_filename = 'registrydiary.xls'
     map = {'MONTH': monthlabel(intmonth)+' '+str(intyear)+' год',
            'FILENAME': 'reestr-'+year+'-'+month}
     l = []
@@ -205,7 +204,7 @@ def moves(request, year, month):
     intmonth = int(month)
     fd = nextmonthfirstday(intyear, intmonth)
     occupieds = Occupied.objects.filter(start_date__year=intyear).values('order__customer__name').annotate(cnt=Count('order__customer__name'),sm=Sum('order__price'))
-    template_filename = '/Users/rpanov/Downloads/moves.xls'
+    template_filename = 'moves.xls'
     map = {'MONTH': monthlabel(intmonth)+' '+str(intyear)+' год',
            'M':monthlabel(intmonth),
            'MNEXT':monthlabel(fd.month),
@@ -233,7 +232,7 @@ def moves(request, year, month):
 def nakl(request, occupied_id):
     occupied = Occupied.objects.get(id=occupied_id)
     order = occupied.order
-    template_filename = '/Users/rpanov/Downloads/tov_nakl1.xls'
+    template_filename = 'tov_nakl1.xls'
     fullname = 'ООО санаторий "Хопровские зори"'
     vendor = 'КПП 581701001 '+ fullname + ' Пензенская обл., п.Колышлей, ул.Лесная 1а'
     client  = order.patient.fio()+','+order.patient.address
@@ -255,7 +254,7 @@ def nakl(request, occupied_id):
 def pko(request, occupied_id):
     occupied = Occupied.objects.get(id=occupied_id)
     order = occupied.order
-    template_filename = '/Users/rpanov/Downloads/prih_order1.xls'
+    template_filename = 'prih_order1.xls'
     fullname = 'ООО санаторий "Хопровские зори"'
     client  = order.patient.fio()
     delt = order.end_date - order.start_date
@@ -274,7 +273,7 @@ def pko(request, occupied_id):
 def zayava(request, occupied_id):
     occupied = Occupied.objects.get(id=occupied_id)
     order = occupied.order
-    template_filename = '/Users/rpanov/Downloads/zayava.xls'
+    template_filename = 'zayava.xls'
     fullname = 'ООО санаторий "Хопровские зори"'
     clientaddress = order.patient.address
     clientio = order.patient.name + ' ' + order.patient.sname
@@ -297,7 +296,7 @@ def zayava(request, occupied_id):
 def schetfactura(request, occupied_id):
     occupied = Occupied.objects.get(id=occupied_id)
     order = occupied.order
-    template_filename = '/Users/rpanov/Downloads/sch_fakt1.xls'
+    template_filename = 'sch_fakt1.xls'
     fullname = 'ООО санаторий "Хопровские зори"'
     saleaddress = 'Пензенская обл., п.Колышлей, ул.Лесная 1а'
     vendor = fullname + ' ' + saleaddress

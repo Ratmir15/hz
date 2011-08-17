@@ -5,6 +5,7 @@ from xlrd import open_workbook
 
 import re
 import xlwt
+from mysite import settings
 
 def get_xlwt_style_list(rdbook):
     wt_style_list = []
@@ -107,7 +108,7 @@ def write_cell(wtsheet, merged_cell_top_left_map, value, style, rdrowx, rdcolx, 
 
 
 def fill_excel_template(template_filename, tel):
-    rb = open_workbook(template_filename,formatting_info=True)
+    rb = open_workbook(settings.STATIC_ROOT + '/xls/' + template_filename,formatting_info=True)
     rsh = rb.sheet_by_index(0)
     w = xlwt.Workbook(encoding="utf-8", style_compression=2)
     wtsheet = w.add_sheet('Shit', cell_overwrite_ok=True)
