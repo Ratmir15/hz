@@ -12,7 +12,7 @@ from django.http import HttpResponse
 from django.shortcuts import render_to_response
 from django.shortcuts import redirect 
 import logging
-from mysite import settings
+from pansionat.pytils import numeral
 from mysite.pansionat.models import Order, Customer, Occupied
 import datetime
 from django import forms
@@ -245,7 +245,7 @@ def nakl(request, occupied_id):
            'DIRECTOR': 'Киселев В.И.',
            'GBUH': 'Абрамова Н.Г.',
            'KASSIR': 'Кузьмина В.В.',
-           'SP': order.price,
+           'SP': numeral.rubles(order.price, True),
            'DATE':order.start_date, 'QTYSUM':1, 'AMOUNTSUM':order.price, 'AMOUNTNDSSUM':order.price, 'ALLAMOUNTSUM':order.price,
            'TOVAR': [{'ROWINDEX':1,'NAME':tovar,'QTY':1,'PRICE':order.price,'AMOUNT':order.price,
                       'PNDS':0,'AMOUNTNDS':'-','ALLAMOUNT':order.price}]}
