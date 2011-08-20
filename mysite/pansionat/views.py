@@ -12,9 +12,10 @@ from django.http import HttpResponse
 from django.shortcuts import render_to_response
 from django.shortcuts import redirect 
 import logging
+from mysite.pansionat import gavnetso
 from pytils import numeral
-from mysite.pansionat.gavnetso import monthlabel, nextmonthfirstday, init
-from mysite.pansionat.models import Occupied
+from mysite.pansionat.gavnetso import monthlabel, nextmonthfirstday, init, initroles
+from mysite.pansionat.models import Occupied, Role
 import datetime
 from django import forms
 from django.core.context_processors import csrf
@@ -58,6 +59,7 @@ def detail(request, patient_id):
 
 def reestr(request, year, month):
     init(0)
+    #initroles()
     intyear = int(year)
     intmonth = int(month)
     occupieds = Occupied.objects.filter(start_date__year=intyear, start_date__month=intmonth)
@@ -104,7 +106,7 @@ def moves(request, year, month):
            'M':monthlabel(intmonth),
            'MNEXT':monthlabel(fd.month),
            'FILENAME': 'moves-'+year+'-'+month,
-           'MARKETING': 'Зитев С.А.'}
+           'MARKETING': gavnetso.getEmployerByRoleNameAndDate('Маркетинг',datetime.date(intyear, intmonth,1)).__unicode__()}
     l = []
     i = 0
     print len(occupieds)
@@ -133,13 +135,16 @@ def nakl(request, occupied_id):
     client  = order.patient.fio()+','+order.patient.address
     delt = order.end_date - order.start_date
     days = delt.days + 1
+    dir = gavnetso.getEmployerByRoleNameAndDate('Директор',order.start_date).__unicode__()
+    gb = gavnetso.getEmployerByRoleNameAndDate('Главный бухгалтер',order.start_date).__unicode__()
+    kassir = gavnetso.getEmployerByRoleNameAndDate('Кассир',order.start_date).__unicode__()
     tovar = 'Пут. сан.-кур. на '+str(days)+' дней c '+str(order.start_date)+' по '+str(order.end_date) + '№ '+ str(order.code)
     tel = {'PIZDEZ': fullname, 'NUMBER': order.code,
            'FILENAME': 'nakladnaya-'+order.code,
            'CLIENT': client, 'VENDOR': vendor,
-           'DIRECTOR': 'Киселев В.И.',
-           'GBUH': 'Абрамова Н.Г.',
-           'KASSIR': 'Кузьмина В.В.',
+           'DIRECTOR': dir,
+           'GBUH': gb,
+           'KASSIR': kassir,
            'SP': numeral.rubles(order.price, True),
            'DATE':order.start_date, 'QTYSUM':1, 'AMOUNTSUM':order.price, 'AMOUNTNDSSUM':order.price, 'ALLAMOUNTSUM':order.price,
            'TOVAR': [{'ROWINDEX':1,'NAME':tovar,'QTY':1,'PRICE':order.price,'AMOUNT':order.price,
@@ -152,14 +157,16 @@ def pko(request, occupied_id):
     template_filename = 'prih_order1.xls'
     fullname = 'ООО санаторий "Хопровские зори"'
     client  = order.patient.fio()
+    gb = gavnetso.getEmployerByRoleNameAndDate('Главный бухгалтер',order.start_date).__unicode__()
+    kassir = gavnetso.getEmployerByRoleNameAndDate('Кассир',order.start_date).__unicode__()
     delt = order.end_date - order.start_date
     days = delt.days + 1
     tovar = 'Пут. сан.-кур. на '+str(days)+' дней c '+str(order.start_date)+' по '+str(order.end_date) + '№ '+ str(order.code)
     tel = {'FULLNAME': fullname, 'NUMBER': order.code,
            'FILENAME': 'pko-'+order.code,
            'CLIENT': client,
-           'GBUH': 'Абрамова Н.Г.',
-           'KASSIR': 'Кузьмина В.В.',
+           'GBUH': gb,
+           'KASSIR': kassir,
            'PRICE': order.price,
            'DATE':order.start_date,
            'DESCRIPTION':tovar}
@@ -172,6 +179,7 @@ def zayava(request, occupied_id):
     fullname = 'ООО санаторий "Хопровские зори"'
     clientaddress = order.patient.address
     clientio = order.patient.name + ' ' + order.patient.sname
+    dir = gavnetso.getEmployerByRoleNameAndDate('Директор',order.start_date).__unicode__()
     delt = order.end_date - order.start_date
     days = delt.days + 1
     tel = {'FULLNAME': fullname, 'CODE': order.code,
@@ -180,7 +188,7 @@ def zayava(request, occupied_id):
            'CLIENTFAMILY': order.patient.family,
            'CLIENTIO': clientio,
            'CLIENTADDRESS': clientaddress,
-           'DIRECTOR': 'Киселев В.И.',
+           'DIRECTOR': dir,
            'AMOUNT': order.price,
            'DAYS': days,
            'STARTDATE': str(order.start_date),
@@ -196,6 +204,9 @@ def schetfactura(request, occupied_id):
     saleaddress = 'Пензенская обл., п.Колышлей, ул.Лесная 1а'
     vendor = fullname + ' ' + saleaddress
     client  = order.patient.fio()+','+order.patient.address
+    dir = gavnetso.getEmployerByRoleNameAndDate('Директор',order.start_date).__unicode__()
+    gb = gavnetso.getEmployerByRoleNameAndDate('Главный бухгалтер',order.start_date).__unicode__()
+    kassir = gavnetso.getEmployerByRoleNameAndDate('Кассир',order.start_date).__unicode__()
     delt = order.end_date - order.start_date
     days = delt.days + 1
     tovar = 'Пут. сан.-кур. на '+str(days)+' дней c '+str(order.start_date)+' по '+str(order.end_date) + '№ '+ str(order.code)
@@ -203,9 +214,9 @@ def schetfactura(request, occupied_id):
            'FILENAME': 'schetfaktura-'+order.code,
            'CLIENT': order.patient.fio(), 'CLIENTADDRESS': order.patient.address,
            'CLIENTALL': client, 'VENDOR': vendor,
-           'DIRECTOR': 'Киселев В.И.',
-           'GBUH': 'Абрамова Н.Г.',
-           'KASSIR': 'Кузьмина В.В.',
+           'DIRECTOR': dir,
+           'GBUH': gb,
+           'KASSIR': kassir,
            'INN': '5817000430',
            'SALEADDRESS': saleaddress,
            'DATE':order.start_date, 'QTYSUM':1, 'AMOUNTSUM':order.price, 'AMOUNTNDSSUM':order.price, 'ALLAMOUNTSUM':order.price,

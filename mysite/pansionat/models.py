@@ -6,6 +6,8 @@ class Employer(models.Model):
     family = models.CharField(max_length=50, verbose_name = 'Фамилия')
     name = models.CharField(max_length=50, verbose_name = 'Имя')
     sname = models.CharField(max_length=50, verbose_name = 'Отчество')
+    def __unicode__(self):
+        return self.family+' '+self.name+' '+self.sname
 
     class Meta:
         verbose_name = 'Сотрудник'
@@ -34,16 +36,24 @@ class Patient(models.Model):
 
 class Role(models.Model):
     name = models.CharField(max_length=50, verbose_name = 'Название')
+    def __unicode__(self):
+        return self.name
 
     class Meta:
         verbose_name = 'Должность'
         verbose_name_plural = 'Должности'
 
 class EmployerRoleHistory(models.Model):
-    employer = models.ForeignKey(Employer)
-    role = models.ForeignKey(Role)
-    start_date = models.DateTimeField('date started')
-    end_date = models.DateTimeField('date finished')
+    employer = models.ForeignKey(Employer, verbose_name = 'Сотрудник')
+    role = models.ForeignKey(Role, verbose_name = 'Должность')
+    start_date = models.DateField('Дата назначения')
+    end_date = models.DateField('Дата увольнения')
+    def __unicode__(self):
+        return self.employer.__unicode__()+'/'+self.role.__unicode__()
+
+    class Meta:
+        verbose_name = 'История должностей'
+        verbose_name_plural = 'История должностей'
 
 class Diet(models.Model):
     name = models.CharField(max_length=50)

@@ -1,6 +1,7 @@
 from pansionat.models import Employer
 from pansionat.models import Patient
 from pansionat.models import Role
+from pansionat.models import EmployerRoleHistory
 from pansionat.models import Diet
 from pansionat.models import Item
 from pansionat.models import DietItems
@@ -31,6 +32,7 @@ class DietAdmin(admin.ModelAdmin):
 
 
 admin.site.register(Employer)
+admin.site.register(EmployerRoleHistory)
 admin.site.register(Patient)
 admin.site.register(Role)
 admin.site.register(Diet, DietAdmin)

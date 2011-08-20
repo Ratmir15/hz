@@ -1,6 +1,7 @@
 # coding: utf-8
-from datetime import datetime
-from mysite.pansionat.models import Patient, Customer, Order, Occupied, Room, RoomType
+import datetime
+from django.db import connection
+from mysite.pansionat.models import Patient, Customer, Order, Occupied, Room, RoomType, EmployerRoleHistory, Role, Employer
 
 def nextmonthfirstday(year, month):
     if month==12:
@@ -77,6 +78,32 @@ def init(doit):
     oc4 = Occupied(order = o4, room = r4, start_date=datetime.date(2007,7,4),end_date=datetime.date(2007,7,15), description = 'четвертый')
     oc4.save()
 
+def initroles():
+    role1 = Role(name = 'Директор')
+    role1.save()
+    role2 = Role(name = 'Главный бухгалтер')
+    role2.save()
+    role3 = Role(name = 'Кассир')
+    role3.save()
+    role4 = Role(name = 'Маркетинг')
+    role4.save()
+    e1 = Employer(family = 'Зитев',name='С.',sname='А.')
+    e1.save()
+    e2 = Employer(family = 'Киселев',name='В.',sname='И.')
+    e2.save()
+    e3 = Employer(family = 'Абрамова',name='Н.',sname='Г.')
+    e3.save()
+    e4 = Employer(family = 'Кузьмина',name='В.',sname='В.')
+    e4.save()
+    erh1 = EmployerRoleHistory(employer = e1, role = role4, start_date=datetime.date(2007,1,1),end_date=datetime.date(2015,1,1))
+    erh1.save()
+    erh2 = EmployerRoleHistory(employer = e2, role = role1, start_date=datetime.date(2007,1,1),end_date=datetime.date(2015,1,1))
+    erh2.save()
+    erh3 = EmployerRoleHistory(employer = e3, role = role2, start_date=datetime.date(2007,1,1),end_date=datetime.date(2015,1,1))
+    erh3.save()
+    erh4 = EmployerRoleHistory(employer = e4, role = role3, start_date=datetime.date(2007,1,1),end_date=datetime.date(2015,1,1))
+    erh4.save()
+
 def monthlabel(month):
     if month==1:
         return 'Январь'
@@ -104,4 +131,12 @@ def monthlabel(month):
         return 'Декабрь'
     return 'Ну типа this should never accured'
 
+def getEmployerByRoleAndDate(erole, date):
+    roles = EmployerRoleHistory.objects.filter(role=erole,start_date__lte=date,end_date__gte=date)
+    print len(roles)
+    print connection.queries
+    for role in roles:
+        return role.employer
 
+def getEmployerByRoleNameAndDate(rolename, date):
+    return getEmployerByRoleAndDate(Role.objects.get_or_create(name = rolename)[0], date)
