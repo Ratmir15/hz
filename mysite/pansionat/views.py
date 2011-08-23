@@ -8,6 +8,7 @@ from pansionat.models import RoomType
 from pansionat.models import Room
 from pansionat.models import Book
 from pansionat.models import RoomBook
+from pansionat.models import Order
 from django.http import HttpResponse
 from django.shortcuts import render_to_response
 from django.shortcuts import redirect 
@@ -18,8 +19,10 @@ from mysite.pansionat.gavnetso import monthlabel, nextmonthfirstday, init, initr
 from mysite.pansionat.models import Occupied, Role
 import datetime
 from django import forms
+from django.forms import ModelForm
 from django.core.context_processors import csrf
 from django.db.models import Q
+from django.forms.models import inlineformset_factory
 
 from django.db import connection
 from mysite.pansionat.xltemplates import fill_excel_template
@@ -253,26 +256,29 @@ def room_with_occupied(start_date, end_date):
                 for room in room_list]
 
 class BookForm(forms.Form):
-    start_date = forms.DateField(label = 'Start Date', input_formats = ('%d.%m.%Y',))
-    end_date = forms.DateField(label = 'End date', input_formats  = ('%d.%m.%Y',))
-    name = forms.CharField(label = 'Name', max_length = 65535)
-    phone = forms.CharField(label = 'Phone', max_length = 11)
-    description = forms.CharField(label = 'Description', max_length = 65535)
-    is_type = forms.BooleanField(label = "Book by category", required = False)
+    start_date = forms.DateField(label = 'Дата въезда', input_formats = ('%d.%m.%Y',))
+    end_date = forms.DateField(label = 'Дата выезда', input_formats  = ('%d.%m.%Y',))
+    name = forms.CharField(label = 'Имя', max_length = 65535)
+    phone = forms.CharField(label = 'Телефон', max_length = 11)
+    description = forms.CharField(label = 'Описание', max_length = 65535)
+    is_type = forms.BooleanField(label = "Забронировать по типу комнаты", required = False)
 
 #TODO: use django form with multiselect field
 def bookit(request):
     # Add handler here
     rooms = request.POST.getlist('rooms')
-    query = None
-    for room in rooms:
-        if not query is None:
-            query |= Q(id = room)
-        else:
-            query = Q(id = room)
     book_form = BookForm()
-    request.session['rooms'] = Room.objects.filter(query) 
-    values = {'rooms' : request.session['rooms'], 'book_form' : book_form}
+    values = {'book_form' : book_form}
+    # if rooms haven't selected then we don't add it
+    if rooms:#  Check if rooms isn't empty
+        query = None
+        for room in rooms:
+            if not query is None:
+                query |= Q(id = room)
+            else:
+                query = Q(id = room)
+        request.session['rooms'] = Room.objects.filter(query) 
+        values['rooms'] = request.session['rooms']    
     values.update(csrf(request))
 
     return render_to_response('pansionat/bookit.html', values)
@@ -280,27 +286,51 @@ def bookit(request):
 def bookit_save(request):
     if request.method == 'POST':
         form = BookForm(request.POST)
-#        print dir(form)
-        print form.is_valid()
-        print form.errors
-#TODO: add form validation
- #       if form.is_valid():
+        if form.is_valid():
             #TODO: use ModelFrom instead of simple form
-        book = Book()
-        book.start_date = form.cleaned_data['start_date']
-        book.end_date = form.cleaned_data['end_date']
-        book.name = form.cleaned_data['name']
-        book.phone = form.cleaned_data['phone']
-        book.description = form.cleaned_data['description']
-        book.save()
-        #TODO: handle type flag
-        for room in request.session['rooms']:
-            room_book = RoomBook()
-            room_book.room = room
-            room_book.book = book
-            room_book.save()
-#        else:
-#            values = {'rooms' : request.session['rooms'], 'book_form' : form}
-#            return render_to_response('pansionat/bookit.html', values)
+            book = Book()
+            book.start_date = form.cleaned_data['start_date']
+            book.end_date = form.cleaned_data['end_date']
+            book.name = form.cleaned_data['name']
+            book.phone = form.cleaned_data['phone']
+            book.description = form.cleaned_data['description']
+            book.save()
+            if not form.cleaned_data['is_type']:
+                for room in request.session['rooms']:
+                    room_book = RoomBook()
+                    room_book.room = room
+                    room_book.book = book
+                    room_book.save()
+            else:
+                #TODO: handle room type booking 
+                pass
+        else:
+            values = {'rooms' : request.session['rooms'], 'book_form' : form}
+            return render_to_response('pansionat/bookit.html', values)
     # anyway redirect to rooms
     return redirect('/rooms')            
+
+class OrderForm(ModelForm):
+    class Meta:
+        model = Order
+        exclude = ('patient')
+
+class PatientForm(ModelForm):
+    class Meta:
+        model = Patient
+
+def order(request):
+    if request.method == 'POST':
+        order_form = OrderForm(request.POST)
+        patient_form = PatientForm(request.POST)
+        if order_form.is_valid() and patient_form.is_valid():
+            patient = patient_form.save()
+            order = order_form.save(commit = False)
+            order.patient = patient
+            order.save()
+            return redirect('/rooms')
+    order_form = OrderForm() 
+    patient_form = PatientForm()
+    values = {'order_form': order_form, 'patient_form' : patient_form}
+    values.update(csrf(request))
+    return render_to_response('pansionat/order.html', values)

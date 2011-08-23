@@ -120,17 +120,20 @@ class Customer(models.Model):
 
 
 class Order(models.Model):
-    code = models.CharField(max_length = 10)
+    code = models.CharField(max_length = 10, verbose_name = 'Номер заказа')
     patient = models.ForeignKey(Patient)
-    customer = models.ForeignKey(Customer)
-    directive = models.ForeignKey(Customer, related_name='dir')
-    start_date = models.DateField('date started')
-    end_date = models.DateField('date finished')
-    price = models.DecimalField(decimal_places = 2,max_digits=8)
-    is_with_child = models.BooleanField()
+    customer = models.ForeignKey(Customer, verbose_name = 'Предприятие')
+    directive = models.ForeignKey(Customer, related_name='dir', verbose_name = 'Оплачивающий')
+    start_date = models.DateField('Дата заезда')
+    end_date = models.DateField('Даты выезда')
+    price = models.DecimalField(decimal_places = 2,max_digits=8, verbose_name = 'Стоимоить')
+    is_with_child = models.BooleanField(verbose_name = 'Мать и дитя')
     def __unicode__(self):
         return self.code
 
+    class Meta:
+        verbose_name = 'Заказ'
+        verbose_name_plural = 'Заказы'
 
 # Room book service
 #ROOM_TYPE = (
