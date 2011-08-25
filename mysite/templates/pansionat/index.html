@@ -52,6 +52,7 @@
 			
 		<!-- content-wrap starts here -->
 		<div id="content-wrap">
+            {%  block allcontent %}
 				
 			<div id="sidebar">
 					
@@ -100,7 +101,8 @@
 				{% block content %}{% endblock %}
 			</div>
 		
-		<!-- content-wrap ends here -->	
+            {% endblock %}
+		<!-- content-wrap ends here -->
 		</div>
 					
 		<!--footer starts here-->
