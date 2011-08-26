@@ -256,7 +256,7 @@ def rooms(request):
         if request.POST['room_type'] != '':
             room_type = request.POST['room_type']
 
-    book_list = room_with_occupied(start_date, end_date, room_type, book_type)  
+    book_list = room_with_orders(start_date, end_date, room_type, book_type)  
     types = RoomType.objects.all()
     values = {'book_list': book_list, 'types': types,\
               'start_date' : start_date.strftime('%d.%m.%Y'),\
@@ -266,14 +266,15 @@ def rooms(request):
 #    print connection.queries
     return render_to_response('pansionat/rooms.html', values)
 
-def room_with_occupied(start_date, end_date, room_type, room_book):
+def room_with_orders(start_date, end_date, room_type, room_book):
     room_list = None
+    
     if not room_type is None:
         room_list = Room.objects.filter(room_type__name = room_type) 
     else:
         room_list = Room.objects.all()
 
-    return [(room, room.occupied_set.filter(start_date__lte = start_date,\
+    return [(room, room.order_set.filter(start_date__lte = start_date,\
                 end_date__gte = end_date),\
                 room.roombook_set.filter(book__start_date__lte = start_date,\
                 book__end_date__gte = end_date))
@@ -351,7 +352,7 @@ def bookit(request):
 class OrderForm(ModelForm):
     class Meta:
         model = Order
-        exclude = ('patient')
+        exclude = ('patient', 'room')
 
 class PatientForm(ModelForm):
     class Meta:
@@ -379,6 +380,7 @@ def order(request):
             patient = patient_form.save()
             order = order_form.save(commit = False)
             order.patient = patient
+            order.room = rooms[0] # Get first element because len of array should be 1
             order.save()
             return redirect('/rooms')
 

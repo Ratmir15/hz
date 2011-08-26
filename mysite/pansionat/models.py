@@ -118,29 +118,6 @@ class Customer(models.Model):
         verbose_name = 'Клиент'
         verbose_name_plural = 'Клиенты'
 
-
-class Order(models.Model):
-    code = models.CharField(max_length = 10, verbose_name = 'Номер заказа')
-    patient = models.ForeignKey(Patient)
-    customer = models.ForeignKey(Customer, verbose_name = 'Предприятие')
-    directive = models.ForeignKey(Customer, related_name='dir', verbose_name = 'Оплачивающий')
-    start_date = models.DateField('Дата заезда')
-    end_date = models.DateField('Даты выезда')
-    price = models.DecimalField(decimal_places = 2,max_digits=8, verbose_name = 'Стоимоить')
-    is_with_child = models.BooleanField(verbose_name = 'Мать и дитя')
-    def __unicode__(self):
-        return self.code
-
-    class Meta:
-        verbose_name = 'Заказ'
-        verbose_name_plural = 'Заказы'
-
-# Room book service
-#ROOM_TYPE = (
-#    ("L", "Lux"),
-#    ("D", "Default"),
-#)
-    
 class RoomType(models.Model):
     name = models.CharField(max_length = 50)
     places = models.IntegerField()
@@ -166,6 +143,29 @@ class Room (models.Model):
         verbose_name = 'Комната'
         verbose_name_plural = 'Комнаты'
 
+class Order(models.Model):
+    code = models.CharField(max_length = 10, verbose_name = 'Номер заказа')
+    patient = models.ForeignKey(Patient)
+    customer = models.ForeignKey(Customer, verbose_name = 'Предприятие')
+    room = models.ForeignKey(Room)
+    directive = models.ForeignKey(Customer, related_name='dir', verbose_name = 'Оплачивающий')
+    start_date = models.DateField('Дата заезда')
+    end_date = models.DateField('Даты выезда')
+    price = models.DecimalField(decimal_places = 2,max_digits=8, verbose_name = 'Стоимоить')
+    is_with_child = models.BooleanField(verbose_name = 'Мать и дитя')
+    def __unicode__(self):
+        return self.code
+
+    class Meta:
+        verbose_name = 'Заказ'
+        verbose_name_plural = 'Заказы'
+
+# Room book service
+#ROOM_TYPE = (
+#    ("L", "Lux"),
+#    ("D", "Default"),
+#)
+    
 class Occupied(models.Model):
     order = models.ForeignKey(Order)
     room = models.ForeignKey(Room)

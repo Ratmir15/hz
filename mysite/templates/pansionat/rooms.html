@@ -20,6 +20,8 @@
             $.datepicker.setDefaults($.datepicker.regional['ru']);
             $('.datepicker').datepicker();
             $('input:submit').button()
+            $('#book').button()
+            $('#order').button()
             $('#book').click(function(){
                 $('#bookit').submit()
             })
@@ -84,45 +86,55 @@
         </form>
         <form action="/book/handler/" method="POST" id="#bookit">
             {% csrf_token %}
-            <table border="1" id = "rooms" class = "display">
-                <thead>
-                    <tr>
-                        <th>&nbsp;</th>
-                        <th>Имя комнаты</th>
-                        <th>Тип комнаты</th>
-                        <th>Описание</th>
-                        <th>Кол-во мест</th>
-                        <th>Заселенные</th>
-                        <th>Забраннированые</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for room, occupied_set, roombook_set in book_list%}
-                        <tr>
-                            <td> <input type="checkbox" name="rooms" value="{{ room.id }}"/></td>
-                            <td> {{ room.name  }} </td>
-                            <td> {{ room.room_type.name}} </td>
-                            <td> {{ room.description }} </td>
-                            <td> {{ room.type.places }} </td>
-                            <td>
-                                {% for occupied in occupied_set %}
-                                    <a href="/patients/{{ occupied.order.patient.id }}/"> {{ occupied.order.patient.name  }} </a> &nbsp;
+            <table border="0">
+                <tr>
+                    <td>
+                        <table border="1" id = "rooms" class = "display">
+                            <thead>
+                                <tr>
+                                    <th>&nbsp;</th>
+                                    <th>Имя комнаты</th>
+                                    <th>Тип комнаты</th>
+                                    <th>Описание</th>
+                                    <th>Кол-во мест</th>
+                                    <th>Заселенные</th>
+                                    <th>Забраннированые</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for room, orders, roombook_set in book_list%}
+                                    <tr>
+                                        <td> <input type="checkbox" name="rooms" value="{{ room.id }}"/></td>
+                                        <td> {{ room.name  }} </td>
+                                        <td> {{ room.room_type.name}} </td>
+                                        <td> {{ room.description }} </td>
+                                        <td> {{ room.type.places }} </td>
+                                        <td>
+                                            {% for order in orders %}
+                                                <a href="/patients/{{ order.patient.id }}/"> {{ order.patient.name  }} </a> &nbsp;
+                                            {% endfor %}
+                                            &nbsp;
+                                        </td>
+                                        <td>
+                                            {% for roombook in roombook_set %}
+                                                {{ roombook.book.name }} &nbsp;
+                                            {% endfor %}
+                                            &nbsp;
+                                        </td>
+                                    </tr>
                                 {% endfor %}
-                                &nbsp;
-                            </td>
-                            <td>
-                                {% for roombook in roombook_set %}
-                                    {{ roombook.book.name }} &nbsp;
-                                {% endfor %}
-                                &nbsp;
-                            </td>
-                        </tr>
-                    {% endfor %}
-                </tbody>
+                            </tbody>
+                        </table>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <input type="hidden" name="start_date" value="{{ start_date }}"/>
+                        <input type="hidden" name="end_date" value="{{ end_date }}"/>
+                        <button name='is_book' value="true" id="#book">Бронировать</button>
+                        <button name='is_book' value="false" id="#order">Сформировать заказ</button>
+                    </td>
+                </tr>
             </table>
-            <input type="hidden" name="start_date" value="{{ start_date }}"/>
-            <input type="hidden" name="end_date" value="{{ end_date }}"/>
-            <button name='is_book' value="true" id="#book">Бронировать</button>
-            <button name='is_book' value="false" id="#order">Сформировать заказ</button>
         </form>
 {%  endblock  %}
