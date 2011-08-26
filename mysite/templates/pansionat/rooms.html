@@ -20,6 +20,12 @@
             $.datepicker.setDefaults($.datepicker.regional['ru']);
             $('.datepicker').datepicker();
             $('input:submit').button()
+            $('#book').click(function(){
+                $('#bookit').submit()
+            })
+            $('#order').click(function(){
+                $('#bookit').submit()
+            })
             } );
     </script>
  {%  endblock  %}
@@ -40,45 +46,54 @@
             {% csrf_token %}
             <table border="0">
                 <tr>
-                    <td>Start date:</td>
-                    <td><input type="text" name="start_date" class = "datepicker"></td>
-                    <td>End date:</td>
-                    <td><input type="text" name="end_date" class = "datepicker"></td>
+                    <td>Дата заселения:</td>
+                    <td><input type="text" name="start_date" class = "datepicker" value = "{{ start_date }}"></td>
+                    <td>Дата выезда:</td>
+                    <td><input type="text" name="end_date" class = "datepicker" value = "{{ end_date }}"></td>
                 </tr>
                 <tr>
-                    <td>Is Booked:</td>
+                    <td>Занят/Не занят:</td>
                     <td>
-                        <select name="typeSelect" id="typeSelect">
-                            <option value="All" selected>All</option>
-                            <option value="Booked">Booked</option>
-                            <option value="NotBooked">Not booked</option>
+                        <select name="book_type" id="typeSelect">
+                            <option value="All" selected>Все</option>
+                            <option value="Booked">Занятые</option>
+                            <option value="NotBooked">Не занятые</option>
                         </select>
                     </td>
-                    <td>Select type:</td>
+                    <td>Тип номера:</td>
                     <td>
-                        <select name="type">
+                        <select name="room_type">
+                            {% if room_type == None %}
+                                <option value="" selected="selected">---------</option>
+                            {% else %}
+                                <option value="">---------</option>
+                            {% endif %}
                             {% for type in types%}
-                                <option value = "{{ type.name }}">{{ type.name }}</option>
+                                {% if room_type != type.name %}                                
+                                    <option value = "{{ type.name }}">{{ type.name }}</option>
+                                {% else %}
+                                    <option selected = "selected" value = "{{ type.name }}">{{ type.name }}</option>
+                                {% endif %}
                             {% endfor %}
                         </select>
                     </td>
                 </tr>
 
             </table>
-            <input type="submit" value="filter" class = "filter">
+            <input type="submit" value="Найти" class = "filter">
         </form>
-        <form action="/bookit/" method="POST">
+        <form action="/book/handler/" method="POST" id="#bookit">
             {% csrf_token %}
             <table border="1" id = "rooms" class = "display">
                 <thead>
                     <tr>
                         <th>&nbsp;</th>
-                        <th>Name</th>
-                        <th>Type</th>
-                        <th>Description</th>
-                        <th>Places</th>
-                        <th>Occupied</th>
-                        <th>Book users</th>
+                        <th>Имя комнаты</th>
+                        <th>Тип комнаты</th>
+                        <th>Описание</th>
+                        <th>Кол-во мест</th>
+                        <th>Заселенные</th>
+                        <th>Забраннированые</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -105,6 +120,9 @@
                     {% endfor %}
                 </tbody>
             </table>
-            <input type="submit" value="Book"/>
+            <input type="hidden" name="start_date" value="{{ start_date }}"/>
+            <input type="hidden" name="end_date" value="{{ end_date }}"/>
+            <button name='is_book' value="true" id="#book">Бронировать</button>
+            <button name='is_book' value="false" id="#order">Сформировать заказ</button>
         </form>
 {%  endblock  %}

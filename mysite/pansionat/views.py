@@ -236,19 +236,43 @@ def xt(request):
     template_filename = '/Users/rpanov/Downloads/tov_nakl1.xls'
     return fill_excel_template(template_filename, tel)
 
-	
+class FilterForm(forms.Form):
+    start_date = forms.DateField(label = 'Дата въезда', input_formats = ('%d.%m.%Y',))
+    end_date = forms.DateField(label = 'Дата выезда', input_formats  = ('%d.%m.%Y',))
+    room_type = forms.ChoiceField()
+    book_type = forms.ChoiceField()	
+
 def rooms(request):
-    now = datetime.datetime.now()
-    book_list = room_with_occupied(now, now)  
+    start_date = datetime.datetime.now()
+    end_date = datetime.datetime.now()
+    book_type = 'All'
+    room_type = None
+    if request.method == 'POST':
+        start_date = datetime.datetime.strptime(request.POST['start_date'],\
+                     '%d.%m.%Y')
+        end_date = datetime.datetime.strptime(request.POST['end_date'],\
+                    '%d.%m.%Y')
+        book_type = request.POST['book_type']
+        if request.POST['room_type'] != '':
+            room_type = request.POST['room_type']
+
+    book_list = room_with_occupied(start_date, end_date, room_type, book_type)  
     types = RoomType.objects.all()
-    values = {'book_list': book_list, 'types': types}
+    values = {'book_list': book_list, 'types': types,\
+              'start_date' : start_date.strftime('%d.%m.%Y'),\
+              'end_date' : end_date.strftime('%d.%m.%Y'),\
+              'room_type' : room_type}
     values.update(csrf(request))
 #    print connection.queries
     return render_to_response('pansionat/rooms.html', values)
 
-def room_with_occupied(start_date, end_date):
-#    print dir(Room) 
-    room_list = Room.objects.all()
+def room_with_occupied(start_date, end_date, room_type, room_book):
+    room_list = None
+    if not room_type is None:
+        room_list = Room.objects.filter(room_type__name = room_type) 
+    else:
+        room_list = Room.objects.all()
+
     return [(room, room.occupied_set.filter(start_date__lte = start_date,\
                 end_date__gte = end_date),\
                 room.roombook_set.filter(book__start_date__lte = start_date,\
@@ -264,12 +288,28 @@ class BookForm(forms.Form):
     is_type = forms.BooleanField(label = "Забронировать по типу комнаты", required = False)
 
 #TODO: use django form with multiselect field
-def bookit(request):
+def book_handler(request):
     # Add handler here
-    rooms = request.POST.getlist('rooms')
-    book_form = BookForm()
-    values = {'book_form' : book_form}
+    room_list = request.POST.getlist('rooms')
+    start_date = request.POST['start_date']
+    end_date = request.POST['end_date']
+
     # if rooms haven't selected then we don't add it
+    rooms = room_handler(room_list)
+    if not rooms is None:
+        request.session['rooms'] = rooms
+
+    if (not start_date is None) or (start_date != ''):
+        request.session['start_date'] = start_date
+
+    if (not end_date is None) or (end_date != ''):
+        request.session['end_date'] = end_date
+    
+    if (request.POST['is_book']) == 'true':
+        return redirect('/bookit')
+    return redirect('/order')
+
+def room_handler(rooms):
     if rooms:#  Check if rooms isn't empty
         query = None
         for room in rooms:
@@ -277,13 +317,12 @@ def bookit(request):
                 query |= Q(id = room)
             else:
                 query = Q(id = room)
-        request.session['rooms'] = Room.objects.filter(query) 
-        values['rooms'] = request.session['rooms']    
-    values.update(csrf(request))
+        return Room.objects.filter(query)
+    return None
 
-    return render_to_response('pansionat/bookit.html', values)
-
-def bookit_save(request):
+def bookit(request):
+    form = BookForm(initial = {'start_date' : request.session['start_date'],\
+                'end_date' : request.session['end_date']})
     if request.method == 'POST':
         form = BookForm(request.POST)
         if form.is_valid():
@@ -304,11 +343,10 @@ def bookit_save(request):
             else:
                 #TODO: handle room type booking 
                 pass
-        else:
-            values = {'rooms' : request.session['rooms'], 'book_form' : form}
-            return render_to_response('pansionat/bookit.html', values)
-    # anyway redirect to rooms
-    return redirect('/rooms')            
+            return redirect('/rooms')
+    values = {'rooms' : request.session['rooms'], 'book_form' : form}
+    values.update(csrf(request))
+    return render_to_response('pansionat/bookit.html', values)
 
 class OrderForm(ModelForm):
     class Meta:
@@ -320,6 +358,20 @@ class PatientForm(ModelForm):
         model = Patient
 
 def order(request):
+    if request.session.has_key('rooms'):
+        if len(request.session['rooms']) == 1:
+            rooms = request.session['rooms']
+        else:
+            request.session['book_message'] = 'Вы можите заселить только в одну комнату'
+            return redirect('/rooms')
+    else:
+        request.session['book_message'] = 'Вы должны выбрать комнату для заселения'
+        return redirect('/rooms')
+        
+    
+    order_form = OrderForm(initial={'start_date' : request.session['start_date'],\
+                                    'end_date' : request.session['end_date']})
+    patient_form = PatientForm()
     if request.method == 'POST':
         order_form = OrderForm(request.POST)
         patient_form = PatientForm(request.POST)
@@ -329,8 +381,8 @@ def order(request):
             order.patient = patient
             order.save()
             return redirect('/rooms')
-    order_form = OrderForm() 
-    patient_form = PatientForm()
-    values = {'order_form': order_form, 'patient_form' : patient_form}
+
+    values = {'order_form': order_form, 'patient_form' : patient_form,\
+                'rooms': rooms}
     values.update(csrf(request))
     return render_to_response('pansionat/order.html', values)

@@ -24,10 +24,7 @@
                 $('input:submit').button()
                 } );
         </script> 
-
-        <title>Bookit</title>
 {%  endblock  %}
-{% block content %}
         {% block form %}
             <form action="/order/" method="post">
                 {% csrf_token %}
@@ -40,4 +37,3 @@
                 <input type="submit" value="Сформировать заказ" />
             </form>
         {% endblock %}
-{%  endblock  %}

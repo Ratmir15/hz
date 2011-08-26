@@ -26,7 +26,7 @@ urlpatterns = patterns('',
     (r'^reports/$', 'pansionat.views.reports'),
     (r'^xt/$', 'pansionat.views.xt'),
     (r'^bookit/$', 'pansionat.views.bookit'),
-    (r'^bookit/save/$', 'pansionat.views.bookit_save'),
+    (r'^book/handler/$', 'pansionat.views.book_handler'),
     (r'^order/$', 'pansionat.views.order'),
     (r'^admin/', include(admin.site.urls)),
 )

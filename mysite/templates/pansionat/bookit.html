@@ -25,6 +25,7 @@
         </script> 
 {%  endblock  %}
 {% block content %}
+    {% block rooms %}
         {% if rooms %}
             Выбранные комнаты:
             <table border="1" id = "rooms" class = "display">
@@ -46,13 +47,14 @@
                 </tbody>
             </table>
         {% endif %}
-        {% block form %}
-            <form action="/bookit/save/" method="post">
-                {% csrf_token %}
-                <table border = "0">
-                    {{ book_form.as_table }}
-                </table>
-                <input type="submit" value="Забронировать" />
-            </form>
-        {% endblock %}
+    {% endblock %}
+    {% block form %}
+        <form action="/bookit/" method="post">
+            {% csrf_token %}
+            <table border = "0">
+                {{ book_form.as_table }}
+            </table>
+            <input type="submit" value="Забронировать" />
+        </form>
+    {% endblock %}
 {%  endblock  %}
