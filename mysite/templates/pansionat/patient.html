@@ -1,6 +1,6 @@
 {% extends "pansionat/index.html" %}
 
-{% block title %} Бронирования {%  endblock  %}
+{% block title %} Пациент {%  endblock  %}
 
 {% block head %}
     <style type="text/css">
@@ -17,55 +17,70 @@
     <script src="/static/jquery-ui/ui/jquery.ui.button.js"></script>
 
 <link rel="stylesheet" href="/static/Refresh.css" type="text/css" />
-    <script type="text/javascript">
-        $(document).ready(function() {
-            $('#occupied').dataTable();
-            } );
-    </script>
  {%  endblock  %}
 
 {% block mainmenu %}
     <ul>
         <li><a href="index.html">Главная</a></li>
-        <li><a href="/patients">Пациенты</a></li>
+        <li  id="current"><a href="/patients">Пациенты</a></li>
         <li><a href="index.html">Персонал</a></li>
         <li><a href="/rooms">Номера</a></li>
-        <li id="current"><a href="/orders">Путевки</a></li>
+        <li><a href="/orders">Путевки</a></li>
         <li><a href="/reports">Отчеты</a></li>
     </ul>
  {%  endblock  %}
 
 {% block allcontent %}
-    <h1>Список брони</h1>
+    <h1>Пациент</h1>
     <table border="0" id = "occupied" class = "display">
-    <thead>
-    <th>Код</th>
-    <th>Клиент</th>
-    <th>Пациент</th>
-    <th>Сумма</th>
-    <th></th>
-    </thead>
-            {% for occupied in occupied_list %}
                 <tr>
+                    <td>Фамилия</td>
                 <td>
-                    {{ occupied.code }}
+                    {{ patient.family }}
                 </td>
+        </tr>
+        <tr>
+                    <td>Имя</td>
                 <td>
-                    {{ occupied.customer.name }}
+                    {{ patient.name }}
                 </td>
+        </tr>
+        <tr>
+                    <td>Отчество</td>
                 <td>
-                    {{ occupied.patient.fio }}
+                    {{ patient.sname }}
                 </td>
+        </tr>
+        <tr>
+                    <td>Дата рождения</td>
                 <td>
-                    {{ occupied.price }}
+                    {{ patient.birthdate }}
                 </td>
+        </tr>
+        <tr>
+                    <td>Должность</td>
                 <td>
-                    <a href="nakl/{{ occupied.id }}/">Накладная</a>/
-                        <a href="sf/{{ occupied.id }}/">Счет-фактура</a>/
-                        <a href="pko/{{ occupied.id }}/">ПКО</a>/
-                        <a href="zayava/{{ occupied.id }}/">Заявление</a>
-                    </td>
-                </tr>
-            {% endfor %}
+                    {{ patient.grade }}
+                </td>
+        </tr>
+        <tr>
+                    <td>Серия и номер паспорта</td>
+                <td>
+                    {{ patient.passport_number }}
+                </td>
+        </tr>
+        <tr>
+                    <td>Кем выдан</td>
+                <td>
+                    {{ patient.passport_whom }}
+                </td>
+        </tr>
+        <tr>
+                    <td>Адрес</td>
+                <td>
+                    {{ patient.address }}
+                </td>
+        </tr>
+    <tr><td colspan="2"><a href="/orders/patient/{{ patient.id }}">Путевки</a></td></tr>
     </table>
 {%  endblock  %}

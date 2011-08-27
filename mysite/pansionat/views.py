@@ -41,8 +41,25 @@ def index(request):
 	})
 	return HttpResponse(t.render(c))
 
+def patients(request):
+	patients_list = Patient.objects.all()
+	t = loader.get_template('pansionat/patients.html')
+	c = Context({
+	'patients_list': patients_list,
+	})
+	return HttpResponse(t.render(c))
+
 def orders(request):
     occupied_list = Order.objects.all()
+    t = loader.get_template('pansionat/orders.html')
+    c = Context({
+    'occupied_list': occupied_list,
+    })
+    return HttpResponse(t.render(c))
+
+def orders_patient(request, patient_id):
+    patient = Patient.objects.get(id=patient_id)
+    occupied_list = Order.objects.filter(patient = patient)
     t = loader.get_template('pansionat/orders.html')
     c = Context({
     'occupied_list': occupied_list,
@@ -58,7 +75,12 @@ def reports(request):
     return HttpResponse(t.render(c))
 
 def detail(request, patient_id):
-    return HttpResponse("You're looking at patient %s." % patient_id)
+    patient = Patient.objects.get(id = patient_id)
+    t = loader.get_template('pansionat/patient.html')
+    c = Context({
+    'patient': patient,
+    })
+    return HttpResponse(t.render(c))
 
 def reestr(request, year, month):
     #init(1)

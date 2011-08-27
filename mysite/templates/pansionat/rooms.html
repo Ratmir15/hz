@@ -35,7 +35,7 @@
 {% block mainmenu %}
     <ul>
         <li><a href="index.html">Главная</a></li>
-        <li><a href="index.html">Пациенты</a></li>
+        <li><a href="/patients">Пациенты</a></li>
         <li><a href="index.html">Персонал</a></li>
         <li id="current"><a href="/rooms">Номера</a></li>
         <li><a href="/orders">Путевки</a></li>
@@ -98,7 +98,7 @@
                                     <th>Описание</th>
                                     <th>Кол-во мест</th>
                                     <th>Заселенные</th>
-                                    <th>Забраннированые</th>
+                                    <th>Забронированые</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -111,7 +111,7 @@
                                         <td> {{ room.type.places }} </td>
                                         <td>
                                             {% for order in orders %}
-                                                <a href="/patients/{{ order.patient.id }}/"> {{ order.patient.name  }} </a> &nbsp;
+                                                <a href="/patients/{{ order.patient.id }}/"> {{ order.patient.fio  }} </a> &nbsp;
                                             {% endfor %}
                                             &nbsp;
                                         </td>

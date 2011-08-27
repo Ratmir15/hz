@@ -1,6 +1,6 @@
 {% extends "pansionat/index.html" %}
 
-{% block title %} Бронирования {%  endblock  %}
+{% block title %} Пациенты {%  endblock  %}
 
 {% block head %}
     <style type="text/css">
@@ -27,43 +27,40 @@
 {% block mainmenu %}
     <ul>
         <li><a href="index.html">Главная</a></li>
-        <li><a href="/patients">Пациенты</a></li>
+        <li id="current"><a href="/patients">Пациенты</a></li>
         <li><a href="index.html">Персонал</a></li>
         <li><a href="/rooms">Номера</a></li>
-        <li id="current"><a href="/orders">Путевки</a></li>
+        <li><a href="/orders">Путевки</a></li>
         <li><a href="/reports">Отчеты</a></li>
     </ul>
  {%  endblock  %}
 
 {% block allcontent %}
-    <h1>Список брони</h1>
+    <h1>Пациенты</h1>
     <table border="0" id = "occupied" class = "display">
     <thead>
-    <th>Код</th>
-    <th>Клиент</th>
-    <th>Пациент</th>
-    <th>Сумма</th>
+    <th>Фамилия</th>
+    <th>Имя</th>
+    <th>Отчество</th>
+    <th>Серия/Номер паспорта</th>
     <th></th>
     </thead>
-            {% for occupied in occupied_list %}
+            {% for patient in patients_list %}
                 <tr>
                 <td>
-                    {{ occupied.code }}
+                    {{ patient.family }}
                 </td>
                 <td>
-                    {{ occupied.customer.name }}
+                    {{ patient.name }}
                 </td>
                 <td>
-                    {{ occupied.patient.fio }}
+                    {{ patient.sname }}
                 </td>
                 <td>
-                    {{ occupied.price }}
+                    {{ patient.passport_number }}
                 </td>
                 <td>
-                    <a href="nakl/{{ occupied.id }}/">Накладная</a>/
-                        <a href="sf/{{ occupied.id }}/">Счет-фактура</a>/
-                        <a href="pko/{{ occupied.id }}/">ПКО</a>/
-                        <a href="zayava/{{ occupied.id }}/">Заявление</a>
+                    <a href="/patients/{{ patient.id }}/">&rsaquo;</a>
                     </td>
                 </tr>
             {% endfor %}
