@@ -42,7 +42,7 @@ def index(request):
 	return HttpResponse(t.render(c))
 
 def orders(request):
-    occupied_list = Occupied.objects.all()
+    occupied_list = Order.objects.all()
     t = loader.get_template('pansionat/orders.html')
     c = Context({
     'occupied_list': occupied_list,
@@ -61,7 +61,7 @@ def detail(request, patient_id):
     return HttpResponse("You're looking at patient %s." % patient_id)
 
 def reestr(request, year, month):
-    init(0)
+    #init(1)
     #initroles()
     intyear = int(year)
     intmonth = int(month)

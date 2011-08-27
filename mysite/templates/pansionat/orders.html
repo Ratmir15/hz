@@ -48,16 +48,16 @@
             {% for occupied in occupied_list %}
                 <tr>
                 <td>
-                    {{ occupied.order.code }}
+                    {{ occupied.code }}
                 </td>
                 <td>
-                    {{ occupied.order.customer.name }}
+                    {{ occupied.customer.name }}
                 </td>
                 <td>
-                    {{ occupied.order.patient.fio }}
+                    {{ occupied.patient.fio }}
                 </td>
                 <td>
-                    {{ occupied.order.price }}
+                    {{ occupied.price }}
                 </td>
                 <td>
                     <a href="nakl/{{ occupied.id }}/">Накладная</a>/
