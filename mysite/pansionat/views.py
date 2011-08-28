@@ -382,10 +382,15 @@ def order(request):
     else:
         request.session['book_message'] = 'Вы должны выбрать комнату для заселения'
         return redirect('/rooms')
-        
+
+    print request.session['end_date']
+    period = datetime.datetime.strptime(request.session['end_date'],'%d.%m.%Y') - datetime.datetime.strptime(request.session['start_date'],'%d.%m.%Y')
+    print period
+    price = rooms[0].room_type.price * (period.days + 1)
     
     order_form = OrderForm(initial={'start_date' : request.session['start_date'],\
-                                    'end_date' : request.session['end_date']})
+                                    'end_date' : request.session['end_date'],\
+                                    'price': price})
     patient_form = PatientForm()
     if request.method == 'POST':
         order_form = OrderForm(request.POST)
