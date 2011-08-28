@@ -965,22 +965,22 @@
 			 *   by javascript
 			 */
 			this.oLanguage = {
-				"sProcessing": "Processing...",
-				"sLengthMenu": "Show _MENU_ entries",
-				"sZeroRecords": "No matching records found",
-				"sEmptyTable": "No data available in table",
-				"sLoadingRecords": "Loading...",
-				"sInfo": "Showing _START_ to _END_ of _TOTAL_ entries",
-				"sInfoEmpty": "Showing 0 to 0 of 0 entries",
-				"sInfoFiltered": "(filtered from _MAX_ total entries)",
+				"sProcessing": "Обрабатывается...",
+				"sLengthMenu": "Показывать _MENU_ записей",
+				"sZeroRecords": "Подходящих записей не найдено",
+				"sEmptyTable": "Нет данных",
+				"sLoadingRecords": "Загружается...",
+				"sInfo": "Показано с _START_ до _END_ из _TOTAL_ записей",
+				"sInfoEmpty": "Показано с 0 до 0 из 0 записей",
+				"sInfoFiltered": "(отфильтровано из _MAX_ всего записей)",
 				"sInfoPostFix": "",
-				"sSearch": "Search:",
+				"sSearch": "Поиск:",
 				"sUrl": "",
 				"oPaginate": {
-					"sFirst":    "First",
-					"sPrevious": "Previous",
-					"sNext":     "Next",
-					"sLast":     "Last"
+					"sFirst":    "Первая",
+					"sPrevious": "Предыдущая",
+					"sNext":     "Следующая",
+					"sLast":     "Последняя"
 				},
 				"fnInfoCallback": null
 			};
