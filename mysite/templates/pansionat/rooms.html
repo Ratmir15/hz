@@ -20,8 +20,7 @@
             $.datepicker.setDefaults($.datepicker.regional['ru']);
             $('.datepicker').datepicker();
             $('input:submit').button()
-            $('#book').button()
-            $('#order').button()
+            $(':button').button()
             $('#book').click(function(){
                 $('#bookit').submit()
             })
@@ -108,7 +107,7 @@
                                         <td> {{ room.name  }} </td>
                                         <td> {{ room.room_type.name}} </td>
                                         <td> {{ room.description }} </td>
-                                        <td> {{ room.type.places }} </td>
+                                        <td> {{ room.room_type.places }} </td>
                                         <td>
                                             {% for order in orders %}
                                                 <a href="/patients/{{ order.patient.id }}/"> {{ order.patient.fio  }} </a> &nbsp;
