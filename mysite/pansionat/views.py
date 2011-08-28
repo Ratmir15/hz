@@ -16,7 +16,6 @@ import logging
 from mysite.pansionat import gavnetso
 from pytils import numeral
 from mysite.pansionat.gavnetso import monthlabel, nextmonthfirstday, init, initroles
-from mysite.pansionat.models import Occupied, Role
 import datetime
 from django import forms
 from django.forms import ModelForm
@@ -67,7 +66,7 @@ def orders_patient(request, patient_id):
     return HttpResponse(t.render(c))
 
 def reports(request):
-    t_list = Occupied.objects.dates('start_date','month', order='DESC')
+    t_list = Order.objects.dates('start_date','month', order='DESC')
     t = loader.get_template('pansionat/reports.html')
     c = Context({
     't_list': t_list,
@@ -87,15 +86,13 @@ def reestr(request, year, month):
     #initroles()
     intyear = int(year)
     intmonth = int(month)
-    occupieds = Occupied.objects.filter(start_date__year=intyear, start_date__month=intmonth)
+    orders = Order.objects.filter(start_date__year=intyear, start_date__month=intmonth)
     template_filename = 'registrydiary.xls'
     map = {'MONTH': monthlabel(intmonth)+' '+str(intyear)+' год',
            'FILENAME': 'reestr-'+year+'-'+month}
     l = []
     i = 0
-    print len(occupieds)
-    for occupied in occupieds:
-        order = occupied.order
+    for order in orders:
         i += 1
         innermap = dict()
         innermap['NUMBER'] = i
@@ -113,7 +110,7 @@ def reestr(request, year, month):
         innermap['BIRTHDATE'] = str(order.patient.birth_date)
         innermap['PASSPORT'] = order.patient.passport_number+' '+order.patient.passport_whom
         innermap['ADDRESS'] = order.patient.address
-        innermap['ROOM'] = occupied.room.name
+        innermap['ROOM'] = order.room.name
         l.append(innermap)
 
     map['T'] = l
@@ -125,7 +122,7 @@ def moves(request, year, month):
     intyear = int(year)
     intmonth = int(month)
     fd = nextmonthfirstday(intyear, intmonth)
-    occupieds = Occupied.objects.filter(start_date__year=intyear).values('order__customer__name').annotate(cnt=Count('order__customer__name'),sm=Sum('order__price'))
+    orders = Order.objects.filter(start_date__year=intyear).values('customer__name').annotate(cnt=Count('customer__name'),sm=Sum('price'))
     template_filename = 'moves.xls'
     map = {'MONTH': monthlabel(intmonth)+' '+str(intyear)+' год',
            'M':monthlabel(intmonth),
@@ -134,17 +131,16 @@ def moves(request, year, month):
            'MARKETING': gavnetso.getEmployerByRoleNameAndDate('Маркетинг',datetime.date(intyear, intmonth,1)).__unicode__()}
     l = []
     i = 0
-    print len(occupieds)
-    print connection.queries
-    for occupied in occupieds:
+    #print len(occupieds)
+    #print connection.queries
+    for order in orders:
         i += 1
-        print occupied
         innermap = dict()
         innermap['IDX'] = i
-        innermap['NAME'] = occupied['order__customer__name']
-        innermap['QTY'] = occupied['cnt']
-        innermap['M'] = occupied['sm']
-        innermap['MNEXT'] = occupied['sm']
+        innermap['NAME'] = order['customer__name']
+        innermap['QTY'] = order['cnt']
+        innermap['M'] = order['sm']
+        innermap['MNEXT'] = order['sm']
         l.append(innermap)
 
     map['T'] = l
@@ -152,8 +148,7 @@ def moves(request, year, month):
 
 
 def nakl(request, occupied_id):
-    occupied = Occupied.objects.get(id=occupied_id)
-    order = occupied.order
+    order = Order.objects.get(id=occupied_id)
     template_filename = 'tov_nakl1.xls'
     fullname = 'ООО санаторий "Хопровские зори"'
     vendor = 'КПП 581701001 '+ fullname + ' Пензенская обл., п.Колышлей, ул.Лесная 1а'
@@ -177,8 +172,7 @@ def nakl(request, occupied_id):
     return fill_excel_template(template_filename, tel)
 
 def pko(request, occupied_id):
-    occupied = Occupied.objects.get(id=occupied_id)
-    order = occupied.order
+    order = Order.objects.get(id=occupied_id)
     template_filename = 'prih_order1.xls'
     fullname = 'ООО санаторий "Хопровские зори"'
     client  = order.patient.fio()
@@ -198,8 +192,7 @@ def pko(request, occupied_id):
     return fill_excel_template(template_filename, tel)
 
 def zayava(request, occupied_id):
-    occupied = Occupied.objects.get(id=occupied_id)
-    order = occupied.order
+    order = Order.objects.get(id=occupied_id)
     template_filename = 'zayava.xls'
     fullname = 'ООО санаторий "Хопровские зори"'
     clientaddress = order.patient.address
@@ -209,7 +202,7 @@ def zayava(request, occupied_id):
     days = delt.days + 1
     tel = {'FULLNAME': fullname, 'CODE': order.code,
            'FILENAME': 'zayavlenie-'+order.code,
-           'ROOM': occupied.room.name,
+           'ROOM': order.room.name,
            'CLIENTFAMILY': order.patient.family,
            'CLIENTIO': clientio,
            'CLIENTADDRESS': clientaddress,
@@ -222,8 +215,7 @@ def zayava(request, occupied_id):
     return fill_excel_template(template_filename, tel)
 
 def schetfactura(request, occupied_id):
-    occupied = Occupied.objects.get(id=occupied_id)
-    order = occupied.order
+    order = Order.objects.get(id=occupied_id)
     template_filename = 'sch_fakt1.xls'
     fullname = 'ООО санаторий "Хопровские зори"'
     saleaddress = 'Пензенская обл., п.Колышлей, ул.Лесная 1а'
