@@ -135,7 +135,7 @@ class RoomType(models.Model):
 class Room (models.Model):
     name = models.CharField(max_length = 50) # it can be room number or name of room
     room_type = models.ForeignKey(RoomType)
-    description = models.CharField(max_length = 65535)
+    description = models.CharField(max_length = 10000)
     def __unicode__(self):
         return self.name
 
@@ -171,7 +171,7 @@ class Occupied(models.Model):
     room = models.ForeignKey(Room)
     start_date = models.DateField("Start book date")
     end_date = models.DateField("End book date")
-    description = models.CharField(max_length = 65535)
+    description = models.CharField(max_length = 10000)
     def __unicode__(self):
         return self.order.code
 
@@ -182,9 +182,9 @@ class Occupied(models.Model):
 class Book(models.Model):
     start_date = models.DateTimeField("Start book date")
     end_date = models.DateTimeField("End book date")
-    name = models.CharField(max_length = 65535)
+    name = models.CharField(max_length = 10000)
     phone = models.CharField(max_length = 11)
-    description = models.CharField(max_length = 65535)
+    description = models.CharField(max_length = 10000)
 
 class RoomBook(models.Model):
     room = models.ForeignKey(Room)
