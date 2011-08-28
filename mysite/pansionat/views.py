@@ -17,6 +17,7 @@ from mysite.pansionat import gavnetso
 from pytils import numeral
 from mysite.pansionat.gavnetso import monthlabel, nextmonthfirstday, init, initroles
 import datetime
+import time
 from django import forms
 from django.forms import ModelForm
 from django.core.context_processors import csrf
@@ -254,7 +255,10 @@ class FilterForm(forms.Form):
     start_date = forms.DateField(label = 'Дата въезда', input_formats = ('%d.%m.%Y',))
     end_date = forms.DateField(label = 'Дата выезда', input_formats  = ('%d.%m.%Y',))
     room_type = forms.ChoiceField()
-    book_type = forms.ChoiceField()	
+    book_type = forms.ChoiceField()
+	
+def strptime(str_date, str_format):
+    return datetime.datetime(*(time.strptime(str_date, str_format)[0:6]))
 
 def rooms(request):
     start_date = datetime.datetime.now()
@@ -262,9 +266,9 @@ def rooms(request):
     book_type = 'All'
     room_type = None
     if request.method == 'POST':
-        start_date = datetime.datetime.strptime(request.POST['start_date'],\
+        start_date = strptime(request.POST['start_date'],\
                      '%d.%m.%Y')
-        end_date = datetime.datetime.strptime(request.POST['end_date'],\
+        end_date = strptime(request.POST['end_date'],\
                     '%d.%m.%Y')
         book_type = request.POST['book_type']
         if request.POST['room_type'] != '':
@@ -384,7 +388,7 @@ def order(request):
         return redirect('/rooms')
 
     print request.session['end_date']
-    period = datetime.datetime.strptime(request.session['end_date'],'%d.%m.%Y') - datetime.datetime.strptime(request.session['start_date'],'%d.%m.%Y')
+    period = strptime(request.session['end_date'],'%d.%m.%Y') - strptime(request.session['start_date'],'%d.%m.%Y')
     print period
     price = rooms[0].room_type.price * (period.days + 1)
     
