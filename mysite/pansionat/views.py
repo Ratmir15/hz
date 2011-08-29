@@ -261,8 +261,8 @@ def strptime(str_date, str_format):
     return datetime.datetime(*(time.strptime(str_date, str_format)[0:6]))
 
 def rooms(request):
-    start_date = datetime.datetime.now()
-    end_date = datetime.datetime.now()
+    start_date = datetime.date.today()
+    end_date = datetime.date.today()
     book_type = 'All'
     room_type = None
     if request.method == 'POST':
@@ -292,11 +292,16 @@ def room_with_orders(start_date, end_date, room_type, room_book):
     else:
         room_list = Room.objects.all()
 
-    return [(room, room.order_set.filter(start_date__lte = start_date,\
-                end_date__gte = end_date),\
-                room.roombook_set.filter(book__start_date__lte = start_date,\
-                book__end_date__gte = end_date))
-                for room in room_list]
+    ordered_rooms = [] 
+
+    for room in room_list:
+        order_rooms = room.order_set.filter(start_date__lte = start_date,\
+                        end_date__gte = end_date)
+        booked_rooms = room.roombook_set.filter(book__start_date__lte = start_date,\
+                        book__end_date__gte = end_date)
+        ordered_rooms.append((room, order_rooms, booked_rooms))
+
+    return ordered_rooms
 
 class BookForm(forms.Form):
     start_date = forms.DateField(label = 'Дата въезда', input_formats = ('%d.%m.%Y',))
@@ -318,10 +323,10 @@ def book_handler(request):
     if not rooms is None:
         request.session['rooms'] = rooms
 
-    if (not start_date is None) or (start_date != ''):
+    if (not start_date is None) and (start_date != ''):
         request.session['start_date'] = start_date
 
-    if (not end_date is None) or (end_date != ''):
+    if (not end_date is None) and (end_date != ''):
         request.session['end_date'] = end_date
     
     if (request.POST['is_book']) == 'true':
@@ -387,9 +392,7 @@ def order(request):
         request.session['book_message'] = 'Вы должны выбрать комнату для заселения'
         return redirect('/rooms')
 
-    print request.session['end_date']
     period = strptime(request.session['end_date'],'%d.%m.%Y') - strptime(request.session['start_date'],'%d.%m.%Y')
-    print period
     price = rooms[0].room_type.price * (period.days + 1)
     
     order_form = OrderForm(initial={'start_date' : request.session['start_date'],\

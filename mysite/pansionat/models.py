@@ -19,7 +19,8 @@ class Patient(models.Model):
     sname = models.CharField(max_length=50, verbose_name = 'Отчество')
     birth_date = models.DateField(verbose_name = 'Дата рождения')
     grade = models.CharField(max_length=50, verbose_name = 'Должность')
-    passport_number = models.CharField(max_length=20, verbose_name = 'Серия и номер паспорта')
+    passport_number = models.CharField(unique = True, max_length=20,\
+                    verbose_name = 'Серия и номер паспорта')
     passport_whom = models.CharField(max_length=30, verbose_name = 'Кем выдан паспорт')
     address = models.CharField(max_length=200, verbose_name = 'Адрес')
     def fio(self):
