@@ -172,6 +172,13 @@ def nakl(request, occupied_id):
                       'PNDS':0,'AMOUNTNDS':'-','ALLAMOUNT':order.price}]}
     return fill_excel_template(template_filename, tel)
 
+def rootik(request, order_id):
+    order = Order.objects.get(id=order_id)
+    template_filename = 'rootik.xls'
+    tel = {'FIO': order.patient.fio(), 'ROOM': order.room.name,
+           'DATEIN': str(order.start_date) }
+    return fill_excel_template(template_filename, tel)
+
 def pko(request, occupied_id):
     order = Order.objects.get(id=occupied_id)
     template_filename = 'prih_order1.xls'
