@@ -39,8 +39,10 @@
     <thead>
     <th>Код</th>
     <th>Клиент</th>
+    <th>Дата заезда</th>
+    <th>Дата выезда</th>
     <th>Пациент</th>
-    <th>Сумма</th>
+    <th>Сумма(руб)</th>
     <th></th>
     </thead>
             {% for occupied in occupied_list %}
@@ -52,8 +54,14 @@
                     {{ occupied.customer.name }}
                 </td>
                 <td>
-                    {{ occupied.patient.fio }}
+                    {{ occupied.start_date }}
                 </td>
+                    <td>
+                        {{ occupied.end_date }}
+                    </td>
+                    <td>
+                        {{ occupied.patient.fio }}
+                    </td>
                 <td>
                     {{ occupied.price }}
                 </td>
