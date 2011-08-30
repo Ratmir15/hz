@@ -26,8 +26,29 @@
 				
 			<h1 id="logo-text">Хопровские<span class="gray">зори</span></h1>
 			<h2 id="slogan">Пензенская область, г. Колышлей</h2>
-				
-			<!--<form class="search" method="post" action="#">
+
+            {% if user.is_authenticated %}
+                <form action="/logout/" method="post" class="login">
+                {% csrf_token %}
+                <table><tr>
+                    <td>Пользователь:{{ user }}</td>
+                </tr><tr><td>
+                    <input type="submit" value="Выйти">
+                </td></tr></table>
+
+            {% endif %}
+            {% if not user.is_authenticated %}
+                <form action="/login/" method="post" class="login">
+                <input type="hidden" name="next" value="{{ next }}"/>
+                {% csrf_token %}
+                <table><tr><td>
+                    Пользователь:<input class="textbox" type="text" name="username" value="" /></td></tr><tr><td>
+                    Пароль:<input class="textbox" type="password" name="password" value="" /><input class="button" type="submit" name="Submit" value="Войти" /></td>
+                </tr></table>
+
+            {% endif %}
+            </form>
+		    <!--<form class="search" method="post" action="#">
 				<p>
 	  			<input class="textbox" type="text" name="search_query" value="" />
 	 			<input class="button" type="submit" name="Submit" value="Поиск" />
@@ -40,10 +61,10 @@
 		<div  id="menu">
             {% block mainmenu %}
             <ul>
-				<li><a href="index.html">Пациенты</a></li>
-				<li><a href="index.html">Номера</a></li>
-				<li><a href="index.html">Питание</a></li>
-				<li><a href="index.html">Отчеты</a></li>
+				<li><a href="/patients/">Пациенты</a></li>
+				<li><a href="/rooms/">Номера</a></li>
+				<li><a href="/orders/">Путевки</a></li>
+				<li><a href="/reports/">Отчеты</a></li>
 			</ul>
             {% endblock %}
 		</div>					

@@ -1,5 +1,8 @@
 # Create your views here.
 # coding: utf-8
+import user
+from django.contrib.auth import logout, login, authenticate
+from django.contrib.auth.decorators import login_required, permission_required
 from django.db.models.aggregates import Count, Sum
 
 from django.template import Context, loader
@@ -9,10 +12,11 @@ from pansionat.models import Room
 from pansionat.models import Book
 from pansionat.models import RoomBook
 from pansionat.models import Order
-from django.http import HttpResponse
+from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render_to_response
 from django.shortcuts import redirect 
 import logging
+from django.template.context import RequestContext
 from mysite.pansionat import gavnetso
 from pytils import numeral
 from mysite.pansionat.gavnetso import monthlabel, nextmonthfirstday, init, initroles
@@ -20,7 +24,7 @@ import datetime
 import time
 from django import forms
 from django.forms import ModelForm
-from django.core.context_processors import csrf
+from django.core.context_processors import csrf, request
 from django.db.models import Q
 from django.forms.models import inlineformset_factory
 
@@ -34,54 +38,90 @@ ch.setLevel(logging.DEBUG)
 logger.addHandler(ch)
 
 def index(request):
-	patients_list = Patient.objects.all()
 	t = loader.get_template('pansionat/index.html')
-	c = Context({
-	'patients_list': patients_list,
+	c = RequestContext(request, {
+        'next': request.GET.get('next','')
 	})
 	return HttpResponse(t.render(c))
 
+def forbidden(request):
+	t = loader.get_template('pansionat/forbidden.html')
+	c = RequestContext(request, {
+        'next': request.GET.get('next','')
+	})
+	return HttpResponse(t.render(c))
+
+@login_required
+@permission_required('pansionat.arm_registration', login_url='/forbidden/')
 def patients(request):
 	patients_list = Patient.objects.all()
 	t = loader.get_template('pansionat/patients.html')
-	c = Context({
+	c = RequestContext(request, {
 	'patients_list': patients_list,
 	})
 	return HttpResponse(t.render(c))
 
+@login_required
 def orders(request):
+#    print request.user
+#    if not request.user.is_authenticated():
+#        return HttpResponseRedirect('/login/?next=%s' % request.path)
     occupied_list = Order.objects.all()
     t = loader.get_template('pansionat/orders.html')
-    c = Context({
+    c = RequestContext(request, {
     'occupied_list': occupied_list,
     })
     return HttpResponse(t.render(c))
 
+def my_view(request):
+    username = request.POST.get('username','')
+    password = request.POST.get('password','')
+    user = authenticate(username=username, password=password)
+    if user is not None:
+        if user.is_active:
+            login(request, user)
+            url = request.POST.get("next",request.META['HTTP_REFERER'])
+            return HttpResponseRedirect(url)
+        else:
+            return HttpResponseRedirect('/?msg="Пользователь не активирован"/')
+            # Return a 'disabled account' error message
+    else:
+        return HttpResponseRedirect('/?msg="Необходимо авторизоваться"/')
+        # Return an 'invalid login' error message.
+
+def logout_page(request):
+    logout(request)
+    return HttpResponseRedirect('/')
+
+@login_required
 def orders_patient(request, patient_id):
     patient = Patient.objects.get(id=patient_id)
     occupied_list = Order.objects.filter(patient = patient)
     t = loader.get_template('pansionat/orders.html')
-    c = Context({
+    c = RequestContext(request,{
     'occupied_list': occupied_list,
     })
     return HttpResponse(t.render(c))
 
+@login_required
 def reports(request):
     t_list = Order.objects.dates('start_date','month', order='DESC')
     t = loader.get_template('pansionat/reports.html')
-    c = Context({
+    c = RequestContext(request,{
     't_list': t_list,
     })
     return HttpResponse(t.render(c))
 
+@login_required
 def detail(request, patient_id):
     patient = Patient.objects.get(id = patient_id)
     t = loader.get_template('pansionat/patient.html')
-    c = Context({
+    c = RequestContext(request, {
     'patient': patient,
     })
     return HttpResponse(t.render(c))
 
+@login_required
 def reestr(request, year, month):
     #init(1)
     #initroles()
@@ -118,6 +158,7 @@ def reestr(request, year, month):
     return fill_excel_template(template_filename, map)
 
 
+@login_required
 def moves(request, year, month):
     init(0)
     intyear = int(year)
@@ -148,6 +189,7 @@ def moves(request, year, month):
     return fill_excel_template(template_filename, map)
 
 
+@login_required
 def nakl(request, occupied_id):
     order = Order.objects.get(id=occupied_id)
     template_filename = 'tov_nakl1.xls'
@@ -172,6 +214,7 @@ def nakl(request, occupied_id):
                       'PNDS':0,'AMOUNTNDS':'-','ALLAMOUNT':order.price}]}
     return fill_excel_template(template_filename, tel)
 
+@login_required
 def rootik(request, order_id):
     order = Order.objects.get(id=order_id)
     template_filename = 'rootik.xls'
@@ -179,6 +222,7 @@ def rootik(request, order_id):
            'DATEIN': str(order.start_date) }
     return fill_excel_template(template_filename, tel)
 
+@login_required
 def pko(request, occupied_id):
     order = Order.objects.get(id=occupied_id)
     template_filename = 'prih_order1.xls'
@@ -199,6 +243,7 @@ def pko(request, occupied_id):
            'DESCRIPTION':tovar}
     return fill_excel_template(template_filename, tel)
 
+@login_required
 def zayava(request, occupied_id):
     order = Order.objects.get(id=occupied_id)
     template_filename = 'zayava.xls'
@@ -222,6 +267,7 @@ def zayava(request, occupied_id):
            'DATE':order.start_date, 'QTYSUM':1, 'AMOUNTSUM':order.price, 'AMOUNTNDSSUM':order.price, 'ALLAMOUNTSUM':order.price}
     return fill_excel_template(template_filename, tel)
 
+@login_required
 def schetfactura(request, occupied_id):
     order = Order.objects.get(id=occupied_id)
     template_filename = 'sch_fakt1.xls'
@@ -249,6 +295,7 @@ def schetfactura(request, occupied_id):
                       'PNDS':0,'AMOUNTNDS':'-','ALLAMOUNT':order.price}]}
     return fill_excel_template(template_filename, tel)
 
+@login_required
 def xt(request):
     tel = {'PIZDEZ': 'HZ', 'NUMBER': 1236, 'DATE':'26.07.11', 'QTYSUM':3, 'AMOUNTSUM':17810, 'AMOUNTNDSSUM':17810, 'ALLAMOUNTSUM':17810,
            'TOVAR': [{'ROWINDEX':1,'NAME':'TOVAR1','QTY':1,'PRICE':17810,'AMOUNT':17810,
@@ -267,6 +314,7 @@ class FilterForm(forms.Form):
 def strptime(str_date, str_format):
     return datetime.datetime(*(time.strptime(str_date, str_format)[0:6]))
 
+@login_required
 def rooms(request):
     start_date = datetime.date.today()
     end_date = datetime.date.today()
@@ -286,7 +334,8 @@ def rooms(request):
     values = {'book_list': book_list, 'types': types,\
               'start_date' : start_date.strftime('%d.%m.%Y'),\
               'end_date' : end_date.strftime('%d.%m.%Y'),\
-              'room_type' : room_type}
+              'room_type' : room_type,
+              'user' : request.user}
     values.update(csrf(request))
 #    print connection.queries
     return render_to_response('pansionat/rooms.html', values)
@@ -319,6 +368,7 @@ class BookForm(forms.Form):
     is_type = forms.BooleanField(label = "Забронировать по типу комнаты", required = False)
 
 #TODO: use django form with multiselect field
+@login_required
 def book_handler(request):
     # Add handler here
     room_list = request.POST.getlist('rooms')
@@ -351,6 +401,7 @@ def room_handler(rooms):
         return Room.objects.filter(query)
     return None
 
+@login_required
 def bookit(request):
     form = BookForm(initial = {'start_date' : request.session['start_date'],\
                 'end_date' : request.session['end_date']})
@@ -375,7 +426,7 @@ def bookit(request):
                 #TODO: handle room type booking 
                 pass
             return redirect('/rooms')
-    values = {'rooms' : request.session['rooms'], 'book_form' : form}
+    values = {'rooms' : request.session['rooms'], 'book_form' : form, 'user':request.user}
     values.update(csrf(request))
     return render_to_response('pansionat/bookit.html', values)
 
@@ -418,6 +469,6 @@ def order(request):
             return redirect('/rooms')
 
     values = {'order_form': order_form, 'patient_form' : patient_form,\
-                'rooms': rooms}
+                'rooms': rooms, user: request.user}
     values.update(csrf(request))
     return render_to_response('pansionat/order.html', values)

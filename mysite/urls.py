@@ -14,6 +14,10 @@ admin.autodiscover()
     # Uncomment the next line to enable the admin:
 urlpatterns = patterns('',
     (r'^patients/$', 'pansionat.views.patients'),
+    (r'^accounts/login/$', 'pansionat.views.index'),
+    (r'^forbidden/$', 'pansionat.views.forbidden'),
+    (r'^login/$', 'pansionat.views.my_view'),
+    (r'^logout/$', 'pansionat.views.logout_page'),
     (r'^patients/(?P<patient_id>\d+)/$', 'pansionat.views.detail'),
     (r'^rooms/$', 'pansionat.views.rooms'),
     (r'^orders/$', 'pansionat.views.orders'),
@@ -31,4 +35,5 @@ urlpatterns = patterns('',
     (r'^book/handler/$', 'pansionat.views.book_handler'),
     (r'^order/$', 'pansionat.views.order'),
     (r'^admin/', include(admin.site.urls)),
+    (r'^$', 'pansionat.views.index'),
 )

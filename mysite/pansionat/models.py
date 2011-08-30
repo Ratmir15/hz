@@ -160,6 +160,8 @@ class Order(models.Model):
     class Meta:
         verbose_name = 'Заказ'
         verbose_name_plural = 'Заказы'
+        permissions = (
+            ("arm_registration", "REGISTRATION"))
 
 # Room book service
 #ROOM_TYPE = (
