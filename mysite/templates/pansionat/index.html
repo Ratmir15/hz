@@ -31,9 +31,9 @@
                 <form action="/logout/" method="post" class="login">
                 {% csrf_token %}
                 <table><tr>
-                    <td>Пользователь:{{ user }}</td>
-                </tr><tr><td>
-                    <input type="submit" value="Выйти">
+                    <td>{{ user }}</td>
+                <td>
+                    <input class="loginbutton" type="submit" value="Выйти">
                 </td></tr></table>
 
             {% endif %}
@@ -42,8 +42,9 @@
                 <input type="hidden" name="next" value="{{ next }}"/>
                 {% csrf_token %}
                 <table><tr><td>
-                    Пользователь:<input class="textbox" type="text" name="username" value="" /></td></tr><tr><td>
-                    Пароль:<input class="textbox" type="password" name="password" value="" /><input class="button" type="submit" name="Submit" value="Войти" /></td>
+                    Пользователь</td><td><input class="textbox" type="text" name="username" value="" /></td>
+                <td rowspan="2"><input class="loginbutton" type="submit" name="Submit" value="Войти" /></td></tr><tr><td>
+                    Пароль</td><td><input class="textbox" type="password" name="password" value="" /></td>
                 </tr></table>
 
             {% endif %}
@@ -59,20 +60,25 @@
 		
 		<!-- menu -->	
 		<div  id="menu">
-            {% block mainmenu %}
-            <ul>
+            {% block menu %}
+                <ul>
+                {% for item in menu_list %}
+                    <li><a href="{{ item.href }}">{{ item.label }}</a></li>
+                {% endfor %}
+                </ul>
+       <!--     <ul>
 				<li><a href="/patients/">Пациенты</a></li>
 				<li><a href="/rooms/">Номера</a></li>
 				<li><a href="/orders/">Путевки</a></li>
 				<li><a href="/reports/">Отчеты</a></li>
-			</ul>
+			</ul>-->
             {% endblock %}
 		</div>					
 			
 		<!-- content-wrap starts here -->
 		<div id="content-wrap">
             {%  block allcontent %}
-				{% block content %}{% endblock %}
+				{% block content %}<div style="text-align: center"><img style="text-align: center; border: 0px; padding: 10px;" src="/static/gerb.gif"/></div> {% endblock %}
             {% endblock %}
 		<!-- content-wrap ends here -->
 		</div>

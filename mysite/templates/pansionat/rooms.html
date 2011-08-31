@@ -20,7 +20,7 @@
             $('#rooms').dataTable();
             $.datepicker.setDefaults($.datepicker.regional['ru']);
             $('.datepicker').datepicker();
-            $('input:submit').button()
+            $('input:sub').button()
             $(':button').button()
             $('#book').click(function(){
                 $('#bookit').submit()
@@ -80,7 +80,7 @@
                 </tr>
 
             </table>
-            <input type="submit" value="Найти" class = "filter">
+            <input type="submit" class="sub" value="Найти" class = "filter">
         </form>
         <form action="/book/handler/" method="POST" id="#bookit">
             {% csrf_token %}

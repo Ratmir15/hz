@@ -39,24 +39,52 @@ logger.addHandler(ch)
 
 def index(request):
 	t = loader.get_template('pansionat/index.html')
-	c = RequestContext(request, {
+	c = MenuRequestContext(request, {
         'next': request.GET.get('next','')
 	})
 	return HttpResponse(t.render(c))
 
 def forbidden(request):
 	t = loader.get_template('pansionat/forbidden.html')
-	c = RequestContext(request, {
+	c = MenuRequestContext(request, {
         'next': request.GET.get('next','')
 	})
 	return HttpResponse(t.render(c))
 
+class MenuItem():
+    href = "/"
+    label = "default"
+
+def getMenuItems(request):
+    user = request.user
+    items = []
+    if user.has_perm('pansionat.add_patient'):
+        i = MenuItem()
+        i.href = "/patients/"
+        i.label = "Пациенты"
+        items.append(i)
+    if user.has_perm('pansionat.add_order'):
+        i = MenuItem()
+        i.href = "/rooms/"
+        i.label = "Номера"
+        items.append(i)
+    if user.has_perm('pansionat.add_order'):
+        i = MenuItem()
+        i.href = "/orders/"
+        i.label = "Путевки"
+        items.append(i)
+    i = MenuItem()
+    i.href = "/reports/"
+    i.label = "Отчеты"
+    items.append(i)
+    return items
+
 @login_required
-@permission_required('pansionat.arm_registration', login_url='/forbidden/')
+@permission_required('pansionat.patient_add', login_url='/forbidden/')
 def patients(request):
 	patients_list = Patient.objects.all()
 	t = loader.get_template('pansionat/patients.html')
-	c = RequestContext(request, {
+	c = MenuRequestContext(request, {
 	'patients_list': patients_list,
 	})
 	return HttpResponse(t.render(c))
@@ -68,10 +96,16 @@ def orders(request):
 #        return HttpResponseRedirect('/login/?next=%s' % request.path)
     occupied_list = Order.objects.all()
     t = loader.get_template('pansionat/orders.html')
-    c = RequestContext(request, {
+    c = MenuRequestContext(request, {
     'occupied_list': occupied_list,
+#   'menu_list': getMenuItems(request)
     })
     return HttpResponse(t.render(c))
+
+class MenuRequestContext(RequestContext):
+    def __init__(self, request, dict=None, processors=None, current_app=None, use_l10n=None):
+        dict['menu_list'] = getMenuItems(request)
+        RequestContext.__init__(self, request, dict, processors, current_app=current_app, use_l10n=use_l10n)
 
 def my_view(request):
     username = request.POST.get('username','')
@@ -98,7 +132,7 @@ def orders_patient(request, patient_id):
     patient = Patient.objects.get(id=patient_id)
     occupied_list = Order.objects.filter(patient = patient)
     t = loader.get_template('pansionat/orders.html')
-    c = RequestContext(request,{
+    c = MenuRequestContext(request,{
     'occupied_list': occupied_list,
     })
     return HttpResponse(t.render(c))
@@ -107,7 +141,7 @@ def orders_patient(request, patient_id):
 def reports(request):
     t_list = Order.objects.dates('start_date','month', order='DESC')
     t = loader.get_template('pansionat/reports.html')
-    c = RequestContext(request,{
+    c = MenuRequestContext(request,{
     't_list': t_list,
     })
     return HttpResponse(t.render(c))
@@ -116,7 +150,7 @@ def reports(request):
 def detail(request, patient_id):
     patient = Patient.objects.get(id = patient_id)
     t = loader.get_template('pansionat/patient.html')
-    c = RequestContext(request, {
+    c = MenuRequestContext(request, {
     'patient': patient,
     })
     return HttpResponse(t.render(c))
@@ -337,8 +371,11 @@ def rooms(request):
               'room_type' : room_type,
               'user' : request.user}
     values.update(csrf(request))
+#    t = loader.get_template('pansionat/rooms.html')
+#    c = MenuRequestContext(request, values)
 #    print connection.queries
-    return render_to_response('pansionat/rooms.html', values)
+#    return HttpResponse(t.render(c))
+    return render_to_response('pansionat/rooms.html', MenuRequestContext(request, values))
 
 def room_with_orders(start_date, end_date, room_type, room_book):
     room_list = None

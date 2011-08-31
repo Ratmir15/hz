@@ -164,12 +164,19 @@ form.login input.textbox {
 	background: #FFF;
 	color: #333;
 }
-form.login input.button {
-	background: #CCC url(headerbg.gif) repeat-x;
+form.login input.loginbutton {
+/*	background: #CCC url(headerbg.gif) repeat-x;*/
+	color: #333;
+	border: none;
+	width: 70px; height: 20px;
+    font-size: 12px;
+}
+form.login input.logoutbutton {
+/*	background: #CCC url(headerbg.gif) repeat-x;*/
 	color: #333;
 	border: none;
 	width: 70px; height: 12px;
-    font-size: 8px;
+    font-size: 9px;
 }
 
 /********************************************
