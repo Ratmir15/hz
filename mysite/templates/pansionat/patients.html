@@ -16,11 +16,12 @@
     <script src="/static/jquery-ui/ui/i18n/jquery.ui.datepicker-ru.js"></script>
     <script src="/static/jquery-ui/ui/jquery.ui.button.js"></script>
 
-<link rel="stylesheet" href="/static/Refresh.css" type="text/css" />
+    <link rel="stylesheet" href="/static/Refresh.css" type="text/css" />
     <script type="text/javascript">
         $(document).ready(function() {
             $('#occupied').dataTable();
             } );
+            $('input:submit').button()
     </script>
  {%  endblock  %}
 
@@ -63,4 +64,7 @@
                 </tr>
             {% endfor %}
     </table>
+    <form action="/patients/new/">
+        <input type="submit" value="Создать пользователя"/>
+    </form>
 {%  endblock  %}

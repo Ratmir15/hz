@@ -31,9 +31,11 @@
                 <table border = "0">
                     {{ order_form.as_table }}            
                 </table>
-                <table border = "0">
-                    {{ patient_form.as_table }}
-                </table>
+                {% if patient_form %}
+                    <table border = "0">
+                        {{ patient_form.as_table }}
+                    </table>
+                {% endif %}
                 <input type="submit" value="Сформировать заказ" />
             </form>
         {% endblock %}

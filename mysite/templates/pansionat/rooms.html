@@ -42,6 +42,14 @@
  {%  endblock  %}
 
 {% block content %}
+        {% if patient  %}
+            <table border="0">
+                <tr>
+                    <td><h3>Оформление заказа для пациента:</h3></td>
+                    <td><h3>{{ patient.fio }}</h3></td>
+                </tr>
+            </table>
+        {% endif %}
         <form method="POST">
             {% csrf_token %}
             <table border="0">
@@ -129,7 +137,11 @@
                     <td>
                         <input type="hidden" name="start_date" value="{{ start_date }}"/>
                         <input type="hidden" name="end_date" value="{{ end_date }}"/>
-                        <button name='is_book' value="true" id="#book">Бронировать</button>
+                        {% if not patient %}
+                            <button name='is_book' value="true" id="#book">Бронировать</button>
+                        {% else %}
+                            <input type="hidden" name="patient_id" value="{{ patient.id  }}"/>
+                        {% endif %}
                         <button name='is_book' value="false" id="#order">Сформировать заказ</button>
                     </td>
                 </tr>

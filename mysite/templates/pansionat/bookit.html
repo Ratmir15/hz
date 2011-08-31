@@ -25,6 +25,14 @@
         </script> 
 {%  endblock  %}
 {% block content %}
+    {% if patient %}
+        <table border="0">
+            <tr>
+                <td><h3>Оформление заказа для пациента:</h3></td>
+                <td><h3>{{ patient.fio }}</h3></td>
+            </tr>                
+        </table>
+    {% endif %}
     {% block rooms %}
         {% if rooms %}
             Выбранные комнаты:

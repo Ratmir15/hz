@@ -15,7 +15,14 @@
     <script src="/static/jquery-ui/ui/jquery.ui.datepicker.js"></script>
     <script src="/static/jquery-ui/ui/i18n/jquery.ui.datepicker-ru.js"></script>
     <script src="/static/jquery-ui/ui/jquery.ui.button.js"></script>
-
+    <script type="text/javascript">
+        $(document).ready(function() {
+            $.datepicker.setDefaults($.datepicker.regional['ru']);
+            $('#id_birth_date').datepicker();
+            $('input:submit').button()
+            $(':button').button()
+            } );
+    </script> 
 <link rel="stylesheet" href="/static/Refresh.css" type="text/css" />
  {%  endblock  %}
 
@@ -30,55 +37,33 @@
 
 {% block allcontent %}
     <h1>Пациент</h1>
-    <table border="0" id = "occupied" class = "display">
+    {% if patient_id %}
+        <table border="0">
+            <tr>
+                <td>
+                    <a href="/orders/patient/{{ patient_id }}">Путевки</a>
+                </td>
+            </tr>
+        </table>
+    {% endif %}
+    <form action = "/patients/save/" method="POST">
+        {% csrf_token %}
+        <table border="0" id = "occupied" class = "display">
+            {{ patient_form.as_table}}
                 <tr>
-                    <td>Фамилия</td>
-                <td>
-                    {{ patient.family }}
-                </td>
-        </tr>
-        <tr>
-                    <td>Имя</td>
-                <td>
-                    {{ patient.name }}
-                </td>
-        </tr>
-        <tr>
-                    <td>Отчество</td>
-                <td>
-                    {{ patient.sname }}
-                </td>
-        </tr>
-        <tr>
-                    <td>Дата рождения</td>
-                <td>
-                    {{ patient.birthdate }}
-                </td>
-        </tr>
-        <tr>
-                    <td>Должность</td>
-                <td>
-                    {{ patient.grade }}
-                </td>
-        </tr>
-        <tr>
-                    <td>Серия и номер паспорта</td>
-                <td>
-                    {{ patient.passport_number }}
-                </td>
-        </tr>
-        <tr>
-                    <td>Кем выдан</td>
-                <td>
-                    {{ patient.passport_whom }}
-                </td>
-        </tr>
-        <tr>
-                    <td>Адрес</td>
-                <td>
-                    {{ patient.address }}
-                </td>
-        </tr>
-    <tr><td colspan="2"><a href="/orders/patient/{{ patient.id }}">Путевки</a></td></tr>
-    </table>
+                    <td colspan="2">
+                        <input type="submit" value="Сохранить">
+                    </td>
+                </tr>                            
+            {% if patient_id %}
+                <input type="hidden" name="patient_id" value="{{ patient_id }}"/>
+            {% endif %}
+        </table>
+    </form>
+    {% if patient_id %}
+        <form action="/rooms/" id="rooms">
+            <input type="hidden" name="patient_id" value="{{ patient_id }}"/>
+            <input type="submit" value="Сформировать заказ"/>
+        </form>
+    {% endif %}
 {%  endblock  %}

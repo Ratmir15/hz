@@ -146,13 +146,39 @@ def reports(request):
     return HttpResponse(t.render(c))
 
 @login_required
-def detail(request, patient_id):
+def patient_edit(request, patient_id):
     patient = Patient.objects.get(id = patient_id)
-    t = loader.get_template('pansionat/patient.html')
-    c = MenuRequestContext(request, {
-    'patient': patient,
-    })
-    return HttpResponse(t.render(c))
+    patient_form = PatientForm(instance=patient)
+    values = {'patient_form' : patient_form,\
+                'patient_id' : patient_id}        
+    values.update(csrf(request))
+    return render_to_response('pansionat/patient.html', values)
+
+@login_required
+def patient_new(request):
+    patient_form = PatientForm()
+    values = {'patient_form' : patient_form}
+    values.update(csrf(request))
+    return render_to_response('pansionat/patient.html', values)
+
+@login_required
+def patient_save(request):
+    if request.method == 'POST':
+        print 'POST'
+        patient_form = None
+        patient_id = request.POST.get('patient_id')
+        if patient_id is None:
+            patient_form = PatientForm(request.POST) 
+        else:
+            patient = Patient.objects.get(id = patient_id)            
+            patient_form = PatientForm(request.POST, instance = patient)
+
+        patient = patient_form.save()
+        print patient.id
+        values = {'patient_form' : patient_form, 'patient_id' : patient.id}
+        values.update(csrf(request))
+        return render_to_response('pansionat/patient.html', values)
+    return patient_new(request) #if method is't post then show empty form
 
 @login_required
 def init(request):
@@ -380,10 +406,12 @@ def strptime(str_date, str_format):
 
 @login_required
 def rooms(request):
+    clear_rooms_session(request.session)
     start_date = datetime.date.today()
     end_date = datetime.date.today()
     book_type = 'All'
     room_type = None
+               
     if request.method == 'POST':
         start_date = strptime(request.POST['start_date'],\
                      '%d.%m.%Y')
@@ -401,10 +429,10 @@ def rooms(request):
               'room_type' : room_type,
               'user' : request.user}
     values.update(csrf(request))
-#    t = loader.get_template('pansionat/rooms.html')
-#    c = MenuRequestContext(request, values)
-#    print connection.queries
-#    return HttpResponse(t.render(c))
+    if 'patient_id' in request.GET:
+        patient_id = request.GET['patient_id']
+        patient = Patient.objects.get(id=patient_id)
+        values['patient'] = patient
     return render_to_response('pansionat/rooms.html', MenuRequestContext(request, values))
 
 def room_with_orders(start_date, end_date, room_type, room_book):
@@ -439,8 +467,9 @@ class BookForm(forms.Form):
 def book_handler(request):
     # Add handler here
     room_list = request.POST.getlist('rooms')
-    start_date = request.POST['start_date']
-    end_date = request.POST['end_date']
+    start_date = request.POST.get('start_date')
+    end_date = request.POST.get('end_date')
+    patient_id = request.POST.get('patient_id')
 
     # if rooms haven't selected then we don't add it
     rooms = room_handler(room_list)
@@ -452,10 +481,22 @@ def book_handler(request):
 
     if (not end_date is None) and (end_date != ''):
         request.session['end_date'] = end_date
+    if (not patient_id is None) and (patient_id != ''):
+        request.session['patient_id'] = patient_id
     
     if (request.POST['is_book']) == 'true':
         return redirect('/bookit')
     return redirect('/order')
+
+def clear_rooms_session(session):
+    if 'rooms' in session:
+        del session['rooms']
+    if 'start_date' in session:
+        del session['start_date']
+    if 'end_date' in session:
+        del session['end_date']
+    if 'patient_id' in session:
+        del session['patient_id']
 
 def room_handler(rooms):
     if rooms:#  Check if rooms isn't empty
@@ -523,19 +564,35 @@ def order(request):
     order_form = OrderForm(initial={'start_date' : request.session['start_date'],\
                                     'end_date' : request.session['end_date'],\
                                     'price': price})
-    patient_form = PatientForm()
     if request.method == 'POST':
         order_form = OrderForm(request.POST)
-        patient_form = PatientForm(request.POST)
-        if order_form.is_valid() and patient_form.is_valid():
-            patient = patient_form.save()
-            order = order_form.save(commit = False)
-            order.patient = patient
-            order.room = rooms[0] # Get first element because len of array should be 1
-            order.save()
-            return redirect('/rooms')
+        patient_form = None
+        patient = None
+        if 'patient_id' in request.session:
+            patient_id = request.session['patient_id']
+            patient = Patient.objects.get(id=patient_id)
+        else:
+            patient_form = PatientForm(request.POST)
 
-    values = {'order_form': order_form, 'patient_form' : patient_form,\
-                'rooms': rooms, user: request.user}
+        if order_form.is_valid():
+            if (not patient_form is None and patient_form.is_valid()):
+                patient = patient_form.save()
+
+            if not patient is None:
+                order = order_form.save(commit = False)
+                order.patient = patient
+                order.room = rooms[0] # Get first element because len of array should be 1
+                order.save()
+                return redirect('/rooms')
+
+    values = {'order_form': order_form, 'rooms': rooms, user: request.user}
     values.update(csrf(request))
+    if 'patient_id' in request.session:
+        patient_id = request.session['patient_id']
+        patient = Patient.objects.get(id=patient_id)
+        values['patient'] = patient
+    else:    
+        patient_form = PatientForm()
+        values['patient_form'] = patient_form
+        
     return render_to_response('pansionat/order.html', values)
