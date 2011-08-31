@@ -12,7 +12,7 @@ def nextmonthfirstday(year, month):
         newyear = year
     return datetime.date(int(newyear), int(newmonth), 1)
 
-def init(doit):
+def initbase(doit):
     if not doit:
         return
     p1 = Patient(family = 'Харитонова',name = 'Ульяна', sname = 'Яковлевна',

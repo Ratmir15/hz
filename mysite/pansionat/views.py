@@ -19,7 +19,7 @@ import logging
 from django.template.context import RequestContext
 from mysite.pansionat import gavnetso
 from pytils import numeral
-from mysite.pansionat.gavnetso import monthlabel, nextmonthfirstday, init, initroles
+from mysite.pansionat.gavnetso import monthlabel, nextmonthfirstday, initbase, initroles
 import datetime
 import time
 from django import forms
@@ -156,9 +156,18 @@ def detail(request, patient_id):
     return HttpResponse(t.render(c))
 
 @login_required
+def init(request):
+    order_list = Order.objects.all()
+    if not len(order_list):
+        initbase(1)
+        initroles()
+    t = loader.get_template('pansionat/index.html')
+    c = MenuRequestContext(request, {
+    })
+    return HttpResponse(t.render(c))
+
+@login_required
 def reestr(request, year, month):
-    #init(1)
-    #initroles()
     intyear = int(year)
     intmonth = int(month)
     orders = Order.objects.filter(start_date__year=intyear, start_date__month=intmonth)
@@ -246,6 +255,28 @@ def nakl(request, occupied_id):
            'DATE':order.start_date, 'QTYSUM':1, 'AMOUNTSUM':order.price, 'AMOUNTNDSSUM':order.price, 'ALLAMOUNTSUM':order.price,
            'TOVAR': [{'ROWINDEX':1,'NAME':tovar,'QTY':1,'PRICE':order.price,'AMOUNT':order.price,
                       'PNDS':0,'AMOUNTNDS':'-','ALLAMOUNT':order.price}]}
+    return fill_excel_template(template_filename, tel)
+
+@login_required
+@permission_required('pansionat.order_add', login_url='/forbidden/')
+def ill_history(request, order_id):
+    order = Order.objects.get(id=order_id)
+    template_filename = 'history.xls'
+    delt = datetime.date.today() - order.patient.birth_date
+    years = int (delt.days / 365.25)
+    srok = 'c '+str(order.start_date)+' по '+str(order.end_date)
+    tel = { 'NUMBER': order.code,
+           'FILENAME': 'ill_history-'+order.code,
+           'SURNAME': order.patient.family, 'NAME': order.patient.name,
+           'SNAME': order.patient.sname,
+           'WHOIS': order.patient.profession,
+           'WHOARE': order.patient.grade,
+           'CLIENT': order.customer.name,
+           'ONANIST': order.patient.marriage,
+           'ADDRESS': order.patient.address,
+           'AGE': years,
+           'SROK':srok,
+    }
     return fill_excel_template(template_filename, tel)
 
 @login_required

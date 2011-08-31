@@ -13,12 +13,21 @@ class Employer(models.Model):
         verbose_name = 'Сотрудник'
         verbose_name_plural = 'Сотрудники'
 
+
+MARRIAGE = (
+    ("M","женат/замужем"),
+    ("H","холост(а)"),
+    ("D","разведен(а)"),
+)
+
 class Patient(models.Model):
     family = models.CharField(max_length=50, verbose_name = 'Фамилия')
     name = models.CharField(max_length=50, verbose_name = 'Имя')
     sname = models.CharField(max_length=50, verbose_name = 'Отчество')
     birth_date = models.DateField(verbose_name = 'Дата рождения')
     grade = models.CharField(max_length=50, verbose_name = 'Должность')
+    profession = models.CharField(max_length=50, verbose_name = 'Профессия')
+    marriage = models.CharField(max_length = 1, choices = MARRIAGE, verbose_name='Семейное положение')
     passport_number = models.CharField(unique = True, max_length=20,\
                     verbose_name = 'Серия и номер паспорта')
     passport_whom = models.CharField(max_length=30, verbose_name = 'Кем выдан паспорт')
@@ -160,15 +169,25 @@ class Order(models.Model):
     class Meta:
         verbose_name = 'Заказ'
         verbose_name_plural = 'Заказы'
-        permissions = (
-            ("arm_registration", "REGISTRATION"))
+#        permissions = (
+#            ("arm_registration", "REGISTRATION"))
+
+class IllHistory(models.Model):
+    order = models.OneToOneField(Order)
+    first_diagnose = models.CharField(max_length=255)
+    main_diagnose = models.CharField(max_length=255)
+    secondary_diagnose = models.CharField(max_length=255)
+    conditions = models.CharField(max_length=255)
+    class Meta:
+        verbose_name = 'История болезни'
+        verbose_name_plural = 'Истории болезни'
 
 # Room book service
 #ROOM_TYPE = (
 #    ("L", "Lux"),
 #    ("D", "Default"),
 #)
-    
+
 class Occupied(models.Model):
     order = models.ForeignKey(Order)
     room = models.ForeignKey(Room)
