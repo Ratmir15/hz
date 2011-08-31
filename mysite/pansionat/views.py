@@ -51,7 +51,7 @@ def forbidden(request):
 	})
 	return HttpResponse(t.render(c))
 
-class MenuItem():
+class MenuItem:
     href = "/"
     label = "default"
 
@@ -68,11 +68,10 @@ def getMenuItems(request):
         i.href = "/rooms/"
         i.label = "Номера"
         items.append(i)
-    if user.has_perm('pansionat.add_order'):
-        i = MenuItem()
-        i.href = "/orders/"
-        i.label = "Путевки"
-        items.append(i)
+    i = MenuItem()
+    i.href = "/orders/"
+    i.label = "Путевки"
+    items.append(i)
     i = MenuItem()
     i.href = "/reports/"
     i.label = "Отчеты"
@@ -80,7 +79,7 @@ def getMenuItems(request):
     return items
 
 @login_required
-@permission_required('pansionat.patient_add', login_url='/forbidden/')
+@permission_required('pansionat.add_patient', login_url='/forbidden/')
 def patients(request):
 	patients_list = Patient.objects.all()
 	t = loader.get_template('pansionat/patients.html')
@@ -258,7 +257,7 @@ def nakl(request, occupied_id):
     return fill_excel_template(template_filename, tel)
 
 @login_required
-@permission_required('pansionat.order_add', login_url='/forbidden/')
+@permission_required('pansionat.add_order', login_url='/forbidden/')
 def ill_history(request, order_id):
     order = Order.objects.get(id=order_id)
     template_filename = 'history.xls'
