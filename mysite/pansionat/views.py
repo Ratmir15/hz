@@ -151,15 +151,13 @@ def patient_edit(request, patient_id):
     patient_form = PatientForm(instance=patient)
     values = {'patient_form' : patient_form,\
                 'patient_id' : patient_id}        
-    values.update(csrf(request))
-    return render_to_response('pansionat/patient.html', values)
+    return render_to_response('pansionat/patient.html', MenuRequestContext(request, values))
 
 @login_required
 def patient_new(request):
     patient_form = PatientForm()
     values = {'patient_form' : patient_form}
-    values.update(csrf(request))
-    return render_to_response('pansionat/patient.html', values)
+    return render_to_response('pansionat/patient.html', MenuRequestContext(request, values))
 
 @login_required
 def patient_save(request):
@@ -176,8 +174,7 @@ def patient_save(request):
         patient = patient_form.save()
         print patient.id
         values = {'patient_form' : patient_form, 'patient_id' : patient.id}
-        values.update(csrf(request))
-        return render_to_response('pansionat/patient.html', values)
+        return render_to_response('pansionat/patient.html', MenuRequestContext(request, values))
     return patient_new(request) #if method is't post then show empty form
 
 @login_required
