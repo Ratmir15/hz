@@ -19,7 +19,7 @@ from django.shortcuts import redirect
 import logging
 from django.template.context import RequestContext
 from mysite.pansionat import gavnetso
-from mysite.pansionat.models import IllHistory
+from mysite.pansionat.models import IllHistory, Customer
 from pytils import numeral
 from mysite.pansionat.gavnetso import monthlabel, nextmonthfirstday, initbase, initroles
 import datetime
@@ -65,6 +65,10 @@ def getMenuItems(request):
         i.href = "/patients/"
         i.label = "Пациенты"
         items.append(i)
+        i = MenuItem()
+        i.href = "/clients/"
+        i.label = "Клиенты"
+        items.append(i)
     if user.has_perm('pansionat.add_order'):
         i = MenuItem()
         i.href = "/rooms/"
@@ -87,6 +91,15 @@ def patients(request):
 	t = loader.get_template('pansionat/patients.html')
 	c = MenuRequestContext(request, {
 	'patients_list': patients_list,
+	})
+	return HttpResponse(t.render(c))
+
+@login_required
+def clients(request):
+	clients_list = Customer.objects.all()
+	t = loader.get_template('pansionat/clients.html')
+	c = MenuRequestContext(request, {
+	'clients_list': clients_list,
 	})
 	return HttpResponse(t.render(c))
 
@@ -177,6 +190,35 @@ def patient_save(request):
         print patient.id
         values = {'patient_form' : patient_form, 'patient_id' : patient.id}
         return render_to_response('pansionat/patient.html', MenuRequestContext(request, values))
+    return patient_new(request) #if method is't post then show empty form
+
+@login_required
+def client_edit(request, client_id):
+    client = Customer.objects.get(id = client_id)
+    client_form = CustomerForm(instance=client)
+    values = {'client_form' : client_form,\
+                'client_id' : client_id}
+    return render_to_response('pansionat/client.html', MenuRequestContext(request, values))
+
+@login_required
+def client_new(request):
+    client_form = CustomerForm()
+    values = {'client_form' : client_form}
+    return render_to_response('pansionat/client.html', MenuRequestContext(request, values))
+
+@login_required
+def client_save(request):
+    if request.method == 'POST':
+        client_id = request.POST.get('client_id')
+        if client_id is None:
+            client_form = CustomerForm(request.POST)
+        else:
+            patient = Customer.objects.get(id = client_id)
+            client_form = CustomerForm(request.POST, instance = patient)
+
+        client = client_form.save()
+        values = {'client_form' : client_form, 'client_id' : client.id}
+        return render_to_response('pansionat/client.html', MenuRequestContext(request, values))
     return patient_new(request) #if method is't post then show empty form
 
 @login_required
@@ -594,6 +636,10 @@ class OrderForm(ModelForm):
 class PatientForm(ModelForm):
     class Meta:
         model = Patient
+
+class CustomerForm(ModelForm):
+    class Meta:
+        model = Customer
 
 class IllHistoryForm(ModelForm):
     class Meta:

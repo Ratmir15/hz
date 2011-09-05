@@ -1,6 +1,6 @@
 {% extends "pansionat/index.html" %}
 
-{% block title %} Пациенты {%  endblock  %}
+{% block title %} Клиенты {%  endblock  %}
 
 {% block head %}
     <style type="text/css">
@@ -26,36 +26,24 @@
  {%  endblock  %}
 
 {% block allcontent %}
-    <h1>Пациенты</h1>
+    <h1>Клиенты</h1>
     <table border="0" id = "occupied" class = "display">
     <thead>
-    <th>Фамилия</th>
-    <th>Имя</th>
-    <th>Отчество</th>
-    <th>Серия/Номер паспорта</th>
+    <th>Наименование</th>
     <th></th>
     </thead>
-            {% for patient in patients_list %}
+            {% for client in clients_list %}
                 <tr>
                 <td>
-                    {{ patient.family }}
+                    {{ client.name }}
                 </td>
                 <td>
-                    {{ patient.name }}
-                </td>
-                <td>
-                    {{ patient.sname }}
-                </td>
-                <td>
-                    {{ patient.passport_number }}
-                </td>
-                <td>
-                    <a href="/patients/{{ patient.id }}/">&rsaquo;&rsaquo;&rsaquo;&rsaquo;</a>
+                    <a href="/clients/{{ client.id }}/">&rsaquo;&rsaquo;&rsaquo;&rsaquo;</a>
                     </td>
                 </tr>
             {% endfor %}
     </table>
-    <form action="/patients/new/">
-        <input type="submit" value="Создать пользователя"/>
+    <form action="/clients/new/">
+        <input type="submit" value="Создать клиента"/>
     </form>
 {%  endblock  %}
