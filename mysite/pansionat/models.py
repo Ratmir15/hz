@@ -173,11 +173,11 @@ class Order(models.Model):
 #            ("arm_registration", "REGISTRATION"))
 
 class IllHistory(models.Model):
-    order = models.OneToOneField(Order)
-    first_diagnose = models.CharField(max_length=255)
-    main_diagnose = models.CharField(max_length=255)
-    secondary_diagnose = models.CharField(max_length=255)
-    conditions = models.CharField(max_length=255)
+    order = models.OneToOneField(Order, verbose_name='Путевка')
+    first_diagnose = models.CharField(max_length=255, verbose_name='Диагноз поступления')
+    main_diagnose = models.CharField(max_length=255, verbose_name='Основной диагноз')
+    secondary_diagnose = models.CharField(max_length=255, verbose_name='Сопутствующий диагноз')
+    conditions = models.CharField(max_length=255, verbose_name='Условия труда')
     class Meta:
         verbose_name = 'История болезни'
         verbose_name_plural = 'Истории болезни'

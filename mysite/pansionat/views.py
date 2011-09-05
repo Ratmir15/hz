@@ -4,6 +4,7 @@ import user
 from django.contrib.auth import logout, login, authenticate
 from django.contrib.auth.decorators import login_required, permission_required
 from django.db.models.aggregates import Count, Sum
+from django.forms.widgets import Textarea
 
 from django.template import Context, loader
 from pansionat.models import Patient
@@ -18,6 +19,7 @@ from django.shortcuts import redirect
 import logging
 from django.template.context import RequestContext
 from mysite.pansionat import gavnetso
+from mysite.pansionat.models import IllHistory
 from pytils import numeral
 from mysite.pansionat.gavnetso import monthlabel, nextmonthfirstday, initbase, initroles
 import datetime
@@ -178,6 +180,44 @@ def patient_save(request):
     return patient_new(request) #if method is't post then show empty form
 
 @login_required
+def ill_history_edit(request, order_id):
+    ord = Order.objects.get(id = order_id)
+    ill_historys = IllHistory.objects.filter(order = ord)
+    values = {}
+    if len(ill_historys)>0:
+        ill_history = ill_historys[0]
+        values['ill_history_id'] = ill_history.id
+    else:
+        ill_history = IllHistory(order = ord)
+    ill_history_form = IllHistoryForm(instance=ill_history)
+    values['ill_history_form'] = ill_history_form
+    values['order_id'] = order_id
+    values['patient_name'] = ord.patient.fio()
+    return render_to_response('pansionat/illhistory.html', MenuRequestContext(request, values))
+
+@login_required
+def ill_history_new(request):
+    ill_history_form = IllHistoryForm()
+    values = {'ill_history_form' : ill_history_form}
+    return render_to_response('pansionat/illhistory.html', MenuRequestContext(request, values))
+
+@login_required
+def ill_history_save(request):
+    if request.method == 'POST':
+        ill_history_id = request.POST.get('ill_history_id')
+        if ill_history_id is None:
+            ill_history = IllHistory(order = Order.objects.get(id = request.POST.get('id_order_id')))
+        else:
+            ill_history = IllHistory.objects.get(id = ill_history_id)
+
+        ill_history_form = IllHistoryForm(request.POST, instance = ill_history)
+        ill_history = ill_history_form.save()
+
+        values = {'ill_history_form' : ill_history_form, 'ill_history_id' : ill_history.id}
+        return render_to_response('pansionat/illhistory.html', MenuRequestContext(request, values))
+    return ill_history_new(request) #if method is't post then show empty form
+
+@login_required
 def init(request):
     order_list = Order.objects.all()
     if not len(order_list):
@@ -287,6 +327,13 @@ def ill_history(request, order_id):
     delt = datetime.date.today() - order.patient.birth_date
     years = int (delt.days / 365.25)
     srok = 'c '+str(order.start_date)+' по '+str(order.end_date)
+    ill_history = IllHistory.objects.filter(order = order)[0]
+    first_diagnose = ill_history.first_diagnose
+    pref = u'С каким диагнозом прибыл: '
+    first_diagnose =  pref + first_diagnose
+    main_diagnose =  u'Диагноз санатория а) основной: ' + ill_history.main_diagnose
+    secondary_diagnose = u'б) сопутствующего заболевания: ' + ill_history.secondary_diagnose
+    conditions =  u'Условия труда и быта больного: ' + ill_history.conditions
     tel = { 'NUMBER': order.code,
            'FILENAME': 'ill_history-'+order.code,
            'SURNAME': order.patient.family, 'NAME': order.patient.name,
@@ -298,6 +345,10 @@ def ill_history(request, order_id):
            'ADDRESS': order.patient.address,
            'AGE': years,
            'SROK':srok,
+           'FD': first_diagnose,
+           'MD': main_diagnose,
+           'SD': secondary_diagnose,
+           'COND': conditions
     }
     return fill_excel_template(template_filename, tel)
 
@@ -543,6 +594,17 @@ class OrderForm(ModelForm):
 class PatientForm(ModelForm):
     class Meta:
         model = Patient
+
+class IllHistoryForm(ModelForm):
+    class Meta:
+        model = IllHistory
+        exclude = ('order')
+        widgets = {
+            'first_diagnose': Textarea(attrs={'cols': 80, 'rows': 20}),
+            'main_diagnose': Textarea(attrs={'cols': 80, 'rows': 20}),
+            'secondary_diagnose': Textarea(attrs={'cols': 80, 'rows': 20}),
+            'conditions': Textarea(attrs={'cols': 80, 'rows': 20}),
+        }
 
 def order(request):
     if request.session.has_key('rooms'):
