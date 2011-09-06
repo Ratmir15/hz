@@ -242,6 +242,10 @@ def fill_excel_template(template_filename, tel):
             else:
                 #print 'Копирование ячейки 2'+str(i)
                 write_and_clone_cell(wtsheet, mc_map, v, style, rrowx, col, rrowx + ymargin, col, i)
+        if rsh.rowinfo_map.has_key(rrowx):
+            #print str(rrowx)+":"+str(rsh.rowinfo_map[rrowx].height)
+            wtsheet.row(rrowx + ymargin).height = rsh.rowinfo_map[rrowx].height
+            wtsheet.row(rrowx + ymargin).height_mismatch = True
 
     response = HttpResponse(mimetype='application/vnd.ms-excel')
     filename = tel.get('FILENAME','report')
