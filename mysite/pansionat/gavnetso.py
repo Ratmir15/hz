@@ -35,32 +35,24 @@ def initbase(doit):
                 passport_whom = 'ОВД ШЕМЫШЕЙКА',passport_number='56 07 736141',
                 address = 'ШЕМЫШ.Р-Н С.МАЧКАССЫ УЛ.МОЛОДЕЖНАЯ 5. 28-1-34Д.Т.')
     p4.save()
-    c1 = Customer(name = 'Кожвендиспансер')
+    c1 = Customer(name = 'Кожвендиспансер', inn = 1)
     c1.save()
-    c2 = Customer(name = 'Администрация окт. р-на')
+    c2 = Customer(name = 'Администрация окт. р-на', inn = 2)
     c2.save()
-    c3 = Customer(name = 'Администрация каржиманского c/c')
+    c3 = Customer(name = 'Администрация каржиманского c/c', inn = 3)
     c3.save()
-    c4 = Customer(name = 'МОУ СОШ№35')
+    c4 = Customer(name = 'МОУ СОШ№35', inn = 4)
     c4.save()
-    c5 = Customer(name = 'Атмис-сахар')
+    c5 = Customer(name = 'Атмис-сахар', inn = 5)
     c5.save()
-    c6 = Customer(name = 'ХЗ')
+    c6 = Customer(name = 'ХЗ', inn = 6)
     c6.save()
-    c7 = Customer(name = 'ЦРБ')
+    c7 = Customer(name = 'ЦРБ', inn = 7)
     c7.save()
-    rt1 = RoomType(name = 'Люкс', places = 2, price=2000)
-    rt1.save()
-    rt2 = RoomType(name = 'Полулюкс', places = 3, price=1500)
-    rt2.save()
-    r1 = Room(name='1СК',room_type=rt1)
-    r1.save()
-    r2 = Room(name='1Д',room_type=rt2)
-    r2.save()
-    r3 = Room(name='33Б',room_type=rt2)
-    r3.save()
-    r4 = Room(name='3НК',room_type=rt1)
-    r4.save()
+    r1 = Room.objects.get(name = '1СК')
+    r2 = Room.objects.get(name = '1Д')
+    r3 = Room.objects.get(name = '33Б')
+    r4 = Room.objects.get(name = '2Д')
     o1 = Order(room = r1, code = '1266', start_date=datetime.date(2007,7,1),end_date=datetime.date(2007,7,15), patient = p1, customer = c1, directive = c5, price = 12345)
     o1.save()
     o2 = Order(room = r2,code = '1267', start_date=datetime.date(2007,7,2),end_date=datetime.date(2007,7,15), patient = p2, customer = c2, directive = c5, price = 11000)
@@ -77,6 +69,57 @@ def initbase(doit):
     oc3.save()
     oc4 = Occupied(order = o4, room = r4, start_date=datetime.date(2007,7,4),end_date=datetime.date(2007,7,15), description = 'четвертый')
     oc4.save()
+
+def initroomtypes():
+    rt1 = RoomType(name = 'Двухместный номер блочный повышенной комфортности',\
+                   description = 'телевизор, холодильник, душевая кабина, кондиционер',\
+                   places = 2, price = 1310, price_alone = 2120)
+    rt1.save()
+    rt2 = RoomType(name = 'Двухместный номер стандартный',\
+                   description = 'телевизор, холодильник',\
+                   places = 2, price = 1370, price_alone = 2230)
+    rt2.save()
+    rt3 = RoomType(name = 'Двухместный номер 1 категории',\
+                   description = 'телевизор, холодильник, душевая кабина',\
+                   places = 2, price = 1580, price_alone = 2650)
+    rt3.save()
+    rt4 = RoomType(name = 'Двухместный номер повышенной комфортности',\
+                   description = 'телевизор, холодильник, кондиционер',\
+                   places = 2, price = 1730, price_alone = 2960)
+    rt4.save()
+    rt5 = RoomType(name = 'Двухкомнатный номер «Люкс»',\
+                   description = 'телевизор, холодильник, душевая кабина, кондиционер',\
+                   places = 2, price = 2000, price_alone = 4000)
+    rt5.save()
+    rt6 = RoomType(name = 'Двухкомнатный номер «Люкс»',\
+                   description = 'телевизор, холодильник, душевая кабина',\
+                   places = 2, price = 1750, price_alone = 3500)
+    rt6.save()
+    rt7 = RoomType(name = 'Домики (двухместный номер)',\
+                   description = 'телевизор, холодильник',\
+                   places = 2, price = 1050, price_alone = 1600)
+    rt7.save()
+    rt7 = RoomType(name = 'Домики (трехместный номер)',\
+                   description = 'телевизор, холодильник',\
+                   places = 3, price = 950, price_alone = 0)
+    rt7.save()
+    r1 = Room(name='1СК',room_type=rt1)
+    r1.save()
+    r2 = Room(name='1Д',room_type=rt2)
+    r2.save()
+    r3 = Room(name='33Б',room_type=rt2)
+    r3.save()
+    r4 = Room(name='3НК',room_type=rt1)
+    r4.save()
+    r1 = Room(name='2СК',room_type=rt1)
+    r1.save()
+    r2 = Room(name='2Д',room_type=rt2)
+    r2.save()
+    r3 = Room(name='433Б',room_type=rt3)
+    r3.save()
+    r4 = Room(name='2НК',room_type=rt3)
+    r4.save()
+
 
 def initroles():
     role1 = Role(name = 'Директор')

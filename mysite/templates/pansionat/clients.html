@@ -30,6 +30,7 @@
     <table border="0" id = "occupied" class = "display">
     <thead>
     <th>Наименование</th>
+    <th>ИНН</th>
     <th></th>
     </thead>
             {% for client in clients_list %}
@@ -37,6 +38,9 @@
                 <td>
                     {{ client.name }}
                 </td>
+                    <td>
+                        {{ client.inn }}
+                    </td>
                 <td>
                     <a href="/clients/{{ client.id }}/">&rsaquo;&rsaquo;&rsaquo;&rsaquo;</a>
                     </td>
@@ -44,6 +48,6 @@
             {% endfor %}
     </table>
     <form action="/clients/new/">
-        <input type="submit" value="Создать клиента"/>
+        <input type="submit" value="Добавить клиента"/>
     </form>
 {%  endblock  %}

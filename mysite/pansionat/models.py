@@ -120,6 +120,10 @@ class Busy(models.Model):
 
 class Customer(models.Model):
     name = models.CharField(max_length = 50, verbose_name = 'Название')
+    inn = models.CharField(unique = True, max_length=20, verbose_name='ИНН')
+    bank = models.CharField(max_length=40, verbose_name='Банк')
+    rs = models.CharField(max_length=50, verbose_name='Расчетный счет')
+    address = models.CharField(max_length=255, verbose_name='Адрес')
     is_show = models.BooleanField(verbose_name = 'Показывать в отчетах')
     def __unicode__(self):
         return self.name
@@ -129,9 +133,11 @@ class Customer(models.Model):
         verbose_name_plural = 'Клиенты'
 
 class RoomType(models.Model):
-    name = models.CharField(max_length = 50)
+    name = models.CharField(max_length = 100)
+    description = models.CharField(max_length = 100)
     places = models.IntegerField()
     price = models.DecimalField(decimal_places=2,max_digits=8)
+    price_alone = models.DecimalField(decimal_places=2,max_digits=8)
     is_additional_people_available = models.BooleanField()
     is_blocked_for_single = models.BooleanField()
     def __unicode__(self):
@@ -161,8 +167,9 @@ class Order(models.Model):
     directive = models.ForeignKey(Customer, related_name='dir', verbose_name = 'Оплачивающий')
     start_date = models.DateField('Дата заезда')
     end_date = models.DateField('Даты выезда')
-    price = models.DecimalField(decimal_places = 2,max_digits=8, verbose_name = 'Стоимоить')
+    price = models.DecimalField(decimal_places = 2,max_digits=8, verbose_name = 'Стоимость')
     is_with_child = models.BooleanField(verbose_name = 'Мать и дитя')
+    payd_by_patient = models.BooleanField(verbose_name = 'Оплачивается пациентом')
     def __unicode__(self):
         return self.code
 

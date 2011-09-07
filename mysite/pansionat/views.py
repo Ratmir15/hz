@@ -21,7 +21,7 @@ from django.template.context import RequestContext
 from mysite.pansionat import gavnetso
 from mysite.pansionat.models import IllHistory, Customer
 from pytils import numeral
-from mysite.pansionat.gavnetso import monthlabel, nextmonthfirstday, initbase, initroles
+from mysite.pansionat.gavnetso import monthlabel, nextmonthfirstday, initbase, initroles, initroomtypes
 import datetime
 import time
 from django import forms
@@ -186,10 +186,13 @@ def patient_save(request):
             patient = Patient.objects.get(id = patient_id)            
             patient_form = PatientForm(request.POST, instance = patient)
 
-        patient = patient_form.save()
-        print patient.id
-        values = {'patient_form' : patient_form, 'patient_id' : patient.id}
-        return render_to_response('pansionat/patient.html', MenuRequestContext(request, values))
+        if patient_form.is_valid():
+            patient = patient_form.save()
+            values = {'patient_form' : patient_form, 'patient_id' : patient.id}
+            return render_to_response('pansionat/patient.html', MenuRequestContext(request, values))
+        else:
+            values = {'patient_form' : patient_form, 'patient_id' : patient_id}
+            return render_to_response('pansionat/patient.html', MenuRequestContext(request, values))
     return patient_new(request) #if method is't post then show empty form
 
 @login_required
@@ -216,8 +219,11 @@ def client_save(request):
             patient = Customer.objects.get(id = client_id)
             client_form = CustomerForm(request.POST, instance = patient)
 
-        client = client_form.save()
-        values = {'client_form' : client_form, 'client_id' : client.id}
+        if client_form.is_valid():
+            client = client_form.save()
+            values = {'client_form' : client_form, 'client_id' : client.id}
+        else:
+            values = {'client_form' : client_form, 'client_id' : client_id}
         return render_to_response('pansionat/client.html', MenuRequestContext(request, values))
     return patient_new(request) #if method is't post then show empty form
 
@@ -253,14 +259,21 @@ def ill_history_save(request):
             ill_history = IllHistory.objects.get(id = ill_history_id)
 
         ill_history_form = IllHistoryForm(request.POST, instance = ill_history)
-        ill_history = ill_history_form.save()
 
-        values = {'ill_history_form' : ill_history_form, 'ill_history_id' : ill_history.id}
+        if ill_history_form.is_valid():
+            ill_history = ill_history_form.save()
+            values = {'ill_history_form' : ill_history_form, 'ill_history_id' : ill_history.id}
+        else:
+            values = {'ill_history_form' : ill_history_form, 'ill_history_id' : ill_history_id}
+
         return render_to_response('pansionat/illhistory.html', MenuRequestContext(request, values))
     return ill_history_new(request) #if method is't post then show empty form
 
 @login_required
 def init(request):
+    list = RoomType.objects.all()
+    if not len(list):
+        initroomtypes()
     order_list = Order.objects.all()
     if not len(order_list):
         initbase(1)
@@ -349,13 +362,15 @@ def nakl(request, occupied_id):
     gb = gavnetso.getEmployerByRoleNameAndDate('Главный бухгалтер',order.start_date).__unicode__()
     kassir = gavnetso.getEmployerByRoleNameAndDate('Кассир',order.start_date).__unicode__()
     tovar = 'Пут. сан.-кур. на '+str(days)+' дней c '+str(order.start_date)+' по '+str(order.end_date) + '№ '+ str(order.code)
+    price = order.price
+    rub = numeral.rubles(price, True)
     tel = {'PIZDEZ': fullname, 'NUMBER': order.code,
            'FILENAME': 'nakladnaya-'+order.code,
            'CLIENT': client, 'VENDOR': vendor,
            'DIRECTOR': dir,
            'GBUH': gb,
            'KASSIR': kassir,
-           'SP': numeral.rubles(order.price, True),
+           'SP': rub,
            'DATE':order.start_date, 'QTYSUM':1, 'AMOUNTSUM':order.price, 'AMOUNTNDSSUM':order.price, 'ALLAMOUNTSUM':order.price,
            'TOVAR': [{'ROWINDEX':1,'NAME':tovar,'QTY':1,'PRICE':order.price,'AMOUNT':order.price,
                       'PNDS':0,'AMOUNTNDS':'-','ALLAMOUNT':order.price}]}
@@ -640,6 +655,10 @@ class PatientForm(ModelForm):
 class CustomerForm(ModelForm):
     class Meta:
         model = Customer
+        widgets = {
+            'address': Textarea(attrs={'cols': 80, 'rows': 3}),
+        }
+
 
 class IllHistoryForm(ModelForm):
     class Meta:
