@@ -28,6 +28,7 @@ from django import forms
 from django.forms import ModelForm
 from django.core.context_processors import csrf, request
 from django.db.models import Q
+from django.db.models import F
 from django.forms.models import inlineformset_factory
 
 from django.db import connection
@@ -532,6 +533,7 @@ def rooms(request):
               'start_date' : start_date.strftime('%d.%m.%Y'),\
               'end_date' : end_date.strftime('%d.%m.%Y'),\
               'room_type' : room_type,
+              'book_type' : book_type,
               'user' : request.user}
     values.update(csrf(request))
     if 'patient_id' in request.GET:
@@ -547,6 +549,15 @@ def room_with_orders(start_date, end_date, room_type, room_book):
         room_list = Room.objects.filter(room_type__name = room_type) 
     else:
         room_list = Room.objects.all()
+
+    if room_book == 'Booked':
+        room_list = room_list.annotate(book_count = Count('roombook'),\
+            order_count = Count('order')).filter(\
+                room_type__places__lte = F('book_count') + F('order_count'))
+    elif room_book == 'NotBooked' :
+        room_list = room_list.annotate(book_count = Count('roombook'),\
+            order_count = Count('order')).filter(\
+                room_type__places__gt = F('book_count') + F('order_count'))
 
     ordered_rooms = [] 
 
