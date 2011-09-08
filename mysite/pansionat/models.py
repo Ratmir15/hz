@@ -181,10 +181,20 @@ class Order(models.Model):
 
 class IllHistory(models.Model):
     order = models.OneToOneField(Order, verbose_name='Путевка')
-    first_diagnose = models.CharField(max_length=255, verbose_name='Диагноз поступления')
-    main_diagnose = models.CharField(max_length=255, verbose_name='Основной диагноз')
-    secondary_diagnose = models.CharField(max_length=255, verbose_name='Сопутствующий диагноз')
-    conditions = models.CharField(max_length=255, verbose_name='Условия труда')
+    first_diagnose = models.CharField(max_length=255, blank=True, verbose_name='Диагноз поступления')
+    main_diagnose = models.CharField(max_length=255, blank=True, verbose_name='Основной диагноз')
+    secondary_diagnose = models.CharField(max_length=255, blank=True, verbose_name='Сопутствующий диагноз')
+    conditions = models.CharField(max_length=255, blank=True, verbose_name='Условия труда')
+    complaints = models.CharField(max_length=255, blank=True, verbose_name='Жалобы больного')
+    general = models.CharField(max_length=255, blank=True, verbose_name='Общий анализ')
+    beginning = models.CharField(max_length=255,blank=True, verbose_name='Начало и развитие настоящего заболевания')
+    state = models.CharField(max_length=255,blank=True, verbose_name='Состояние удовлетворительное')
+    body = models.CharField(max_length=255,blank=True, verbose_name='Телосложение: правильное, неправильное')
+    astenik = models.CharField(max_length=100,blank=True, verbose_name='Астеник, нормастеник, гиперстеник')
+    state = models.CharField(max_length=255,blank=True, verbose_name='Состояние удовлетворительное')
+    state = models.CharField(max_length=255,blank=True, verbose_name='Состояние удовлетворительное')
+    state = models.CharField(max_length=255,blank=True, verbose_name='Состояние удовлетворительное')
+
     class Meta:
         verbose_name = 'История болезни'
         verbose_name_plural = 'Истории болезни'
