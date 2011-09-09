@@ -179,25 +179,67 @@ class Order(models.Model):
 #        permissions = (
 #            ("arm_registration", "REGISTRATION"))
 
+class IllHistoryFieldTypeGroup(models.Model):
+    description = models.CharField(max_length=100, verbose_name='Заголовок')
+    order = models.IntegerField()
+
+    class Meta:
+        verbose_name = 'Группа полей истории болезни'
+        verbose_name_plural = 'Группы полей истории болезни'
+
+class IllHistoryFieldType(models.Model):
+    description = models.CharField(max_length=100, verbose_name='Описание')
+    lines = models.IntegerField()
+    defval = models.CharField(max_length=255)
+    order = models.IntegerField()
+    group = models.ForeignKey(IllHistoryFieldTypeGroup)
+    def default_values(self):
+        return self.defval.split(',')
+    def height(self):
+        return self.lines*20
+
+    class Meta:
+        verbose_name = 'Тип поля истории болезни'
+        verbose_name_plural = 'Типы полей истории болезни'
+
 class IllHistory(models.Model):
     order = models.OneToOneField(Order, verbose_name='Путевка')
-    first_diagnose = models.CharField(max_length=255, blank=True, verbose_name='Диагноз поступления')
-    main_diagnose = models.CharField(max_length=255, blank=True, verbose_name='Основной диагноз')
-    secondary_diagnose = models.CharField(max_length=255, blank=True, verbose_name='Сопутствующий диагноз')
-    conditions = models.CharField(max_length=255, blank=True, verbose_name='Условия труда')
-    complaints = models.CharField(max_length=255, blank=True, verbose_name='Жалобы больного')
-    general = models.CharField(max_length=255, blank=True, verbose_name='Общий анализ')
-    beginning = models.CharField(max_length=255,blank=True, verbose_name='Начало и развитие настоящего заболевания')
-    state = models.CharField(max_length=255,blank=True, verbose_name='Состояние удовлетворительное')
-    body = models.CharField(max_length=255,blank=True, verbose_name='Телосложение: правильное, неправильное')
-    astenik = models.CharField(max_length=100,blank=True, verbose_name='Астеник, нормастеник, гиперстеник')
-    state = models.CharField(max_length=255,blank=True, verbose_name='Состояние удовлетворительное')
-    state = models.CharField(max_length=255,blank=True, verbose_name='Состояние удовлетворительное')
-    state = models.CharField(max_length=255,blank=True, verbose_name='Состояние удовлетворительное')
+#    first_diagnose = models.CharField(max_length=255, blank=True, verbose_name='Диагноз поступления')
+#    main_diagnose = models.CharField(max_length=255, blank=True, verbose_name='Основной диагноз')
+#    secondary_diagnose = models.CharField(max_length=255, blank=True, verbose_name='Сопутствующий диагноз')
+#    conditions = models.CharField(max_length=255, blank=True, verbose_name='Условия труда')
+#    complaints = models.CharField(max_length=255, blank=True, verbose_name='Жалобы больного')
+#    general = models.CharField(max_length=255, blank=True, verbose_name='Общий анализ')
+#    beginning = models.CharField(max_length=255,blank=True, verbose_name='Начало и развитие настоящего заболевания')
+#    state = models.CharField(max_length=255,blank=True, verbose_name='Состояние удовлетворительное')
+#    body = models.CharField(max_length=255,blank=True, verbose_name='Телосложение: правильное, неправильное')
+#    astenik = models.CharField(max_length=100,blank=True, verbose_name='Астеник, нормастеник, гиперстеник')
+#    state = models.CharField(max_length=255,blank=True, verbose_name='Состояние удовлетворительное')
+#    state = models.CharField(max_length=255,blank=True, verbose_name='Состояние удовлетворительное')
+#    state = models.CharField(max_length=255,blank=True, verbose_name='Состояние удовлетворительное')
 
     class Meta:
         verbose_name = 'История болезни'
         verbose_name_plural = 'Истории болезни'
+
+class IllHistoryFieldValue(models.Model):
+    ill_history = models.ForeignKey(IllHistory, verbose_name='История болезни')
+    ill_history_field = models.ForeignKey(IllHistoryFieldType, verbose_name='Поле')
+    value = models.CharField(max_length=255, verbose_name='Значение поля')
+
+    class Meta:
+        verbose_name = 'Значение поля'
+        verbose_name_plural = 'Значения полей'
+
+
+class IllHistoryRecord(models.Model):
+    ill_history = models.ForeignKey(IllHistory, verbose_name='История болезни')
+    datetime = models.DateTimeField(verbose_name='Дата записи')
+    text = models.CharField(max_length=1000, verbose_name='Текст')
+
+    class Meta:
+        verbose_name = 'Запись истории болезни'
+        verbose_name_plural = 'Записи историй болезни'
 
 # Room book service
 #ROOM_TYPE = (

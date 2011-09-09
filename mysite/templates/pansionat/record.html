@@ -1,0 +1,46 @@
+{% extends "pansionat/index.html" %}
+
+{% block title %} Запись истории болезни {%  endblock  %}
+
+{% block head %}
+    <style type="text/css">
+        @import "/static/dataTables/media/css/demo_page.css";
+        @import "/static/dataTables/media/css/demo_table.css";
+        @import "/static/jquery-ui/themes/base/jquery.ui.all.css";
+    </style>
+    <script src="/static/dataTables/media/js/jquery.js"></script>
+    <script src="/static/dataTables/media/js/jquery.dataTables.js"></script>
+    <script src="/static/jquery-ui/ui/jquery.ui.core.js"></script>
+    <script src="/static/jquery-ui/ui/jquery.ui.widget.js"></script>
+    <script src="/static/jquery-ui/ui/jquery.ui.datepicker.js"></script>
+    <script src="/static/jquery-ui/ui/i18n/jquery.ui.datepicker-ru.js"></script>
+    <script src="/static/jquery-ui/ui/jquery.ui.button.js"></script>
+    <script type="text/javascript">
+        $(document).ready(function() {
+            $.datepicker.setDefaults($.datepicker.regional['ru']);
+            $('#id_datetime').datepicker();
+            $('input:submit').button()
+            $(':button').button()
+            } );
+    </script>
+<link rel="stylesheet" href="/static/Refresh.css" type="text/css" />
+ {%  endblock  %}
+
+{% block allcontent %}
+    <h1>Запись истории болезни</h1>
+    <form action = "/illhistory/record/save/" method="POST">
+        {% csrf_token %}
+        <table border="0" id = "occupied" class = "display">
+            {{ form.as_table}}
+                <tr>
+                    <td colspan="2">
+                        <input type="submit" value="Сохранить">
+                    </td>
+                </tr>
+            {% if object_id %}
+                <input type="hidden" name="object_id" value="{{ object_id }}"/>
+            {% endif %}
+            <input type="hidden" name="id_ill_history_id" value="{{ ill_history_id }}"/>
+        </table>
+    </form>
+{%  endblock  %}

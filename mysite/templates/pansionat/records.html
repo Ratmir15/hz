@@ -1,0 +1,28 @@
+{% extends "pansionat/datagrid.html" %}
+
+{% block title %} Записи истории болезни {%  endblock  %}
+
+{% block allcontent %}
+    <h1>Записи истории болезни</h1>
+    <h2>{{ order.patient.fio }}</h2>
+    <h4><a href="/illhistory/{{ ill_history.id }}">история болезни</a></h4>
+    <table border="0" id = "datagrid" class = "display">
+    <thead>
+    <th>Дата</th>
+    <th></th>
+    </thead>
+            {% for item in list %}
+                <tr>
+                <td>
+                    {{ item.datetime }}
+                </td>
+                <td>
+                    <a href="/illhistory/record/{{ item.id }}/">&rsaquo;&rsaquo;&rsaquo;&rsaquo;</a>
+                    </td>
+                </tr>
+            {% endfor %}
+    </table>
+    <form action="/illhistory/record/new/{{ ill_history.id }}">
+        <input type="submit" value="Добавить запись"/>
+    </form>
+{%  endblock  %}

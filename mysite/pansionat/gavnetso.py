@@ -1,7 +1,7 @@
 # coding: utf-8
 import datetime
 from django.db import connection
-from mysite.pansionat.models import Patient, Customer, Order, Occupied, Room, RoomType, EmployerRoleHistory, Role, Employer
+from mysite.pansionat.models import Patient, Customer, Order, Occupied, Room, RoomType, EmployerRoleHistory, Role, Employer, IllHistoryFieldTypeGroup, IllHistoryFieldType
 
 def nextmonthfirstday(year, month):
     if month==12:
@@ -15,6 +15,68 @@ def nextmonthfirstday(year, month):
 def initbase(doit):
     if not doit:
         return
+    ihftg1 = IllHistoryFieldTypeGroup(description = 'Общие поля', order = 0)
+    ihftg1.save()
+    ihftg2 = IllHistoryFieldTypeGroup(description = 'Данные объективного исследования', order = 1)
+    ihftg2.save()
+    ihftg3 = IllHistoryFieldTypeGroup(description = 'Органы дыхания', order = 2)
+    ihftg3.save()
+    ihftg4 = IllHistoryFieldTypeGroup(description = 'Сердечно-сосудистая система', order = 3)
+    ihftg4.save()
+
+    ihft1 = IllHistoryFieldType(description = 'С каким диагнозом прибыл', lines = 3, defval ='',\
+                                order = 0, group = ihftg1)
+    ihft1.save()
+    ihft2 = IllHistoryFieldType(description = 'Диагноз санатория, а) основной', lines = 3, defval ='',\
+                                order = 1, group = ihftg1)
+    ihft2.save()
+    ihft3 = IllHistoryFieldType(description = 'б) сопутствующего заболевания', lines = 3, defval ='',\
+                                order = 2, group = ihftg1)
+    ihft3.save()
+    ihft4 = IllHistoryFieldType(description = 'Условия труда и быта больного', lines = 6, defval ='',\
+                                order = 3, group = ihftg1)
+    ihft4.save()
+    ihft5 = IllHistoryFieldType(description = 'Жалобы больного', lines = 8, defval ='',\
+                                order = 4, group = ihftg1)
+    ihft5.save()
+    ihft6 = IllHistoryFieldType(description = 'Общий анамнез', lines = 5, defval ='',\
+                                order = 5, group = ihftg1)
+    ihft6.save()
+    ihft7 = IllHistoryFieldType(description = 'Начало и развитие настоящего заболевания', lines = 5, defval ='',\
+                                order = 6, group = ihftg1)
+    ihft7.save()
+
+    ihft = IllHistoryFieldType(description = 'Состояние удовлетворительное', lines = 1, defval ='',\
+                                order = 0, group = ihftg2)
+    ihft.save()
+    ihft = IllHistoryFieldType(description = 'Телосложение', lines = 1, defval ='правильное,неправильное',\
+                                order = 1, group = ihftg2)
+    ihft.save()
+    ihft = IllHistoryFieldType(description = '', lines = 1, defval ='Астеник, нормастеник, гиперстеник',\
+                                order = 2, group = ihftg2)
+    ihft.save()
+    ihft = IllHistoryFieldType(description = 'Питание', lines = 1, defval ='удовлетворительное, повышенное, пониженное',\
+                                order = 3, group = ihftg2)
+    ihft.save()
+    ihft = IllHistoryFieldType(description = 'Кожные покровы', lines = 2, defval ='нормальной окраски, бледные, гиперемированы, желтушные',\
+                                order = 4, group = ihftg2)
+    ihft.save()
+    ihft = IllHistoryFieldType(description = 'Щитовидная железа', lines = 1, defval ='увеличена, не увеличена',\
+                                order = 5, group = ihftg2)
+    ihft.save()
+    ihft = IllHistoryFieldType(description = 'Региональные лимфатические железы-шейные, подмышечные, паховые', lines = 3, defval ='не увеличены, увеличены, мягкие, уплотненные',\
+                                order = 6, group = ihftg2)
+    ihft.save()
+    ihft = IllHistoryFieldType(description = 'при пальпации', lines = 1, defval ='безболезненные, болезненные',\
+                                order = 7, group = ihftg2)
+    ihft.save()
+    ihft = IllHistoryFieldType(description = 'Косто-мышечная система', lines = 1, defval ='без видимых изменений',\
+                                order = 8, group = ihftg2)
+    ihft.save()
+
+
+
+
     p1 = Patient(family = 'Харитонова',name = 'Ульяна', sname = 'Яковлевна',
                 birth_date=datetime.date(1964,8,21),grade='Доярка',
                 passport_whom = 'ОВД ОКТ Р-НА',passport_number='63 04 658348',

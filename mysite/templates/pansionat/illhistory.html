@@ -32,16 +32,30 @@
         {% csrf_token %}
         <table border="0" id = "occupied" class = "display">
         <tr><td colspan="2">{{ patient_name }}</td></tr>
-        <tr><td colspan="2"><a href="/illhistory/print/{{ order_id }}">печать</a></td></tr>
+        <tr><td colspan="2"><a href="/illhistory/print/{{ order_id }}">печать</a>&nbsp;&nbsp;<a href="/illhistory/records/{{ order_id }}">записи</a></td></tr>
             {{ ill_history_form.as_table}}
-                <tr>
-                    <td colspan="2">
-                        <input type="submit" value="Сохранить">
-                    </td>
-                </tr>                            
             {% if ill_history_id %}
                 <input type="hidden" name="ill_history_id" value="{{ ill_history_id }}"/>
             {% endif %}
+            {% for field, value in ill_history_form.add_fields_values.items %}
+                <tr>
+                    <th>
+                        <label for="id_add_field_{{ field.group.order }}_{{ field.order }}">{{ field.description }}</label>
+                    </th>
+                    <td>
+                        {% if field.defval %}
+                            {% for val in field.default_values %}
+                                <a href="#" onclick="id_add_field_{{ field.group.order }}_{{ field.order }}.innerHTML=this.innerHTML; return false;">{{ val }}</a>&nbsp;
+                            {% endfor %}
+                        {% endif %}
+                        <textarea id="id_add_field_{{ field.group.order }}_{{ field.order }}" rows="{{ field.lines }}" style="height: {{ field.height }}px;" cols="80" name="add_field_{{ field.group.order }}_{{ field.order }}">{{ value }}</textarea></td></tr>
+                <tr>
+            {% endfor %}
+            <tr>
+                <td colspan="2">
+                    <input type="submit" value="Сохранить">
+                </td>
+            </tr>
             <input type="hidden" name="id_order_id" value="{{ order_id }}"/>
         </table>
     </form>

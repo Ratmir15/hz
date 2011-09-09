@@ -19,7 +19,7 @@ from django.shortcuts import redirect
 import logging
 from django.template.context import RequestContext
 from mysite.pansionat import gavnetso
-from mysite.pansionat.models import IllHistory, Customer
+from mysite.pansionat.models import IllHistory, Customer, IllHistoryFieldType, IllHistoryFieldValue, IllHistoryRecord
 from pytils import numeral
 from mysite.pansionat.gavnetso import monthlabel, nextmonthfirstday, initbase, initroles, initroomtypes
 import datetime
@@ -229,6 +229,58 @@ def client_save(request):
     return patient_new(request) #if method is't post then show empty form
 
 @login_required
+def record_edit(request, object_id):
+    obj = IllHistoryRecord.objects.get(id = object_id)
+    form = RecordForm(instance=obj)
+    values = {'form' : form,\
+                'object_id' : object_id,
+                'ill_history_id' : obj.ill_history.id}
+    return render_to_response('pansionat/record.html', MenuRequestContext(request, values))
+
+@login_required
+def record_new(request, ill_history_id):
+    form = RecordForm()
+    values = {'form' : form, 'ill_history_id': ill_history_id}
+    return render_to_response('pansionat/record.html', MenuRequestContext(request, values))
+
+@login_required
+def record_save(request):
+    if request.method == 'POST':
+        object_id = request.POST.get('object_id')
+        if object_id is None:
+            obj = IllHistoryRecord(ill_history = IllHistory.objects.get(id = request.POST.get('id_ill_history_id')))
+        else:
+            obj = IllHistoryRecord.objects.get(id = object_id)
+
+        form = RecordForm(request.POST, instance = obj)
+        if form.is_valid():
+            obj = form.save()
+            values = {'form' : form, 'object_id' : obj.id}
+        else:
+            values = {'form' : form, 'object_id' : object_id}
+        return render_to_response('pansionat/record.html', MenuRequestContext(request, values))
+    return record_new(request)
+
+@login_required
+def records(request, order_id):
+    ord = Order.objects.get(id = order_id)
+    ill_historys = IllHistory.objects.filter(order = ord)
+    values = {}
+    if len(ill_historys)>0:
+        ill_history = ill_historys[0]
+        values['ill_history_id'] = ill_history.id
+    else:
+        ill_history = IllHistory(order = ord)
+    list = IllHistoryRecord.objects.filter(ill_history = ill_history)
+    t = loader.get_template('pansionat/records.html')
+    c = MenuRequestContext(request, {
+    'list': list,
+    'ill_history': ill_history,
+    'order': ord,
+    })
+    return HttpResponse(t.render(c))
+
+@login_required
 def ill_history_edit(request, order_id):
     ord = Order.objects.get(id = order_id)
     ill_historys = IllHistory.objects.filter(order = ord)
@@ -238,7 +290,17 @@ def ill_history_edit(request, order_id):
         values['ill_history_id'] = ill_history.id
     else:
         ill_history = IllHistory(order = ord)
+    additional_fields = IllHistoryFieldType.objects.all()
     ill_history_form = IllHistoryForm(instance=ill_history)
+    ill_history_form.additional_fields = additional_fields
+    ill_history_form.add_fields_values = {}
+    for f in additional_fields:
+        fv = IllHistoryFieldValue.objects.filter(ill_history = ill_history, ill_history_field = f)
+        if len(fv)>0:
+            ill_history_form.add_fields_values[f] = fv[0].value
+        else:
+            ill_history_form.add_fields_values[f] = ""
+
     values['ill_history_form'] = ill_history_form
     values['order_id'] = order_id
     values['patient_name'] = ord.patient.fio()
@@ -261,12 +323,27 @@ def ill_history_save(request):
 
         ill_history_form = IllHistoryForm(request.POST, instance = ill_history)
 
+        additional_fields = IllHistoryFieldType.objects.all()
+        ill_history_form.additional_fields = additional_fields
+        ill_history_form.add_fields_values = {}
+        for f in additional_fields:
+            ill_history_form.add_fields_values[f] = request.POST.get('add_field_'+str(f.group.order)+'_'+str(f.order),'')
+
         if ill_history_form.is_valid():
             ill_history = ill_history_form.save()
-            values = {'ill_history_form' : ill_history_form, 'ill_history_id' : ill_history.id}
-        else:
-            values = {'ill_history_form' : ill_history_form, 'ill_history_id' : ill_history_id}
+            for f in additional_fields:
+                fv = IllHistoryFieldValue.objects.filter(ill_history = ill_history, ill_history_field = f)
+                value = ill_history_form.add_fields_values[f]
+                if len(fv)>0:
+                    fv[0].value = value
+                    fv[0].save()
+                else:
+                    fv = IllHistoryFieldValue(ill_history = ill_history, ill_history_field = f, value = value)
+                    fv.save()
+                    
+            ill_history_id = ill_history.id
 
+        values = {'ill_history_form' : ill_history_form, 'ill_history_id' : ill_history_id}
         return render_to_response('pansionat/illhistory.html', MenuRequestContext(request, values))
     return ill_history_new(request) #if method is't post then show empty form
 
@@ -670,8 +747,18 @@ class CustomerForm(ModelForm):
             'address': Textarea(attrs={'cols': 80, 'rows': 3}),
         }
 
+class RecordForm(ModelForm):
+    class Meta:
+        model = IllHistoryRecord
+        exclude = ('ill_history')
+        widgets = {
+            'text': Textarea(attrs={'cols': 80, 'rows': 20}),
+        }
 
 class IllHistoryForm(ModelForm):
+    field_groups = {}
+    additional_fields = {}
+    add_fields_values = {}
     class Meta:
         model = IllHistory
         exclude = ('order')
