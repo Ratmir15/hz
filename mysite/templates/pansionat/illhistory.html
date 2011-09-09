@@ -45,7 +45,7 @@
                     <td>
                         {% if field.defval %}
                             {% for val in field.default_values %}
-                                <a href="#" onclick="id_add_field_{{ field.group.order }}_{{ field.order }}.innerHTML=this.innerHTML; return false;">{{ val }}</a>&nbsp;
+                                <a href="#" onclick="$('#id_add_field_{{ field.group.order }}_{{ field.order }}').html(this.innerHTML); return false;">{{ val }}</a>&nbsp;
                             {% endfor %}
                         {% endif %}
                         <textarea id="id_add_field_{{ field.group.order }}_{{ field.order }}" rows="{{ field.lines }}" style="height: {{ field.height }}px;" cols="80" name="add_field_{{ field.group.order }}_{{ field.order }}">{{ value }}</textarea></td></tr>
