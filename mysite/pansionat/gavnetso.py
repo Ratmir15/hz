@@ -1,7 +1,7 @@
 # coding: utf-8
 import datetime
 from django.db import connection
-from mysite.pansionat.models import Patient, Customer, Order, Occupied, Room, RoomType, EmployerRoleHistory, Role, Employer, IllHistoryFieldTypeGroup, IllHistoryFieldType, MedicalProcedureType
+from mysite.pansionat.models import Patient, Customer, Order, Occupied, Room, RoomType, EmployerRoleHistory, Role, Employer, IllHistoryFieldTypeGroup, IllHistoryFieldType, MedicalProcedureType, OrderMedicalProcedure, OrderMedicalProcedureSchedule
 
 def nextmonthfirstday(year, month):
     if month==12:
@@ -115,7 +115,7 @@ def initbase(doit):
     r2 = Room.objects.get(name = '1Д')
     r3 = Room.objects.get(name = '33Б')
     r4 = Room.objects.get(name = '2Д')
-    o1 = Order(room = r1, code = '1266', start_date=datetime.date(2007,7,1),end_date=datetime.date(2007,7,15), patient = p1, customer = c1, directive = c5, price = 12345)
+    o1 = Order(room = r1, code = '1266', start_date=datetime.date(2007,7,2),end_date=datetime.date(2007,7,15), patient = p1, customer = c1, directive = c5, price = 12345)
     o1.save()
     o2 = Order(room = r2,code = '1267', start_date=datetime.date(2007,7,2),end_date=datetime.date(2007,7,15), patient = p2, customer = c2, directive = c5, price = 11000)
     o2.save()
@@ -210,8 +210,23 @@ def initroles():
     erh4.save()
 
 def initp():
-    mpt  = MedicalProcedureType(name = 'Грязь на область', order = 1, duration = 15, start_time=datetime.time(8), finish_time = datetime.time(17), capacity = 2)
+    mpt  = MedicalProcedureType(name = 'Грязь на область', order = 1, duration = 30, start_time=datetime.time(8), finish_time = datetime.time(16), capacity = 2)
     mpt.save()
+    orders = Order.objects.filter(code = '1266')
+    ord = orders[0]
+    omp = OrderMedicalProcedure(order = ord, mp_type = mpt)
+    omp.save()
+    for i in xrange(2,7):
+        omps = OrderMedicalProcedureSchedule(order = ord, mp_type = mpt, p_date = datetime.date(2007,7,i), slot = 2)
+        omps.save()
+    orders = Order.objects.filter(code = '1267')
+    ord = orders[0]
+    omp = OrderMedicalProcedure(order = ord, mp_type = mpt)
+    omp.save()
+    for i in xrange(2,7):
+        omps = OrderMedicalProcedureSchedule(order = ord, mp_type = mpt, p_date = datetime.date(2007,7,i), slot = 3)
+        omps.save()
+
     mpt  = MedicalProcedureType(name = 'Подводное вытяжение в минеральной воде', order = 2, duration = 15, start_time=datetime.time(8), finish_time = datetime.time(17), capacity = 2)
     mpt.save()
     mpt  = MedicalProcedureType(name = 'Рапные ванный', order = 3, duration = 15, start_time=datetime.time(8), finish_time = datetime.time(17), capacity = 2)

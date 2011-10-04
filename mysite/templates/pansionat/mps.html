@@ -21,37 +21,54 @@
             $('#id_birth_date').datepicker();
             $('input:submit').button()
             $(':button').button()
+            $(".slot").click(function(){
+                //alert(this.id);
+                id_array = this.id.split('_');
+                input_id = "#slot_"+id_array[2]+"_"+id_array[3];
+                //alert(input_id);
+                if (!$(this).hasClass("checked")) {
+                    $(this).addClass("checked");
+                    $(input_id).val("True");
+                } else {
+                    $(this).removeClass("checked");
+                    $(input_id).val(false);
+                }
+            });
             } );
     </script>
 <link rel="stylesheet" href="/static/Refresh.css" type="text/css" />
+    <style type="text/css">
+    td.checked{
+      background-color: yellow;
+    }
+    </style>
  {%  endblock  %}
 
 {% block allcontent %}
-    <h1>Процедура блядская</h1>
+    <h1>{{ name }}</h1>
     <form action = "/mps/save/" method="POST">
         {% csrf_token %}
         <table border="0" id = "occupied" class = "display">
         <tr><td colspan="2">{{ patient_name }}</td></tr>
             <input type="hidden" name="order_id" value="{{ order_id }}"/>
-            <input type="hidden" name="order" value="{{ order }}"/>
+            <input type="hidden" name="order" value="{{ mp_order }}"/>
             <tr><td>
                 <table>
-                {% for dates in blockdates %}
-                    <tr><td><table><tr>
-                    {% for field in dates %}
-                        <td><table>
-                        <tr><td>{{ field.0 }}</td></tr>
-                        {% for slot_info in field.1 %}
-                            <tr><td
-                                    {% if slot_info.1 %}
-                                    bgcolor="red"
-                                    {% endif %}
-                                    >{{ slot_info.0 }}</td></tr>
-                        {% endfor %}
-                        </table></td>
+                {% for times in blockdates %}
+                    <tr><th></th>
+                    {% for field in times.1 %}
+                        <th>{{ field }}</th>
                     {% endfor %}
                     </tr>
-                    </table></td></tr>
+                    {% for field in times.2 %}
+                        <tr><td id="time_{{ field.2 }}_{{ field.3 }}">{{ field.0 }}</td>
+                        {% for slot_info in field.1 %}
+                            <td class="slot{% if slot_info.0 %} checked{% endif %}" id="td_slot_{{ slot_info.1 }}_{{ slot_info.2 }}">{{ slot_info.4 }}
+                            <input type="hidden" id="slot_{{ slot_info.1 }}_{{ slot_info.2 }}" name="slot_{{ slot_info.1 }}_{{ slot_info.2 }}" value="{{ slot_info.0 }}"/>
+                            </td>
+                        {% endfor %}
+                    {% endfor %}
+                    </tr>
                 {% endfor %}
                 </table>
             </td></tr>

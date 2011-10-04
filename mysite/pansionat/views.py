@@ -288,43 +288,105 @@ def medical_procedures_schedule(request, order_id, mp_type_order):
     mp = mps[0]
 
     blockdates = []
-    dates = []
-
-    d = ord.start_date
     delta = datetime.timedelta(days=1)
     tdelta = datetime.timedelta(minutes=mp.duration)
-    cnt = 0
-    while d <= ord.end_date:
-        if cnt == 7:
-            blockdates.append(dates)
-            dates = []
-            cnt = 0
-        else:
-            cnt += 1
-        print d.strftime("%Y-%m-%d")
-        d += delta
+    hasMoreDays = True
+    d = ord.start_date-datetime.timedelta(days=(ord.start_date.weekday()))
+    c_day = 0
+    week = 0
+
+    while hasMoreDays:
+        week += 1
 
         t = datetime.datetime.combine(d,mp.start_time)
         finish_datetime = datetime.datetime.combine(d,mp.finish_time)
         slot = 1
+        dates = []
         times = []
+        for i in xrange(0,7):
+            cdate = d + datetime.timedelta(days=i)
+            strd = str(cdate.year)+"."+str(cdate.month)+"."+str(cdate.day)
+            dates.append(strd)
+
         while t<= finish_datetime:
-            scheduled = OrderMedicalProcedureSchedule.objects.filter(mp_type = mp, p_date = d, slot= slot)
-            orders = []
-            already = False
-            for omp in scheduled:
-                orders.append(omp.order)
-                if ord == omp:
-                    already = True
-            times.append((str(t.hour)+":"+str(t.minute),already, orders))
+            slots = []
+            for i in xrange(0,7):
+
+                cdate = d + datetime.timedelta(days=i)
+
+                scheduled = OrderMedicalProcedureSchedule.objects.filter(mp_type = mp, p_date = cdate, slot= slot)
+                orders = []
+                already = False
+                for omp in scheduled:
+                    orders.append(omp.order)
+                    if ord == omp.order:
+                        already = True
+
+                slots.append((already, c_day + i, slot, orders, len(orders)))
+            times.append((str(t.hour)+":"+str(t.minute), slots, week, slot))
+
             t += tdelta
             slot +=1
 
-        dates.append((d,times))
+        strd = str(d.year)+"."+str(d.month)+str(d.day)
+        blockdates.append((strd,dates,times))
+        d+=7*delta
+        c_day += 7
+        if d>ord.end_date:
+            hasMoreDays = False
 
-    blockdates.append(dates)
-    values = {'blockdates': blockdates, 'order_id': order_id, 'patient_name': ord.patient.fio()}
+    values = {'blockdates': blockdates, 'order_id': order_id, 'patient_name': ord.patient.fio(),
+              'mp_order': mp_type_order, 'name': mp.name}
     return render_to_response('pansionat/mps.html', MenuRequestContext(request, values))
+
+@login_required
+def medical_procedures_schedule_save(request):
+    if request.method == 'POST':
+        order_id = request.POST.get('order_id')
+        if order_id is None:
+            return
+        else:
+            order = Order.objects.get(id = order_id)
+        mp_order = request.POST.get('order')
+        mps = MedicalProcedureType.objects.filter(order = mp_order)
+        mp = mps[0]
+
+        d = order.start_date-datetime.timedelta(days=(order.start_date.weekday()))
+        delta = datetime.timedelta(days=1)
+        tdelta = datetime.timedelta(minutes=mp.duration)
+        c_day = 0
+
+        while d<=order.end_date:
+            t = datetime.datetime.combine(d,mp.start_time)
+            finish_datetime = datetime.datetime.combine(d,mp.finish_time)
+            slot = 1
+            while t<= finish_datetime:
+                scheduled = OrderMedicalProcedureSchedule.objects.filter(mp_type = mp, p_date = d, slot= slot)
+                orders = []
+                already = False
+                for omp in scheduled:
+                    orders.append(omp.order)
+                    if order == omp.order:
+                        already = True
+                checked = request.POST.get('slot_'+str(c_day)+"_"+str(slot))
+                #print str(already)+"/"+str(checked)
+                if checked=="True":
+                    print "checked "+str(slot)
+                    if not already:
+                        omp = OrderMedicalProcedureSchedule(mp_type=mp, p_date=d,slot=slot, order=order)
+                        print "save "+str(slot)
+                        omp.save()
+                else:
+                    if already:
+                        print "delete "+str(slot)
+                        scheduled[0].delete()
+                t += tdelta
+                slot +=1
+            c_day +=1
+            d += delta
+
+        return medical_procedures_schedule(request, order_id, mp_order)
+    return ill_history_new(request) #if method is't post then show empty form
 
 @login_required
 def medical_procedures(request, order_id):
@@ -443,9 +505,6 @@ def init(request):
     list = RoomType.objects.all()
     if not len(list):
         initroomtypes()
-    list = MedicalProcedureType.objects.all()
-    if not len(list):
-        initp()
     order_list = Order.objects.all()
     if not len(order_list):
         initbase(1)
@@ -453,6 +512,9 @@ def init(request):
     t = loader.get_template('pansionat/index.html')
     c = MenuRequestContext(request, {
     })
+    list = MedicalProcedureType.objects.all()
+    if not len(list):
+        initp()
     return HttpResponse(t.render(c))
 
 @login_required
