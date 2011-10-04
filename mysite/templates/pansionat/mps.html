@@ -1,0 +1,65 @@
+{% extends "pansionat/index.html" %}
+
+{% block title %} Назначение времени процедуры {%  endblock  %}
+
+{% block head %}
+    <style type="text/css">
+        @import "/static/dataTables/media/css/demo_page.css";
+        @import "/static/dataTables/media/css/demo_table.css";
+        @import "/static/jquery-ui/themes/base/jquery.ui.all.css";
+    </style>
+    <script src="/static/dataTables/media/js/jquery.js"></script>
+    <script src="/static/dataTables/media/js/jquery.dataTables.js"></script>
+    <script src="/static/jquery-ui/ui/jquery.ui.core.js"></script>
+    <script src="/static/jquery-ui/ui/jquery.ui.widget.js"></script>
+    <script src="/static/jquery-ui/ui/jquery.ui.datepicker.js"></script>
+    <script src="/static/jquery-ui/ui/i18n/jquery.ui.datepicker-ru.js"></script>
+    <script src="/static/jquery-ui/ui/jquery.ui.button.js"></script>
+    <script type="text/javascript">
+        $(document).ready(function() {
+            $.datepicker.setDefaults($.datepicker.regional['ru']);
+            $('#id_birth_date').datepicker();
+            $('input:submit').button()
+            $(':button').button()
+            } );
+    </script>
+<link rel="stylesheet" href="/static/Refresh.css" type="text/css" />
+ {%  endblock  %}
+
+{% block allcontent %}
+    <h1>Процедура блядская</h1>
+    <form action = "/mps/save/" method="POST">
+        {% csrf_token %}
+        <table border="0" id = "occupied" class = "display">
+        <tr><td colspan="2">{{ patient_name }}</td></tr>
+            <input type="hidden" name="order_id" value="{{ order_id }}"/>
+            <input type="hidden" name="order" value="{{ order }}"/>
+            <tr><td>
+                <table>
+                {% for dates in blockdates %}
+                    <tr><td><table><tr>
+                    {% for field in dates %}
+                        <td><table>
+                        <tr><td>{{ field.0 }}</td></tr>
+                        {% for slot_info in field.1 %}
+                            <tr><td
+                                    {% if slot_info.1 %}
+                                    bgcolor="red"
+                                    {% endif %}
+                                    >{{ slot_info.0 }}</td></tr>
+                        {% endfor %}
+                        </table></td>
+                    {% endfor %}
+                    </tr>
+                    </table></td></tr>
+                {% endfor %}
+                </table>
+            </td></tr>
+            <tr>
+                <td colspan="2">
+                    <input type="submit" value="Сохранить">
+                </td>
+            </tr>
+        </table>
+    </form>
+{%  endblock  %}

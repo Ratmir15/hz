@@ -1,0 +1,59 @@
+{% extends "pansionat/index.html" %}
+
+{% block title %} Назначение списка процедур {%  endblock  %}
+
+{% block head %}
+    <style type="text/css">
+        @import "/static/dataTables/media/css/demo_page.css";
+        @import "/static/dataTables/media/css/demo_table.css";
+        @import "/static/jquery-ui/themes/base/jquery.ui.all.css";
+    </style>
+    <script src="/static/dataTables/media/js/jquery.js"></script>
+    <script src="/static/dataTables/media/js/jquery.dataTables.js"></script>
+    <script src="/static/jquery-ui/ui/jquery.ui.core.js"></script>
+    <script src="/static/jquery-ui/ui/jquery.ui.widget.js"></script>
+    <script src="/static/jquery-ui/ui/jquery.ui.datepicker.js"></script>
+    <script src="/static/jquery-ui/ui/i18n/jquery.ui.datepicker-ru.js"></script>
+    <script src="/static/jquery-ui/ui/jquery.ui.button.js"></script>
+    <script type="text/javascript">
+        $(document).ready(function() {
+            $.datepicker.setDefaults($.datepicker.regional['ru']);
+            $('#id_birth_date').datepicker();
+            $('input:submit').button()
+            $(':button').button()
+            } );
+    </script>
+<link rel="stylesheet" href="/static/Refresh.css" type="text/css" />
+ {%  endblock  %}
+
+{% block allcontent %}
+    <h1>История болезни</h1>
+    <form action = "/mp/save/" method="POST">
+        {% csrf_token %}
+        <table border="0" id = "occupied" class = "display">
+        <tr><td colspan="2">{{ patient_name }}</td></tr>
+            <input type="hidden" name="order_id" value="{{ order_id }}"/>
+            {% for field, value in choosed_values.items %}
+                <tr>
+                    <th>
+                        <label for="id_add_field_{{ field.order }}">{{ field.name }}</label>
+                        {% if value %}
+                        &nbsp;&nbsp;<a href="/mp/{{ order_id }}/{{ field.order }}">назначить время</a>
+                        {% endif %}
+                    </th>
+                    <td>
+                        <input type="checkbox" value="1" id="id_add_field_{{ field.order }}" name="add_field_{{ field.order }}"
+                               {% if value %}
+                               checked
+                                {% endif %}
+                                 >
+                <tr>
+            {% endfor %}
+            <tr>
+                <td colspan="2">
+                    <input type="submit" value="Сохранить">
+                </td>
+            </tr>
+        </table>
+    </form>
+{%  endblock  %}

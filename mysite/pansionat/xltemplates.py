@@ -106,8 +106,28 @@ def write_cell(wtsheet, merged_cell_top_left_map, value, style, rdrowx, rdcolx, 
     else:
         wtsheet.write(wtrowx, wtcolx, value, style)
 
-
 def fill_excel_template(template_filename, tel):
+    w = prepare_excel_template(template_filename, tel)
+    response = HttpResponse(mimetype='application/vnd.ms-excel')
+    filename = tel.get('FILENAME','report')
+    response['Content-Disposition'] = 'attachment; filename=' + filename + '.xls'
+    w.save(response)
+    return response
+
+def fill_excel_template_s_gavnom(template_filename, tel, fields):
+    w = prepare_excel_template(template_filename, tel)
+    response = HttpResponse(mimetype='application/vnd.ms-excel')
+    filename = tel.get('FILENAME','report')
+    response['Content-Disposition'] = 'attachment; filename=' + filename + '.xls'
+    maxr = tel['max_row']
+    wtsheet = w.get_sheet(0)
+    for field in fields:
+        maxr += 1
+        wtsheet.write(maxr, 0, field.value)
+    w.save(response)
+    return response
+
+def prepare_excel_template(template_filename, tel):
     rb = open_workbook(settings.STATIC_ROOT + '/xls/' + template_filename,formatting_info=True)
     rsh = rb.sheet_by_index(0)
     w = xlwt.Workbook(encoding="utf-8", style_compression=2)
@@ -247,8 +267,6 @@ def fill_excel_template(template_filename, tel):
             wtsheet.row(rrowx + ymargin).height = rsh.rowinfo_map[rrowx].height
             wtsheet.row(rrowx + ymargin).height_mismatch = True
 
-    response = HttpResponse(mimetype='application/vnd.ms-excel')
-    filename = tel.get('FILENAME','report')
-    response['Content-Disposition'] = 'attachment; filename=' + filename + '.xls'
-    w.save(response)
-    return response
+    tel['max_row'] = rsh.nrows + ymargin
+
+    return w

@@ -111,6 +111,14 @@ class MedicalLocationRoles(models.Model):
 	start_date = models.DateTimeField('date started')
 	end_date = models.DateTimeField('date finished')
 
+class MedicalProcedureType(models.Model):
+    name = models.CharField(max_length = 50)
+    order = models.IntegerField()
+    capacity = models.IntegerField()
+    duration = models.IntegerField()
+    start_time = models.TimeField()
+    finish_time = models.TimeField()
+
 class Busy(models.Model):
 	location = models.ForeignKey(MedicalLocation)
 	employer = models.ForeignKey(Employer)
@@ -178,6 +186,16 @@ class Order(models.Model):
         verbose_name_plural = 'Заказы'
 #        permissions = (
 #            ("arm_registration", "REGISTRATION"))
+
+class OrderMedicalProcedure(models.Model):
+    order = models.ForeignKey(Order)
+    mp_type = models.ForeignKey(MedicalProcedureType)
+
+class OrderMedicalProcedureSchedule(models.Model):
+    order = models.ForeignKey(Order)
+    mp_type = models.ForeignKey(MedicalProcedureType)
+    p_date = models.DateField()
+    slot = models.IntegerField()
 
 class IllHistoryFieldTypeGroup(models.Model):
     description = models.CharField(max_length=100, verbose_name='Заголовок')

@@ -4,6 +4,7 @@ import user
 from django.contrib.auth import logout, login, authenticate
 from django.contrib.auth.decorators import login_required, permission_required
 from django.db.models.aggregates import Count, Sum
+from django.db.models.base import Model
 from django.forms.widgets import Textarea
 
 from django.template import Context, loader
@@ -19,9 +20,9 @@ from django.shortcuts import redirect
 import logging
 from django.template.context import RequestContext
 from mysite.pansionat import gavnetso
-from mysite.pansionat.models import IllHistory, Customer, IllHistoryFieldType, IllHistoryFieldValue, IllHistoryRecord
+from mysite.pansionat.models import IllHistory, Customer, IllHistoryFieldType, IllHistoryFieldValue, IllHistoryRecord, OrderMedicalProcedure, MedicalProcedureType, OrderMedicalProcedureSchedule
 from pytils import numeral
-from mysite.pansionat.gavnetso import monthlabel, nextmonthfirstday, initbase, initroles, initroomtypes
+from mysite.pansionat.gavnetso import monthlabel, nextmonthfirstday, initbase, initroles, initroomtypes, initp
 import datetime
 import time
 from django import forms
@@ -32,7 +33,7 @@ from django.db.models import F
 from django.forms.models import inlineformset_factory
 
 from django.db import connection
-from mysite.pansionat.xltemplates import fill_excel_template
+from mysite.pansionat.xltemplates import fill_excel_template, fill_excel_template_s_gavnom
 
 
 logger = logging.getLogger(__name__)
@@ -281,6 +282,96 @@ def records(request, order_id):
     return HttpResponse(t.render(c))
 
 @login_required
+def medical_procedures_schedule(request, order_id, mp_type_order):
+    ord = Order.objects.get(id = order_id)
+    mps = MedicalProcedureType.objects.filter(order = mp_type_order)
+    mp = mps[0]
+
+    blockdates = []
+    dates = []
+
+    d = ord.start_date
+    delta = datetime.timedelta(days=1)
+    tdelta = datetime.timedelta(minutes=mp.duration)
+    cnt = 0
+    while d <= ord.end_date:
+        if cnt == 7:
+            blockdates.append(dates)
+            dates = []
+            cnt = 0
+        else:
+            cnt += 1
+        print d.strftime("%Y-%m-%d")
+        d += delta
+
+        t = datetime.datetime.combine(d,mp.start_time)
+        finish_datetime = datetime.datetime.combine(d,mp.finish_time)
+        slot = 1
+        times = []
+        while t<= finish_datetime:
+            scheduled = OrderMedicalProcedureSchedule.objects.filter(mp_type = mp, p_date = d, slot= slot)
+            orders = []
+            already = False
+            for omp in scheduled:
+                orders.append(omp.order)
+                if ord == omp:
+                    already = True
+            times.append((str(t.hour)+":"+str(t.minute),already, orders))
+            t += tdelta
+            slot +=1
+
+        dates.append((d,times))
+
+    blockdates.append(dates)
+    values = {'blockdates': blockdates, 'order_id': order_id, 'patient_name': ord.patient.fio()}
+    return render_to_response('pansionat/mps.html', MenuRequestContext(request, values))
+
+@login_required
+def medical_procedures(request, order_id):
+    ord = Order.objects.get(id = order_id)
+    all_mp = MedicalProcedureType.objects.all()
+    mps = OrderMedicalProcedure.objects.filter(order = ord)
+    choosed = set()
+    for mp in mps:
+        choosed.add(mp.mp_type)
+
+    choosed_values = {}
+    for mp in all_mp:
+        value = False
+        if mp in choosed:
+            value = True
+        choosed_values[mp] = value
+
+    values = {'choosed_values': choosed_values, 'order_id': order_id, 'patient_name': ord.patient.fio()}
+    return render_to_response('pansionat/mp.html', MenuRequestContext(request, values))
+
+@login_required
+def mp_save(request):
+    if request.method == 'POST':
+        order_id = request.POST.get('order_id')
+        if order_id is None:
+            return
+        else:
+            order = Order.objects.get(id = order_id)
+
+        mp_all = MedicalProcedureType.objects.all()
+        checked = {}
+        for f in mp_all:
+            checked[f] = request.POST.get('add_field_'+str(f.order),'')
+            objects = OrderMedicalProcedure.objects.filter(order = order, mp_type = f)
+            was_checked = len(objects) != 0
+            if checked[f]:
+                if not was_checked:
+                    omp = OrderMedicalProcedure(order = order, mp_type = f)
+                    omp.save()
+            else:
+                if was_checked:
+                    objects[0].delete()
+
+        return medical_procedures(request, order_id)
+    return ill_history_new(request) #if method is't post then show empty form
+
+@login_required
 def ill_history_edit(request, order_id):
     ord = Order.objects.get(id = order_id)
     ill_historys = IllHistory.objects.filter(order = ord)
@@ -352,6 +443,9 @@ def init(request):
     list = RoomType.objects.all()
     if not len(list):
         initroomtypes()
+    list = MedicalProcedureType.objects.all()
+    if not len(list):
+        initp()
     order_list = Order.objects.all()
     if not len(order_list):
         initbase(1)
@@ -462,13 +556,14 @@ def ill_history(request, order_id):
     delt = datetime.date.today() - order.patient.birth_date
     years = int (delt.days / 365.25)
     srok = 'c '+str(order.start_date)+' по '+str(order.end_date)
-    ill_history = IllHistory.objects.filter(order = order)[0]
-    first_diagnose = ill_history.first_diagnose
-    pref = u'С каким диагнозом прибыл: '
-    first_diagnose =  pref + first_diagnose
-    main_diagnose =  u'Диагноз санатория а) основной: ' + ill_history.main_diagnose
-    secondary_diagnose = u'б) сопутствующего заболевания: ' + ill_history.secondary_diagnose
-    conditions =  u'Условия труда и быта больного: ' + ill_history.conditions
+    ill_history = IllHistory.objects.get(order = order)
+    ill_history_fields = IllHistoryFieldValue.objects.filter(ill_history = ill_history)
+    #first_diagnose = ill_history.first_diagnose
+    #pref = u'С каким диагнозом прибыл: '
+    #first_diagnose =  pref + first_diagnose
+    #main_diagnose =  u'Диагноз санатория а) основной: ' + ill_history.main_diagnose
+    #secondary_diagnose = u'б) сопутствующего заболевания: ' + ill_history.secondary_diagnose
+    #conditions =  u'Условия труда и быта больного: ' + ill_history.conditions
     tel = { 'NUMBER': order.code,
            'FILENAME': 'ill_history-'+order.code,
            'SURNAME': order.patient.family, 'NAME': order.patient.name,
@@ -480,12 +575,8 @@ def ill_history(request, order_id):
            'ADDRESS': order.patient.address,
            'AGE': years,
            'SROK':srok,
-           'FD': first_diagnose,
-           'MD': main_diagnose,
-           'SD': secondary_diagnose,
-           'COND': conditions
     }
-    return fill_excel_template(template_filename, tel)
+    return fill_excel_template_s_gavnom(template_filename, tel, ill_history_fields)
 
 @login_required
 def rootik(request, order_id):

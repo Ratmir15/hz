@@ -1,7 +1,7 @@
 # coding: utf-8
 import datetime
 from django.db import connection
-from mysite.pansionat.models import Patient, Customer, Order, Occupied, Room, RoomType, EmployerRoleHistory, Role, Employer, IllHistoryFieldTypeGroup, IllHistoryFieldType
+from mysite.pansionat.models import Patient, Customer, Order, Occupied, Room, RoomType, EmployerRoleHistory, Role, Employer, IllHistoryFieldTypeGroup, IllHistoryFieldType, MedicalProcedureType
 
 def nextmonthfirstday(year, month):
     if month==12:
@@ -208,6 +208,54 @@ def initroles():
     erh3.save()
     erh4 = EmployerRoleHistory(employer = e4, role = role3, start_date=datetime.date(2007,1,1),end_date=datetime.date(2015,1,1))
     erh4.save()
+
+def initp():
+    mpt  = MedicalProcedureType(name = 'Грязь на область', order = 1, duration = 15, start_time=datetime.time(8), finish_time = datetime.time(17), capacity = 2)
+    mpt.save()
+    mpt  = MedicalProcedureType(name = 'Подводное вытяжение в минеральной воде', order = 2, duration = 15, start_time=datetime.time(8), finish_time = datetime.time(17), capacity = 2)
+    mpt.save()
+    mpt  = MedicalProcedureType(name = 'Рапные ванный', order = 3, duration = 15, start_time=datetime.time(8), finish_time = datetime.time(17), capacity = 2)
+    mpt.save()
+    mpt  = MedicalProcedureType(name = 'Подводный душ массаж', order = 4, duration = 15, start_time=datetime.time(8), finish_time = datetime.time(17), capacity = 2)
+    mpt.save()
+    mpt  = MedicalProcedureType(name = 'Каменистая дорожка', order = 5, duration = 15, start_time=datetime.time(8), finish_time = datetime.time(17), capacity = 2)
+    mpt.save()
+    mpt  = MedicalProcedureType(name = '4-х камерная ванна(гальваническая, пневмо и гидро массажа)', order = 6, duration = 15, start_time=datetime.time(8), finish_time = datetime.time(17), capacity = 2)
+    mpt.save()
+    mpt  = MedicalProcedureType(name = 'Кислородный коктейль', order = 7, duration = 15, start_time=datetime.time(8), finish_time = datetime.time(17), capacity = 2)
+    mpt.save()
+    mpt  = MedicalProcedureType(name = 'Массаж ручной ( спины, ШВЗ, пояснично-кресцовой, грудной области, ног, рук, головы)', order = 8, duration = 15, start_time=datetime.time(8), finish_time = datetime.time(17), capacity = 2)
+    mpt.save()
+    mpt  = MedicalProcedureType(name = 'Общая магнитотерапия «Калибри»', order = 9, duration = 15, start_time=datetime.time(8), finish_time = datetime.time(17), capacity = 2)
+    mpt.save()
+    mpt  = MedicalProcedureType(name = 'Гирудотерапия', order = 10, duration = 15, start_time=datetime.time(8), finish_time = datetime.time(17), capacity = 2)
+    mpt.save()
+    mpt  = MedicalProcedureType(name = 'СУВ', order = 11, duration = 15, start_time=datetime.time(8), finish_time = datetime.time(17), capacity = 2)
+    mpt.save()
+    mpt  = MedicalProcedureType(name = 'Теплолечение озокерит', order = 12, duration = 15, start_time=datetime.time(8), finish_time = datetime.time(17), capacity = 2)
+    mpt.save()
+    mpt  = MedicalProcedureType(name = 'Ароматерапия', order = 13, duration = 15, start_time=datetime.time(8), finish_time = datetime.time(17), capacity = 2)
+    mpt.save()
+    mpt  = MedicalProcedureType(name = 'Лазеротерапия', order = 14, duration = 15, start_time=datetime.time(8), finish_time = datetime.time(17), capacity = 2)
+    mpt.save()
+    mpt  = MedicalProcedureType(name = 'Ингаляции с ', order = 15, duration = 15, start_time=datetime.time(8), finish_time = datetime.time(17), capacity = 2)
+    mpt.save()
+    mpt  = MedicalProcedureType(name = 'Аэроионотерапия', order = 16, duration = 15, start_time=datetime.time(8), finish_time = datetime.time(17), capacity = 2)
+    mpt.save()
+    mpt  = MedicalProcedureType(name = 'Механомассаж (Ормед, анатомотор, Терамакс)', order = 17, duration = 15, start_time=datetime.time(8), finish_time = datetime.time(17), capacity = 2)
+    mpt.save()
+    mpt  = MedicalProcedureType(name = 'Физиопроцедура (СМТ, ДДТ, дарсонваль, магнит) на область', order = 18, duration = 15, start_time=datetime.time(8), finish_time = datetime.time(17), capacity = 2)
+    mpt.save()
+    mpt  = MedicalProcedureType(name = 'Физиопроцедура (УВЧ, э/форез, э/стимуляция, у/звук, КВЧ, трансаир, э/сон) на область', order = 19, duration = 15, start_time=datetime.time(8), finish_time = datetime.time(17), capacity = 2)
+    mpt.save()
+    mpt  = MedicalProcedureType(name = 'Вакуумный массаж на область', order = 20, duration = 15, start_time=datetime.time(8), finish_time = datetime.time(17), capacity = 2)
+    mpt.save()
+    mpt  = MedicalProcedureType(name = 'Вибромассаж н/к, в/к', order = 21, duration = 15, start_time=datetime.time(8), finish_time = datetime.time(17), capacity = 2)
+    mpt.save()
+    mpt  = MedicalProcedureType(name = 'Прессотерапия', order = 22, duration = 15, start_time=datetime.time(8), finish_time = datetime.time(17), capacity = 2)
+    mpt.save()
+    mpt  = MedicalProcedureType(name = 'Озонотерапия', order = 23, duration = 15, start_time=datetime.time(8), finish_time = datetime.time(17), capacity = 2)
+    mpt.save()
 
 def monthlabel(month):
     if month==1:
