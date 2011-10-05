@@ -37,17 +37,21 @@
                 <tr>
                     <th>
                         <label for="id_add_field_{{ field.order }}">{{ field.name }}</label>
-                        {% if value %}
+                        {% if value.0 %}
                         &nbsp;&nbsp;<a href="/mp/{{ order_id }}/{{ field.order }}">назначить время</a>
                         {% endif %}
                     </th>
+                <td>
+                    <input type="text" value="{{ value.1 }}" id="times_add_field_{{ field.order }}" name="times_field_{{ field.order }}">
+                </td>
                     <td>
                         <input type="checkbox" value="1" id="id_add_field_{{ field.order }}" name="add_field_{{ field.order }}"
-                               {% if value %}
+                               {% if value.0 %}
                                checked
                                 {% endif %}
                                  >
-                <tr>
+                    </td>
+                </tr>
             {% endfor %}
             <tr>
                 <td colspan="2">

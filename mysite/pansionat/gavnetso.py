@@ -119,7 +119,7 @@ def initbase(doit):
     o1.save()
     o2 = Order(room = r2,code = '1267', start_date=datetime.date(2007,7,2),end_date=datetime.date(2007,7,15), patient = p2, customer = c2, directive = c5, price = 11000)
     o2.save()
-    o3 = Order(room = r3, code = '1268', start_date=datetime.date(2007,7,3),end_date=datetime.date(2007,7,15), patient = p3, customer = c3, directive = c6, price = 19000)
+    o3 = Order(room = r3, code = '1268', start_date=datetime.date(2007,7,2),end_date=datetime.date(2007,7,15), patient = p3, customer = c3, directive = c6, price = 19000)
     o3.save()
     o4 = Order(room = r4, code = '1269', start_date=datetime.date(2007,7,4),end_date=datetime.date(2007,7,15), patient = p4, customer = c4, directive = c6, price = 12000)
     o4.save()
@@ -214,17 +214,24 @@ def initp():
     mpt.save()
     orders = Order.objects.filter(code = '1266')
     ord = orders[0]
-    omp = OrderMedicalProcedure(order = ord, mp_type = mpt)
+    omp = OrderMedicalProcedure(order = ord, mp_type = mpt, times = 10)
     omp.save()
     for i in xrange(2,7):
         omps = OrderMedicalProcedureSchedule(order = ord, mp_type = mpt, p_date = datetime.date(2007,7,i), slot = 2)
         omps.save()
     orders = Order.objects.filter(code = '1267')
     ord = orders[0]
-    omp = OrderMedicalProcedure(order = ord, mp_type = mpt)
+    omp = OrderMedicalProcedure(order = ord, mp_type = mpt, times = 10)
     omp.save()
     for i in xrange(2,7):
         omps = OrderMedicalProcedureSchedule(order = ord, mp_type = mpt, p_date = datetime.date(2007,7,i), slot = 3)
+        omps.save()
+    orders = Order.objects.filter(code = '1268')
+    ord = orders[0]
+    omp = OrderMedicalProcedure(order = ord, mp_type = mpt, times = 10)
+    omp.save()
+    for i in xrange(2,7):
+        omps = OrderMedicalProcedureSchedule(order = ord, mp_type = mpt, p_date = datetime.date(2007,7,i), slot = i)
         omps.save()
 
     mpt  = MedicalProcedureType(name = 'Подводное вытяжение в минеральной воде', order = 2, duration = 15, start_time=datetime.time(8), finish_time = datetime.time(17), capacity = 2)
@@ -241,7 +248,7 @@ def initp():
     mpt.save()
     mpt  = MedicalProcedureType(name = 'Массаж ручной ( спины, ШВЗ, пояснично-кресцовой, грудной области, ног, рук, головы)', order = 8, duration = 15, start_time=datetime.time(8), finish_time = datetime.time(17), capacity = 2)
     mpt.save()
-    mpt  = MedicalProcedureType(name = 'Общая магнитотерапия «Калибри»', order = 9, duration = 15, start_time=datetime.time(8), finish_time = datetime.time(17), capacity = 2)
+    mpt  = MedicalProcedureType(name = 'Общая магнитотерапия Калибри', order = 9, duration = 15, start_time=datetime.time(8), finish_time = datetime.time(17), capacity = 2)
     mpt.save()
     mpt  = MedicalProcedureType(name = 'Гирудотерапия', order = 10, duration = 15, start_time=datetime.time(8), finish_time = datetime.time(17), capacity = 2)
     mpt.save()

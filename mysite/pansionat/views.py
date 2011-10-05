@@ -286,6 +286,8 @@ def medical_procedures_schedule(request, order_id, mp_type_order):
     ord = Order.objects.get(id = order_id)
     mps = MedicalProcedureType.objects.filter(order = mp_type_order)
     mp = mps[0]
+    omps = OrderMedicalProcedure.objects.filter(order = ord, mp_type = mp)
+    cur_omp = omps[0]
 
     blockdates = []
     delta = datetime.timedelta(days=1)
@@ -294,6 +296,7 @@ def medical_procedures_schedule(request, order_id, mp_type_order):
     d = ord.start_date-datetime.timedelta(days=(ord.start_date.weekday()))
     c_day = 0
     week = 0
+    curcnt = 0;
 
     while hasMoreDays:
         week += 1
@@ -305,7 +308,13 @@ def medical_procedures_schedule(request, order_id, mp_type_order):
         times = []
         for i in xrange(0,7):
             cdate = d + datetime.timedelta(days=i)
-            strd = str(cdate.year)+"."+str(cdate.month)+"."+str(cdate.day)
+            day = str(cdate.day)
+            if len(day)==1:
+                day = "0"+day
+            month = str(cdate.month)
+            if len(month)==1:
+                month = "0"+month
+            strd = day+"."+month
             dates.append(strd)
 
         while t<= finish_datetime:
@@ -321,9 +330,26 @@ def medical_procedures_schedule(request, order_id, mp_type_order):
                     orders.append(omp.order)
                     if ord == omp.order:
                         already = True
+                        curcnt += 1
 
-                slots.append((already, c_day + i, slot, orders, len(orders)))
-            times.append((str(t.hour)+":"+str(t.minute), slots, week, slot))
+                if len(orders)>0:
+                    lo = len(orders)
+                else:
+                    lo = ""
+                mark = ""
+                if already:
+                    mark = "checked"
+                else:
+                    if len(orders)>=cur_omp.mp_type.capacity:
+                        mark = "blocked"
+                slots.append((already, c_day + i, slot, orders, lo, mark))
+            hour = str(t.hour)
+            if len(hour)==1:
+                hour = "0"+hour
+            minute = str(t.minute)
+            if len(minute)==1:
+                minute = "0"+minute
+            times.append((hour+":"+minute, slots, week, slot))
 
             t += tdelta
             slot +=1
@@ -336,7 +362,7 @@ def medical_procedures_schedule(request, order_id, mp_type_order):
             hasMoreDays = False
 
     values = {'blockdates': blockdates, 'order_id': order_id, 'patient_name': ord.patient.fio(),
-              'mp_order': mp_type_order, 'name': mp.name}
+              'mp_order': mp_type_order, 'name': mp.name, 'curcnt': curcnt,'allcnt': cur_omp.times}
     return render_to_response('pansionat/mps.html', MenuRequestContext(request, values))
 
 @login_required
@@ -394,15 +420,17 @@ def medical_procedures(request, order_id):
     all_mp = MedicalProcedureType.objects.all()
     mps = OrderMedicalProcedure.objects.filter(order = ord)
     choosed = set()
+    timesmap = {}
     for mp in mps:
         choosed.add(mp.mp_type)
+        timesmap[mp.mp_type] = mp.times
 
     choosed_values = {}
     for mp in all_mp:
         value = False
         if mp in choosed:
             value = True
-        choosed_values[mp] = value
+        choosed_values[mp] = (value,timesmap.get(mp,""))
 
     values = {'choosed_values': choosed_values, 'order_id': order_id, 'patient_name': ord.patient.fio()}
     return render_to_response('pansionat/mp.html', MenuRequestContext(request, values))
@@ -418,14 +446,20 @@ def mp_save(request):
 
         mp_all = MedicalProcedureType.objects.all()
         checked = {}
+        times = {}
         for f in mp_all:
             checked[f] = request.POST.get('add_field_'+str(f.order),'')
+            times[f] = request.POST.get('times_field_'+str(f.order),'')
             objects = OrderMedicalProcedure.objects.filter(order = order, mp_type = f)
             was_checked = len(objects) != 0
             if checked[f]:
                 if not was_checked:
-                    omp = OrderMedicalProcedure(order = order, mp_type = f)
+                    omp = OrderMedicalProcedure(order = order, mp_type = f, times = times[f])
                     omp.save()
+                else:
+                    if times[f]!=objects[0].times:
+                        objects[0].times = times[f]
+                        objects[0].save()
             else:
                 if was_checked:
                     objects[0].delete()

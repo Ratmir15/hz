@@ -190,6 +190,7 @@ class Order(models.Model):
 class OrderMedicalProcedure(models.Model):
     order = models.ForeignKey(Order)
     mp_type = models.ForeignKey(MedicalProcedureType)
+    times = models.IntegerField()
 
 class OrderMedicalProcedureSchedule(models.Model):
     order = models.ForeignKey(Order)

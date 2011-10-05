@@ -16,30 +16,135 @@
     <script src="/static/jquery-ui/ui/i18n/jquery.ui.datepicker-ru.js"></script>
     <script src="/static/jquery-ui/ui/jquery.ui.button.js"></script>
     <script type="text/javascript">
+        function change_cur(i) {
+            cur = $("#curcnt").text();
+            $("#curcnt").text(Number(cur)+i);
+        }
+        function invert(column, row) {
+            id = "#td_slot_"+column+"_"+row;
+            if ($(id).hasClass("blocked")) {
+                return false;
+            }
+            //alert(id);
+            input_id = "#slot_"+column+"_"+row;
+            init_id = "#init_"+column+"_"+row;
+            cur = $(input_id).val();
+            was = $(init_id).val();
+            if (!(cur=="True")) {
+                change_cur(1);
+                $(input_id).val("True");
+                if (was=="True") {
+                    $(id).removeClass("was_checked");
+                    $(id).addClass("checked");
+                } else {
+                    $(id).addClass("new_check");
+                }
+            } else {
+                change_cur(-1);
+                $(input_id).val(false);
+                if (was=="True") {
+                    $(id).removeClass("checked");
+                    $(id).addClass("was_checked");
+                } else {
+                    $(id).removeClass("new_check");
+                }
+            }
+        }
         $(document).ready(function() {
             $.datepicker.setDefaults($.datepicker.regional['ru']);
             $('#id_birth_date').datepicker();
             $('input:submit').button()
             $(':button').button()
+            $(".time").click(function(){
+                id_array = this.id.split('_');
+                for (i=0;i<=6;i++){
+                    invert(7*(id_array[1]-1)+i, id_array[2]);
+                }
+            });
             $(".slot").click(function(){
-                //alert(this.id);
+                if ($(this).hasClass("blocked")) {
+                    return false;
+                }
                 id_array = this.id.split('_');
                 input_id = "#slot_"+id_array[2]+"_"+id_array[3];
-                //alert(input_id);
-                if (!$(this).hasClass("checked")) {
-                    $(this).addClass("checked");
+                init_id = "#init_"+id_array[2]+"_"+id_array[3];
+                cur = $(input_id).val();
+                was = $(init_id).val();
+                if (!(cur=="True")) {
+                    change_cur(1);
                     $(input_id).val("True");
+                    if (was=="True") {
+                        $(this).removeClass("was_checked");
+                        $(this).addClass("checked");
+                    } else {
+                        $(this).addClass("new_check");
+                    }
                 } else {
-                    $(this).removeClass("checked");
+                    change_cur(-1);
                     $(input_id).val(false);
+                    if (was=="True") {
+                        $(this).removeClass("checked");
+                        $(this).addClass("was_checked");
+                    } else {
+                        $(this).removeClass("new_check");
+                    }
                 }
+                return false;
+            });
+            $(".slot").mouseenter(function(){
+                id_array = this.id.split('_');
+                input_id = "#addinfo_"+id_array[2]+"_"+id_array[3];
+                orders = ($(input_id).val()).split(",");
+                s = "<table><th colspan=\"2\">Резерв</th>";
+                for (i=1;i<=orders.length/2;i++) {
+                    s += "<tr><td>"+orders[2*i-2]+"</td><td>"+orders[2*i-1]+"</td></tr>";
+                }
+                s += "</table>";
+                $("#addinfo").html(s);
+
             });
             } );
     </script>
 <link rel="stylesheet" href="/static/Refresh.css" type="text/css" />
     <style type="text/css">
+    table.display td.slot {
+        width: 40px;
+        text-align: center;
+        font-size: 9px;
+        -moz-border-radius-topleft: 4px/*{cornerRadius}*/;
+        -webkit-border-top-left-radius: 4px/*{cornerRadius}*/;
+        -khtml-border-top-left-radius: 4px/*{cornerRadius}*/;
+        border-top-left-radius: 4px/*{cornerRadius}*/;
+        -moz-border-radius-topright: 4px/*{cornerRadius}*/;
+        -webkit-border-top-right-radius: 4px/*{cornerRadius}*/;
+        -khtml-border-top-right-radius: 4px/*{cornerRadius}*/;
+        border-top-right-radius: 4px/*{cornerRadius}*/;
+        -moz-border-radius-bottomleft: 4px/*{cornerRadius}*/;
+        -webkit-border-bottom-left-radius: 4px/*{cornerRadius}*/;
+        -khtml-border-bottom-left-radius: 4px/*{cornerRadius}*/;
+        border-bottom-left-radius: 4px/*{cornerRadius}*/;
+        -moz-border-radius-bottomright: 4px/*{cornerRadius}*/;
+        -webkit-border-bottom-right-radius: 4px/*{cornerRadius}*/;
+        -khtml-border-bottom-right-radius: 4px/*{cornerRadius}*/;
+        border-bottom-right-radius: 4px/*{cornerRadius}*/;
+        -moz-user-select: none;-khtml-user-select: none;
+        user-select: none;
+        cursor: default;
+    }
     td.checked{
-      background-color: yellow;
+      background-color: #eeee00;
+    }
+    td.blocked{
+      background-color: red;
+    }
+    td.was_checked{
+        border-style: solid;
+        border-color: black;
+        margin: 0px;
+        background-color: #f8f888;
+    }
+    td.new_check{
+      background-color: #adff2f;
     }
     </style>
  {%  endblock  %}
@@ -49,10 +154,10 @@
     <form action = "/mps/save/" method="POST">
         {% csrf_token %}
         <table border="0" id = "occupied" class = "display">
-        <tr><td colspan="2">{{ patient_name }}</td></tr>
+        <tr><td colspan="2">{{ patient_name }}<h2 align="right">Назначено <span id="curcnt">{{ curcnt }}</span> из {{ allcnt }}</h2><input type="hidden" id="curc1nt" value="{{ curcnt }}"></td></tr>
             <input type="hidden" name="order_id" value="{{ order_id }}"/>
             <input type="hidden" name="order" value="{{ mp_order }}"/>
-            <tr><td>
+            <tr><td width="300">
                 <table>
                 {% for times in blockdates %}
                     <tr><th></th>
@@ -61,16 +166,28 @@
                     {% endfor %}
                     </tr>
                     {% for field in times.2 %}
-                        <tr><td id="time_{{ field.2 }}_{{ field.3 }}">{{ field.0 }}</td>
+                        <tr><td class="time" id="time_{{ field.2 }}_{{ field.3 }}">{{ field.0 }}</td>
                         {% for slot_info in field.1 %}
-                            <td class="slot{% if slot_info.0 %} checked{% endif %}" id="td_slot_{{ slot_info.1 }}_{{ slot_info.2 }}">{{ slot_info.4 }}
+                            <td class="slot {{ slot_info.5 }}" id="td_slot_{{ slot_info.1 }}_{{ slot_info.2 }}">{{ slot_info.4 }}
+                            <input type="hidden" id="init_{{ slot_info.1 }}_{{ slot_info.2 }}" value="{{ slot_info.0 }}"/>
                             <input type="hidden" id="slot_{{ slot_info.1 }}_{{ slot_info.2 }}" name="slot_{{ slot_info.1 }}_{{ slot_info.2 }}" value="{{ slot_info.0 }}"/>
+                            <input type="hidden" id='addinfo_{{ slot_info.1 }}_{{ slot_info.2 }}' value="{% for order in slot_info.3 %}{{ order.code }},{{ order.patient.fio }},{% endfor %}"/>
                             </td>
                         {% endfor %}
                     {% endfor %}
                     </tr>
                 {% endfor %}
                 </table>
+            </td><td valign="top" width="200">
+                <table class="display">
+                    <tr><th colspan="2">Легенда</th></tr>
+                    <tr><td class="slot">Доступное время</td></tr>
+                    <tr><td class="slot checked">Резерв</td></tr>
+                    <tr><td class="slot was_checked">Снимаемый резерв</td></tr>
+                    <tr><td class="slot new_check">Новый резерв</td></tr>
+                    <tr><td class="slot blocked">Занято</td></tr>
+                </table>
+                <div id="addinfo"></div>
             </td></tr>
             <tr>
                 <td colspan="2">
