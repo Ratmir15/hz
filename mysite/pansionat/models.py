@@ -118,6 +118,10 @@ class MedicalProcedureType(models.Model):
     duration = models.IntegerField()
     start_time = models.TimeField()
     finish_time = models.TimeField()
+    optional = models.CharField(max_length=100)
+    def optional_values(self):
+        return self.optional.split(',')
+
 
 class Busy(models.Model):
 	location = models.ForeignKey(MedicalLocation)
@@ -191,6 +195,7 @@ class OrderMedicalProcedure(models.Model):
     order = models.ForeignKey(Order)
     mp_type = models.ForeignKey(MedicalProcedureType)
     times = models.IntegerField()
+    add_info = models.CharField(max_length=50)
 
 class OrderMedicalProcedureSchedule(models.Model):
     order = models.ForeignKey(Order)

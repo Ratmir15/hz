@@ -25,6 +25,9 @@
             if ($(id).hasClass("blocked")) {
                 return false;
             }
+            if ($(id).hasClass("another")) {
+                return false;
+            }
             //alert(id);
             input_id = "#slot_"+column+"_"+row;
             init_id = "#init_"+column+"_"+row;
@@ -63,6 +66,9 @@
             });
             $(".slot").click(function(){
                 if ($(this).hasClass("blocked")) {
+                    return false;
+                }
+                if ($(this).hasClass("another")) {
                     return false;
                 }
                 id_array = this.id.split('_');
@@ -137,6 +143,9 @@
     td.blocked{
       background-color: red;
     }
+    td.another{
+      background-color: #f08080;
+    }
     td.was_checked{
         border-style: solid;
         border-color: black;
@@ -186,6 +195,7 @@
                     <tr><td class="slot was_checked">Снимаемый резерв</td></tr>
                     <tr><td class="slot new_check">Новый резерв</td></tr>
                     <tr><td class="slot blocked">Занято</td></tr>
+                    <tr><td class="slot another">Другая процедура</td></tr>
                 </table>
                 <div id="addinfo"></div>
             </td></tr>
