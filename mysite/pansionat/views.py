@@ -295,6 +295,7 @@ def medical_procedures_schedule(request, order_id, mp_type_order):
     tdelta = datetime.timedelta(minutes=mp.duration)
     hasMoreDays = True
     d = ord.start_date-datetime.timedelta(days=(ord.start_date.weekday()))
+    finish_datetime = datetime.datetime.combine(d,mp.finish_time)
     c_day = 0
     week = 0
     curcnt = 0
@@ -313,10 +314,22 @@ def medical_procedures_schedule(request, order_id, mp_type_order):
 
     set_another = set()
     order_scheduled = OrderMedicalProcedureSchedule.objects.filter(order = ord, p_date__gte = ord.start_date, p_date__lte = ord.end_date)
+    another_sched = dict()
     for sch in order_scheduled:
-        key = str(sch.slot)+"_"+str(sch.p_date)
-        set_another.add(key)
-
+        t1 = datetime.datetime.combine(d,mp.start_time)
+        t2 = datetime.datetime.combine(d,sch.mp_type.start_time)
+        t2delta = datetime.timedelta(minutes=sch.mp_type.duration)
+        t3 = t2 + (sch.slot-1) * t2delta
+        t4 = t2 + sch.slot * t2delta
+        i = 1
+        while t1<= finish_datetime:
+            t11 = t1 + tdelta
+            if (t1>=t3 and t1<t4) or (t11>t3 and t11<=t4) or (t1<=t3 and t4<=t11):
+                key = str(i)+"_"+str(sch.p_date)
+                set_another.add(key)
+                another_sched[key] = sch
+            t1 = t11
+            i +=1
 
     while hasMoreDays:
         week += 1
@@ -353,6 +366,8 @@ def medical_procedures_schedule(request, order_id, mp_type_order):
                 orders = sched.get(key,[])
                 already = key in set_checked
 
+                a_sch = ""
+
                 if len(orders)>0:
                     lo = len(orders)
                 else:
@@ -363,11 +378,12 @@ def medical_procedures_schedule(request, order_id, mp_type_order):
                 else:
                     another = key in set_another
                     if another:
+                        a_sch = another_sched[key]
                         mark = "another"
                     else:
                         if len(orders)>=cur_omp.mp_type.capacity:
                             mark = "blocked"
-                slots.append((already, c_day + i, slot, orders, lo, mark))
+                slots.append((already, c_day + i, slot, orders, lo, mark,a_sch))
             times.append((hour+":"+minute, slots, week, slot))
 
             t += tdelta

@@ -101,9 +101,14 @@
                 id_array = this.id.split('_');
                 input_id = "#addinfo_"+id_array[2]+"_"+id_array[3];
                 orders = ($(input_id).val()).split(",");
-                s = "<table><th colspan=\"2\">Резерв</th>";
+                s = "<table><tr><th colspan=\"2\">Резерв</th></tr>";
                 for (i=1;i<=orders.length/2;i++) {
                     s += "<tr><td>"+orders[2*i-2]+"</td><td>"+orders[2*i-1]+"</td></tr>";
+                }
+                input_id = "#anotherinfo_"+id_array[2]+"_"+id_array[3];
+                addinfo = ($(input_id).val());
+                if (addinfo!="") {
+                    s += "<tr><th colspan=\"2\">Процедура</th></tr><tr><td colspan=\"2\">"+addinfo+"</td></tr>";
                 }
                 s += "</table>";
                 $("#addinfo").html(s);
@@ -181,6 +186,7 @@
                             <input type="hidden" id="init_{{ slot_info.1 }}_{{ slot_info.2 }}" value="{{ slot_info.0 }}"/>
                             <input type="hidden" id="slot_{{ slot_info.1 }}_{{ slot_info.2 }}" name="slot_{{ slot_info.1 }}_{{ slot_info.2 }}" value="{{ slot_info.0 }}"/>
                             <input type="hidden" id='addinfo_{{ slot_info.1 }}_{{ slot_info.2 }}' value="{% for order in slot_info.3 %}{{ order.code }},{{ order.patient.fio }},{% endfor %}"/>
+                            <input type="hidden" id='anotherinfo_{{ slot_info.1 }}_{{ slot_info.2 }}' value="{{ slot_info.6.mp_type.name }}"/>
                             </td>
                         {% endfor %}
                     {% endfor %}
