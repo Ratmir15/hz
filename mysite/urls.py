@@ -56,6 +56,7 @@ urlpatterns = patterns('',
     (r'^book/handler/$', 'pansionat.views.book_handler'),
     (r'^order/$', 'pansionat.views.order'),
     (r'^init/$', 'pansionat.views.init'),
+    (r'^clear/$', 'pansionat.views.clear'),
     (r'^admin/', include(admin.site.urls)),
     (r'^$', 'pansionat.views.index'),
 )

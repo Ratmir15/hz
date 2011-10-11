@@ -20,7 +20,7 @@ from django.shortcuts import redirect
 import logging
 from django.template.context import RequestContext
 from mysite.pansionat import gavnetso
-from mysite.pansionat.models import IllHistory, Customer, IllHistoryFieldType, IllHistoryFieldValue, IllHistoryRecord, OrderMedicalProcedure, MedicalProcedureType, OrderMedicalProcedureSchedule
+from mysite.pansionat.models import IllHistory, Customer, IllHistoryFieldType, IllHistoryFieldValue, IllHistoryRecord, OrderMedicalProcedure, MedicalProcedureType, OrderMedicalProcedureSchedule, Occupied, IllHistoryFieldTypeGroup, EmployerRoleHistory, Role, Employer
 from pytils import numeral
 from mysite.pansionat.gavnetso import monthlabel, nextmonthfirstday, initbase, initroles, initroomtypes, initp
 import datetime
@@ -625,6 +625,29 @@ def ill_history_save(request):
         return render_to_response('pansionat/illhistory.html', MenuRequestContext(request, values))
     return ill_history_new(request) #if method is't post then show empty form
 
+def dellist(l):
+    for o in l:
+        o.delete()
+
+@login_required
+def clear(request):
+    dellist(OrderMedicalProcedureSchedule.objects.all())
+    dellist(OrderMedicalProcedure.objects.all())
+    dellist(MedicalProcedureType.objects.all())
+    dellist(IllHistoryFieldValue.objects.all())
+    dellist(IllHistory.objects.all())
+    dellist(Occupied.objects.all())
+    dellist(Order.objects.all())
+    dellist(Room.objects.all())
+    dellist(RoomType.objects.all())
+    dellist(IllHistoryFieldTypeGroup.objects.all())
+    dellist(IllHistoryFieldType.objects.all())
+    dellist(Patient.objects.all())
+    dellist(Customer.objects.all())
+    dellist(EmployerRoleHistory.objects.all())
+    dellist(Employer.objects.all())
+    dellist(Role.objects.all())
+
 @login_required
 def init(request):
     list = RoomType.objects.all()
@@ -711,17 +734,17 @@ def moves(request, year, month):
 def nakl(request, occupied_id):
     order = Order.objects.get(id=occupied_id)
     template_filename = 'tov_nakl1.xls'
-    fullname = 'ООО санаторий "Хопровские зори"'
-    vendor = 'КПП 581701001 '+ fullname + ' Пензенская обл., п.Колышлей, ул.Лесная 1а'
+    fullname = str('ООО санаторий "Хопровские зори"')
+    vendor = str('КПП 581701001 ')+ fullname + str(' Пензенская обл., п.Колышлей, ул.Лесная 1а')
     client  = order.patient.fio()+','+order.patient.address
     delt = order.end_date - order.start_date
     days = delt.days + 1
     dir = gavnetso.getEmployerByRoleNameAndDate('Директор',order.start_date).__unicode__()
     gb = gavnetso.getEmployerByRoleNameAndDate('Главный бухгалтер',order.start_date).__unicode__()
     kassir = gavnetso.getEmployerByRoleNameAndDate('Кассир',order.start_date).__unicode__()
-    tovar = 'Пут. сан.-кур. на '+str(days)+' дней c '+str(order.start_date)+' по '+str(order.end_date) + '№ '+ str(order.code)
+    tovar = str('Пут. сан.-кур. на ')+str(days)+str(' дней c ')+str(order.start_date)+str(' по ')+str(order.end_date) + str('№ ')+ str(order.code)
     price = order.price
-    rub = numeral.rubles(price, True)
+    rub = numeral.rubles(float(price), True)
     tel = {'PIZDEZ': fullname, 'NUMBER': order.code,
            'FILENAME': 'nakladnaya-'+order.code,
            'CLIENT': client, 'VENDOR': vendor,
