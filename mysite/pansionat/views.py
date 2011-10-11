@@ -3,6 +3,7 @@
 import user
 from django.contrib.auth import logout, login, authenticate
 from django.contrib.auth.decorators import login_required, permission_required
+from django.db import connection
 from django.db.models.aggregates import Count, Sum
 from django.db.models.base import Model
 from django.forms.widgets import Textarea
@@ -935,6 +936,8 @@ def room_with_orders(start_date, end_date, room_type, room_book):
 
     ordered_rooms = [] 
 
+    print connection.queries
+    
     for room in room_list:
         order_rooms = room.order_set.filter(start_date__lte = start_date,\
                         end_date__gte = end_date)
