@@ -183,7 +183,7 @@ form.login input.logoutbutton {
    LAYOUT
 ********************************************/ 
 #wrap {
-	width: 820px;
+	width: 1000px;
 	background: #CCC url(content.jpg) repeat-y center top;
 	margin: 0 auto;
 	text-align: left;
@@ -195,7 +195,7 @@ form.login input.logoutbutton {
 	margin: 0 auto;
 }
 #header {
-	width: 820px;
+	width: 1000px;
 	position: relative;
 	height: 106px;
 	background: #CCC url(header.jpg) no-repeat center top;
@@ -332,7 +332,7 @@ form.login input.logoutbutton {
 	color: #666666;
 	background: #CCC url(footer.jpg) no-repeat center top;
 	clear: both;
-	width: 820px;
+	width: 1000px;
 	height: 55px;
 	text-align: center;	
 	font-size: 92%;
