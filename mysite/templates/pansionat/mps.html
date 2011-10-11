@@ -163,7 +163,7 @@
     <form action = "/mps/save/" method="POST">
         {% csrf_token %}
         <table border="0" id = "occupied" class = "display">
-        <tr><td colspan="2">{{ patient_name }}<h2 align="right">Назначено <span id="curcnt">{{ curcnt }}</span> из {{ allcnt }}</h2><input type="hidden" id="curc1nt" value="{{ curcnt }}"></td></tr>
+        <tr><td colspan="2"><a href="/mp/{{ order_id }}/">{{ patient_name }}</a><h2 align="right">Назначено <span id="curcnt">{{ curcnt }}</span> из {{ allcnt }}</h2><input type="hidden" id="curc1nt" value="{{ curcnt }}"></td></tr>
             <input type="hidden" name="order_id" value="{{ order_id }}"/>
             <input type="hidden" name="order" value="{{ mp_order }}"/>
             <tr><td width="300">

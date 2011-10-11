@@ -444,15 +444,83 @@ def medical_procedures(request, order_id):
         choosed.add(mp.mp_type)
         add_info[mp.mp_type] = (mp.times,mp.add_info)
 
+    order_scheduled = OrderMedicalProcedureSchedule.objects.filter(order = ord, p_date__gte = ord.start_date, p_date__lte = ord.end_date).values('mp_type').annotate(cnt = Count('id'))
+    os= dict()
+    for o in order_scheduled:
+        os[o['mp_type']] = o['cnt']
+
     choosed_values = {}
     for mp in all_mp:
         value = False
         if mp in choosed:
             value = True
-        choosed_values[mp] = (value,add_info.get(mp,""))
+        choosed_values[mp] = (value,add_info.get(mp,""),os.get(mp.id, ""))
 
     values = {'choosed_values': choosed_values, 'order_id': order_id, 'patient_name': ord.patient.fio()}
     return render_to_response('pansionat/mp.html', MenuRequestContext(request, values))
+
+@login_required
+def medical_procedures_print(request, order_id):
+    ord = Order.objects.get(id = order_id)
+
+    order_scheduled = OrderMedicalProcedureSchedule.objects.filter(order = ord, p_date__gte = ord.start_date, p_date__lte = ord.end_date).order_by('p_date','slot')
+    p = []
+    for slot in order_scheduled:
+        tdelta = datetime.timedelta(minutes=slot.mp_type.duration)
+        entry = dict()
+        entry['DATE'] = slot.p_date.strftime('%d.%m.%Y')
+        mp = OrderMedicalProcedure.objects.filter(order = ord, mp_type=slot.mp_type)
+        if len(mp)>0:
+            t = datetime.datetime.combine(slot.p_date,slot.mp_type.start_time)
+            time = t + (slot.slot-1)*tdelta
+            entry['TIME'] = time.strftime('%H:%M')
+            add_info = mp[0].add_info
+        else:
+            add_info = ""
+        entry['NAME'] = slot.mp_type.name +" " +add_info
+        p.append(entry)
+
+    tel = { 'P': p,
+           'FILENAME': 'procedures-'+ord.code,
+           'PATIENT': ord.patient.fio(),
+    }
+    template_filename = 'mp.xls'
+    return fill_excel_template(template_filename, tel)
+
+@login_required
+def schedule_print(request):
+#def schedule_print(request, mp_type_id, year, month, day):
+    mp_type_id = int(request.POST.get("mp_type",""))
+    dt = request.POST.get("start_date","")
+    dtv = dt.split(".")
+    year = int(dtv[2])
+    month = int(dtv[1])
+    day = int(dtv[0])
+    p_date = datetime.date(year, month, day)
+
+    order_scheduled = OrderMedicalProcedureSchedule.objects.filter(p_date = p_date, mp_type = mp_type_id).order_by('slot')
+    p = []
+    for slot in order_scheduled:
+        tdelta = datetime.timedelta(minutes=slot.mp_type.duration)
+        entry = dict()
+        entry['PATIENT'] = slot.order.patient.fio()
+        mp = OrderMedicalProcedure.objects.filter(order = slot.order, mp_type=slot.mp_type)
+        if len(mp)>0:
+            t = datetime.datetime.combine(slot.p_date,slot.mp_type.start_time)
+            time = t + (slot.slot-1)*tdelta
+            entry['TIME'] = time.strftime('%H:%M')
+            add_info = mp[0].add_info
+        else:
+            add_info = ""
+        entry['NAME'] = slot.mp_type.name +" " +add_info
+        p.append(entry)
+
+    tel = { 'P': p,
+            'DATE': p_date.strftime('%d.%m.%Y'),
+           'FILENAME': 'procedures-'+str(mp_type_id)+"-"+p_date.strftime('%d-%m-%Y'),
+    }
+    template_filename = 'mps.xls'
+    return fill_excel_template(template_filename, tel)
 
 @login_required
 def mp_save(request):
@@ -610,7 +678,6 @@ def reestr(request, year, month):
 
 @login_required
 def moves(request, year, month):
-    init(0)
     intyear = int(year)
     intmonth = int(month)
     fd = nextmonthfirstday(intyear, intmonth)
@@ -939,6 +1006,12 @@ def bookit(request):
     values = {'rooms' : request.session['rooms'], 'book_form' : form, 'user':request.user}
     values.update(csrf(request))
     return render_to_response('pansionat/bookit.html', values)
+
+@login_required
+def mpreport(request):
+    types = MedicalProcedureType.objects.all().order_by('order')
+    values = {'types' : types }
+    return render_to_response('pansionat/mpreport.html', MenuRequestContext(request, values))
 
 class OrderForm(ModelForm):
     class Meta:

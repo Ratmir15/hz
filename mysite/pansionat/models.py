@@ -121,7 +121,12 @@ class MedicalProcedureType(models.Model):
     optional = models.CharField(max_length=100)
     def optional_values(self):
         return self.optional.split(',')
+    def __unicode__(self):
+        return self.name
 
+    class Meta:
+        verbose_name = 'Тип медицинской процедуры'
+        verbose_name_plural = 'Типы медицинской процедуры'
 
 class Busy(models.Model):
 	location = models.ForeignKey(MedicalLocation)
@@ -206,6 +211,8 @@ class OrderMedicalProcedureSchedule(models.Model):
 class IllHistoryFieldTypeGroup(models.Model):
     description = models.CharField(max_length=100, verbose_name='Заголовок')
     order = models.IntegerField()
+    def __unicode__(self):
+        return self.description
 
     class Meta:
         verbose_name = 'Группа полей истории болезни'
@@ -221,6 +228,8 @@ class IllHistoryFieldType(models.Model):
         return self.defval.split(',')
     def height(self):
         return self.lines*20
+    def __unicode__(self):
+        return self.description
 
     class Meta:
         verbose_name = 'Тип поля истории болезни'
