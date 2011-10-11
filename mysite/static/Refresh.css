@@ -154,19 +154,19 @@ form.search input.button {
    LAYOUT
 ********************************************/ 
 #wrap {
-	width: 820px;
+	width: 1000px;
 	background: #CCC url(content.jpg) repeat-y center top;
 	margin: 0 auto;
 	text-align: left;
 }
 #content-wrap {
 	clear: both;
-	width: 760px;
+	width: 940px;
 	padding: 0; 
 	margin: 0 auto;
 }
 #header {
-	width: 820px;
+	width: 1000px;
 	position: relative;
 	height: 106px;
 	background: #CCC url(header.jpg) no-repeat center top;
@@ -303,7 +303,7 @@ form.search input.button {
 	color: #666666;
 	background: #CCC url(footer.jpg) no-repeat center top;
 	clear: both;
-	width: 820px;
+	width: 1000px;
 	height: 55px;
 	text-align: center;	
 	font-size: 92%;
