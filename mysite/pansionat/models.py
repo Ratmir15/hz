@@ -189,6 +189,10 @@ class Order(models.Model):
     payd_by_patient = models.BooleanField(verbose_name = 'Оплачивается пациентом')
     def __unicode__(self):
         return self.code
+    def start_date_n(self):
+        return self.start_date.strftime('%Y.%m.%d')
+    def end_date_n(self):
+        return self.end_date.strftime('%Y.%m.%d')
 
     class Meta:
         verbose_name = 'Заказ'

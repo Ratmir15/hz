@@ -77,10 +77,10 @@
                                 <option value="">---------</option>
                             {% endif %}
                             {% for type in types%}
-                                {% if room_type != type.name %}                                
-                                    <option value = "{{ type.name }}">{{ type.name }}</option>
+                                {% if room_type != type.id %}
+                                    <option value = "{{ type.id }}">{{ type.name }}</option>
                                 {% else %}
-                                    <option selected = "selected" value = "{{ type.name }}">{{ type.name }}</option>
+                                    <option selected = "selected" value = "{{ type.id }}">{{ type.name }}</option>
                                 {% endif %}
                             {% endfor %}
                         </select>
@@ -95,7 +95,7 @@
             <table border="0">
                 <tr>
                     <td>
-                        <table border="1" id = "rooms" class = "display">
+                        <table border="0" id = "rooms" class = "display">
                             <thead>
                                 <tr>
                                     <th>&nbsp;</th>

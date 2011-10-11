@@ -32,6 +32,7 @@
     <th>Клиент</th>
     <th>Дата заезда</th>
     <th>Дата выезда</th>
+    <th>Комната</th>
     <th>Пациент</th>
     <th>Сумма(руб)</th>
     <th></th>
@@ -46,10 +47,13 @@
                     {{ occupied.customer.name }}
                 </td>
                 <td>
-                    {{ occupied.start_date }}
+                    {{ occupied.start_date_n }}
                 </td>
                     <td>
-                        {{ occupied.end_date }}
+                        {{ occupied.end_date_n }}
+                    </td>
+                    <td>
+                        {{ occupied.room.name }}
                     </td>
                     <td>
                         {{ occupied.patient.fio }}

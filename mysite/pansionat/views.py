@@ -32,7 +32,6 @@ from django.db.models import Q
 from django.db.models import F
 from django.forms.models import inlineformset_factory
 
-from django.db import connection
 from mysite.pansionat.xltemplates import fill_excel_template, fill_excel_template_s_gavnom
 
 
@@ -380,7 +379,6 @@ def medical_procedures_schedule(request, order_id, mp_type_order):
         if d>ord.end_date:
             hasMoreDays = False
 
-    print connection.queries
     values = {'blockdates': blockdates, 'order_id': order_id, 'patient_name': ord.patient.fio(),
               'mp_order': mp_type_order, 'name': mp.name, 'curcnt': curcnt,'allcnt': cur_omp.times}
     return render_to_response('pansionat/mps.html', MenuRequestContext(request, values))
@@ -714,8 +712,6 @@ def moves(request, year, month):
            'MARKETING': gavnetso.getEmployerByRoleNameAndDate('Маркетинг',datetime.date(intyear, intmonth,1)).__unicode__()}
     l = []
     i = 0
-    #print len(occupieds)
-    #print connection.queries
     for order in orders:
         i += 1
         innermap = dict()
@@ -903,7 +899,7 @@ def rooms(request):
                     '%d.%m.%Y')
         book_type = request.POST['book_type']
         if request.POST['room_type'] != '':
-            room_type = request.POST['room_type']
+            room_type = int(request.POST['room_type'])
 
     book_list = room_with_orders(start_date, end_date, room_type, book_type)  
     types = RoomType.objects.all()
@@ -924,7 +920,7 @@ def room_with_orders(start_date, end_date, room_type, room_book):
     room_list = None
     
     if not room_type is None:
-        room_list = Room.objects.filter(room_type__name = room_type) 
+        room_list = Room.objects.filter(room_type__id = room_type)
     else:
         room_list = Room.objects.all()
 
