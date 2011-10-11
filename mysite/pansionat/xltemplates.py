@@ -5,6 +5,7 @@ from xlrd import open_workbook
 
 import re
 import xlwt
+from xlwt.Style import easyxf
 from mysite import settings
 
 def get_xlwt_style_list(rdbook):
@@ -114,7 +115,7 @@ def fill_excel_template(template_filename, tel):
     w.save(response)
     return response
 
-def fill_excel_template_s_gavnom(template_filename, tel, fields):
+def fill_excel_template_s_gavnom(template_filename, tel, fields, records):
     w = prepare_excel_template(template_filename, tel)
     response = HttpResponse(mimetype='application/vnd.ms-excel')
     filename = tel.get('FILENAME','report')
@@ -122,8 +123,17 @@ def fill_excel_template_s_gavnom(template_filename, tel, fields):
     maxr = tel['max_row']
     wtsheet = w.get_sheet(0)
     for field in fields:
-        maxr += 1
-        wtsheet.write(maxr, 0, field.value)
+        maxr += 2
+        wtsheet.write_merge(maxr-1, maxr, 0, 8, field.ill_history_field.description+": "+ field.value, easyxf('align: wrap on'))
+    maxr += 1
+    wtsheet.write_merge(
+        maxr, maxr,
+        0, 8,
+        'Записи истории болезни')
+    for record in records:
+        maxr += 2
+        wtsheet.write(maxr-1, 0, record.datetime.strftime('%d.%m.%Y'))
+        wtsheet.write_merge(maxr-1, maxr, 1, 8, record.text, easyxf('align: wrap on'))
     w.save(response)
     return response
 

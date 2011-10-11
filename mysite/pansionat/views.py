@@ -256,10 +256,10 @@ def record_save(request):
         form = RecordForm(request.POST, instance = obj)
         if form.is_valid():
             obj = form.save()
-            values = {'form' : form, 'object_id' : obj.id}
+            return records(request, obj.ill_history.id)
         else:
             values = {'form' : form, 'object_id' : object_id}
-        return render_to_response('pansionat/record.html', MenuRequestContext(request, values))
+            return render_to_response('pansionat/record.html', MenuRequestContext(request, values))
     return record_new(request)
 
 @login_required
@@ -272,6 +272,7 @@ def records(request, order_id):
         values['ill_history_id'] = ill_history.id
     else:
         ill_history = IllHistory(order = ord)
+        ill_history.save()
     list = IllHistoryRecord.objects.filter(ill_history = ill_history)
     t = loader.get_template('pansionat/records.html')
     c = MenuRequestContext(request, {
@@ -620,7 +621,7 @@ def ill_history_save(request):
                     
             ill_history_id = ill_history.id
 
-        values = {'ill_history_form' : ill_history_form, 'ill_history_id' : ill_history_id}
+        values = {'ill_history_form' : ill_history_form, 'order_id':ill_history.order.id, 'ill_history_id' : ill_history_id}
         return render_to_response('pansionat/illhistory.html', MenuRequestContext(request, values))
     return ill_history_new(request) #if method is't post then show empty form
 
@@ -743,6 +744,7 @@ def ill_history(request, order_id):
     srok = 'c '+str(order.start_date)+' по '+str(order.end_date)
     ill_history = IllHistory.objects.get(order = order)
     ill_history_fields = IllHistoryFieldValue.objects.filter(ill_history = ill_history)
+    ill_history_records = IllHistoryRecord.objects.filter(ill_history = ill_history).order_by('datetime')
     #first_diagnose = ill_history.first_diagnose
     #pref = u'С каким диагнозом прибыл: '
     #first_diagnose =  pref + first_diagnose
@@ -761,7 +763,7 @@ def ill_history(request, order_id):
            'AGE': years,
            'SROK':srok,
     }
-    return fill_excel_template_s_gavnom(template_filename, tel, ill_history_fields)
+    return fill_excel_template_s_gavnom(template_filename, tel, ill_history_fields, ill_history_records)
 
 @login_required
 def rootik(request, order_id):
