@@ -437,7 +437,9 @@ def medical_procedures_schedule_save(request):
                         omp.save()
                 else:
                     if already:
-                        scheduled[0].delete()
+                        for omp in scheduled:
+                            if order == omp.order:
+                                omp.delete()
                 t += tdelta
                 slot +=1
             c_day +=1
