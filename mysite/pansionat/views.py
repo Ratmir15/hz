@@ -941,25 +941,42 @@ def room_with_orders(start_date, end_date, room_type, room_book):
     else:
         room_list = Room.objects.all()
 
-    if room_book == 'Booked':
-        room_list = room_list.annotate(book_count = Count('roombook'),\
-            order_count = Count('order')).filter(\
-                room_type__places__lte = F('book_count') + F('order_count'))
-    elif room_book == 'NotBooked' :
-        room_list = room_list.annotate(book_count = Count('roombook'),\
-            order_count = Count('order')).filter(\
-                room_type__places__gt = F('book_count') + F('order_count'))
+    #if room_book == 'Booked':
+    #    room_list = room_list.annotate(book_count = Count('roombook'),\
+    #        order_count = Count('order')).filter(\
+    #            room_type__places__lte = F('book_count') + F('order_count'))
+    #elif room_book == 'NotBooked' :
+    #    room_list = room_list.annotate(book_count = Count('roombook'),\
+    #        order_count = Count('order')).filter(\
+    #            room_type__places__gt = F('book_count') + F('order_count'))
 
     ordered_rooms = [] 
 
     print connection.queries
     
     for room in room_list:
-        order_rooms = room.order_set.filter(start_date__lte = start_date,\
-                        end_date__gte = end_date)
-        booked_rooms = room.roombook_set.filter(book__start_date__lte = start_date,\
-                        book__end_date__gte = end_date)
-        ordered_rooms.append((room, order_rooms, booked_rooms))
+        order_rooms = room.order_set.filter(Q(start_date__lte = start_date,\
+                        end_date__gte = end_date) | \
+        Q(start_date__gte = start_date,\
+                        start_date__lte = end_date) | \
+        Q(end_date__gte = start_date,\
+                        end_date__lte = end_date))
+        booked_rooms = room.roombook_set.filter(Q(book__start_date__lte = start_date,\
+                        book__end_date__gte = end_date) | \
+        Q(book__start_date__gte = start_date,\
+                        book__start_date__lte = end_date) | \
+        Q(book__end_date__gte = start_date,\
+                        book__end_date__lte = end_date))
+        #booked_rooms = room.roombook_set.filter(book__start_date__lte = start_date,\
+        #                book__end_date__gte = end_date)
+        if room_book == 'Booked':
+            append = room.room_type.places <= (len(order_rooms) + len(booked_rooms))
+        elif room_book == 'NotBooked':
+            append = room.room_type.places > (len(order_rooms) + len(booked_rooms))
+        else:
+            append = True
+        if append:
+            ordered_rooms.append((room, order_rooms, booked_rooms, len(order_rooms)>0 ,len(booked_rooms)>0))
 
     return ordered_rooms
 

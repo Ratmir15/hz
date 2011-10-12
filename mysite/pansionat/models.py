@@ -303,6 +303,10 @@ class Book(models.Model):
     name = models.CharField(max_length = 10000)
     phone = models.CharField(max_length = 11)
     description = models.CharField(max_length = 10000)
+    def start_date_n(self):
+        return self.start_date.strftime('%Y.%m.%d')
+    def end_date_n(self):
+        return self.end_date.strftime('%Y.%m.%d')
 
 class RoomBook(models.Model):
     room = models.ForeignKey(Room)
