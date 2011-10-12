@@ -21,9 +21,9 @@ from django.shortcuts import redirect
 import logging
 from django.template.context import RequestContext
 from mysite.pansionat import gavnetso
-from mysite.pansionat.models import IllHistory, Customer, IllHistoryFieldType, IllHistoryFieldValue, IllHistoryRecord, OrderMedicalProcedure, MedicalProcedureType, OrderMedicalProcedureSchedule, Occupied, IllHistoryFieldTypeGroup, EmployerRoleHistory, Role, Employer
+from mysite.pansionat.models import IllHistory, Customer, IllHistoryFieldType, IllHistoryFieldValue, IllHistoryRecord, OrderMedicalProcedure, MedicalProcedureType, OrderMedicalProcedureSchedule, Occupied, IllHistoryFieldTypeGroup, EmployerRoleHistory, Role, Employer, OrderDiet, Diet
 from pytils import numeral
-from mysite.pansionat.gavnetso import monthlabel, nextmonthfirstday, initbase, initroles, initroomtypes, initp
+from mysite.pansionat.gavnetso import monthlabel, nextmonthfirstday, initbase, initroles, initroomtypes, initp, initdiet
 import datetime
 import time
 from django import forms
@@ -539,6 +539,38 @@ def schedule_print(request):
     return fill_excel_template(template_filename, tel)
 
 @login_required
+def diets_print(request):
+    dt = request.POST.get("start_date","")
+    dtv = dt.split(".")
+    year = int(dtv[2])
+    month = int(dtv[1])
+    day = int(dtv[0])
+    p_date = datetime.date(year, month, day)
+
+    orders = Order.objects.filter(start_date__lte = p_date, end_date__gte = p_date)
+    d = dict()
+
+    for order in orders:
+        ods = OrderDiet.objects.filter(order = order)
+        if len(ods)>0:
+            od = ods[0]
+            d[od.diet] = d.get(od.diet,0)+1
+
+    p = []
+    for key, value in d.items():
+        entry = dict()
+        entry['DIETNAME'] = key.name
+        entry['VALUE'] = value
+        p.append(entry)
+
+    tel = { 'P': p,
+            'DATE': p_date.strftime('%d.%m.%Y'),
+           'FILENAME': 'diets-'+p_date.strftime('%d-%m-%Y'),
+    }
+    template_filename = 'diets.xls'
+    return fill_excel_template(template_filename, tel)
+
+@login_required
 @permission_required('pansionat.add_ordermedicalprocedure', login_url='/forbidden/')
 def mp_save(request):
     if request.method == 'POST':
@@ -605,6 +637,45 @@ def ill_history_edit(request, order_id):
     return render_to_response('pansionat/illhistory.html', MenuRequestContext(request, values))
 
 @login_required
+def orderdiet(request, order_id):
+    ord = Order.objects.get(id = order_id)
+    orderdiets = OrderDiet.objects.filter(order = ord)
+    values = {}
+    if len(orderdiets)>0:
+        orderdiet = orderdiets[0]
+        values['orderdiet_id'] = orderdiet.id
+        values['diet_type'] = orderdiet.diet.id
+#    else:
+#        orderdiet = OrderDiet(order = ord)
+
+    values['order_id'] = order_id
+    values['patient_name'] = ord.patient.fio()
+    values['types'] = Diet.objects.all()
+    return render_to_response('pansionat/diet.html', MenuRequestContext(request, values))
+
+@login_required
+def orderdiet_save(request):
+    if request.method == 'POST':
+        orderdiet_id = request.POST.get('orderdiet_id')
+        if orderdiet_id is None:
+            orderdiet = OrderDiet(order = Order.objects.get(id = request.POST.get('id_order_id')))
+        else:
+            orderdiet = OrderDiet.objects.get(id = orderdiet_id)
+
+        diet_type = request.POST.get('diet_type')
+        if diet_type != "":
+            diet_type = int(diet_type)
+            diet = Diet.objects.get(id = diet_type)
+            orderdiet.diet = diet
+            orderdiet.save()
+            orderdiet_id = orderdiet.id
+
+        values = {'order_id': orderdiet.order.id, 'orderdiet_id': orderdiet_id,
+                  'patient_name': orderdiet.order.patient.fio(), 'types': Diet.objects.all(), 'diet_type': diet_type}
+        return render_to_response('pansionat/diet.html', MenuRequestContext(request, values))
+    return ill_history_new(request) #if method is't post then show empty form
+
+@login_required
 def ill_history_new(request):
     ill_history_form = IllHistoryForm()
     values = {'ill_history_form' : ill_history_form}
@@ -657,9 +728,12 @@ def clear(request):
     dellist(IllHistoryFieldValue.objects.all())
     dellist(IllHistory.objects.all())
     dellist(Occupied.objects.all())
+    dellist(OrderDiet.objects.all())
     dellist(Order.objects.all())
     dellist(Room.objects.all())
     dellist(RoomType.objects.all())
+    dellist(RoomBook.objects.all())
+    dellist(Book.objects.all())
     dellist(IllHistoryFieldTypeGroup.objects.all())
     dellist(IllHistoryFieldType.objects.all())
     dellist(Patient.objects.all())
@@ -667,6 +741,7 @@ def clear(request):
     dellist(EmployerRoleHistory.objects.all())
     dellist(Employer.objects.all())
     dellist(Role.objects.all())
+    dellist(Diet.objects.all())
 
 @login_required
 def init(request):
@@ -683,6 +758,9 @@ def init(request):
     list = MedicalProcedureType.objects.all()
     if not len(list):
         initp()
+    list = Diet.objects.all()
+    if not len(list):
+        initdiet()
     return HttpResponse(t.render(c))
 
 @login_required
@@ -1074,6 +1152,11 @@ def mpreport(request):
     types = MedicalProcedureType.objects.all().order_by('order')
     values = {'types' : types }
     return render_to_response('pansionat/mpreport.html', MenuRequestContext(request, values))
+
+@login_required
+def diets(request):
+    values = { 'start_date': datetime.date.today().strftime('%d.%m.%Y') }
+    return render_to_response('pansionat/diets.html', MenuRequestContext(request, values))
 
 class OrderForm(ModelForm):
     class Meta:

@@ -200,6 +200,14 @@ class Order(models.Model):
 #        permissions = (
 #            ("arm_registration", "REGISTRATION"))
 
+class OrderDiet(models.Model):
+    diet = models.ForeignKey(Diet)
+    order = models.ForeignKey(Order)
+
+    class Meta:
+        verbose_name = 'Выбор диеты'
+        verbose_name_plural = 'Выбор диеты'
+
 class OrderMedicalProcedure(models.Model):
     order = models.ForeignKey(Order)
     mp_type = models.ForeignKey(MedicalProcedureType)

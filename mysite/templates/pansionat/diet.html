@@ -1,0 +1,63 @@
+{% extends "pansionat/index.html" %}
+
+{% block title %} Выбор диеты {%  endblock  %}
+
+{% block head %}
+    <style type="text/css">
+        @import "/static/dataTables/media/css/demo_page.css";
+        @import "/static/dataTables/media/css/demo_table.css";
+        @import "/static/jquery-ui/themes/base/jquery.ui.all.css";
+    </style>
+    <script src="/static/dataTables/media/js/jquery.js"></script>
+    <script src="/static/dataTables/media/js/jquery.dataTables.js"></script>
+    <script src="/static/jquery-ui/ui/jquery.ui.core.js"></script>
+    <script src="/static/jquery-ui/ui/jquery.ui.widget.js"></script>
+    <script src="/static/jquery-ui/ui/jquery.ui.datepicker.js"></script>
+    <script src="/static/jquery-ui/ui/i18n/jquery.ui.datepicker-ru.js"></script>
+    <script src="/static/jquery-ui/ui/jquery.ui.button.js"></script>
+    <script type="text/javascript">
+        $(document).ready(function() {
+            $.datepicker.setDefaults($.datepicker.regional['ru']);
+            $('#id_birth_date').datepicker();
+            $('input:submit').button()
+            $(':button').button()
+            } );
+    </script>
+<link rel="stylesheet" href="/static/Refresh.css" type="text/css" />
+ {%  endblock  %}
+
+{% block allcontent %}
+    <h1>Выбор диеты</h1>
+    <form action = "/diet/save/" method="POST">
+        {% csrf_token %}
+        <table border="0" id = "occupied" class = "display">
+        <tr><td colspan="2">{{ patient_name }}</td></tr>
+            {% if orderdiet_id %}
+                <input type="hidden" name="orderdiet_id" value="{{ orderdiet_id }}"/>
+            {% endif %}
+            <tr><td>Тип диеты:</td>
+                    <td>
+                        <select name="diet_type">
+                            {% if diet_type == None %}
+                                <option value="" selected="selected">---------</option>
+                            {% else %}
+                                <option value="">---------</option>
+                            {% endif %}
+                            {% for type in types%}
+                                {% if diet_type != type.id %}
+                                    <option value = "{{ type.id }}">{{ type.name }}</option>
+                                {% else %}
+                                    <option selected = "selected" value = "{{ type.id }}">{{ type.name }}</option>
+                                {% endif %}
+                            {% endfor %}
+                        </select>
+</td></tr>
+            <tr>
+                <td colspan="2">
+                    <input type="submit" value="Сохранить">
+                </td>
+            </tr>
+            <input type="hidden" name="id_order_id" value="{{ order_id }}"/>
+        </table>
+    </form>
+{%  endblock  %}

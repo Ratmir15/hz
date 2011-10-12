@@ -1,7 +1,7 @@
 # coding: utf-8
 import datetime
 from django.db import connection
-from mysite.pansionat.models import Patient, Customer, Order, Occupied, Room, RoomType, EmployerRoleHistory, Role, Employer, IllHistoryFieldTypeGroup, IllHistoryFieldType, MedicalProcedureType, OrderMedicalProcedure, OrderMedicalProcedureSchedule, RoomBook, Book
+from mysite.pansionat.models import Patient, Customer, Order, Occupied, Room, RoomType, EmployerRoleHistory, Role, Employer, IllHistoryFieldTypeGroup, IllHistoryFieldType, MedicalProcedureType, OrderMedicalProcedure, OrderMedicalProcedureSchedule, RoomBook, Book, Diet
 
 def nextmonthfirstday(year, month):
     if month==12:
@@ -233,6 +233,14 @@ def initroles():
     erh3.save()
     erh4 = EmployerRoleHistory(employer = e4, role = role3, start_date=datetime.date(2007,1,1),end_date=datetime.date(2015,1,1))
     erh4.save()
+
+def initdiet():
+    d  = Diet(name = 'Диета №1 (вегетерианская)')
+    d.save()
+    d  = Diet(name = 'Диета №2 (легкая)')
+    d.save()
+    d  = Diet(name = 'Диета №3 (питательная)')
+    d.save()
 
 def initp():
     mpt  = MedicalProcedureType(name = 'Грязь на область', order = 1, duration = 30, start_time=datetime.time(8), finish_time = datetime.time(16), capacity = 2, optional='Живота,Головы,Ноги')
