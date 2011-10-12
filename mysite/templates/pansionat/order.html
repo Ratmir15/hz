@@ -21,6 +21,12 @@
                 $('#id_start_date').datepicker();
                 $('#id_end_date').datepicker();
                 $('#id_birth_date').datepicker();
+                $('#id_start_date').change(
+                    function() {
+                        sd = $('#id_start_date').datepicker("getDate");
+                        ed = $('#id_end_date').datepicker("getDate");
+                        $('#id_price').val(Number($('#pr').val())*(1+((ed-sd)/86400000)));
+                });
                 $('input:submit').button()
                 } );
         </script> 
@@ -36,6 +42,7 @@
                         {{ patient_form.as_table }}
                     </table>
                 {% endif %}
+                <input type="hidden" id="pr" name="pr" value="{{ pr }}"/>
                 <input type="submit" value="Сформировать заказ" />
             </form>
         {% endblock %}

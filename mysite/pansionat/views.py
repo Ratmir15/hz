@@ -973,6 +973,8 @@ def room_with_orders(start_date, end_date, room_type, room_book):
             append = room.room_type.places <= (len(order_rooms) + len(booked_rooms))
         elif room_book == 'NotBooked':
             append = room.room_type.places > (len(order_rooms) + len(booked_rooms))
+        elif room_book == 'Empty':
+            append = (len(order_rooms) + len(booked_rooms)) == 0
         else:
             append = True
         if append:
@@ -1146,7 +1148,7 @@ def order(request):
                 order.save()
                 return redirect('/rooms')
 
-    values = {'order_form': order_form, 'rooms': rooms, user: request.user}
+    values = {'order_form': order_form, 'rooms': rooms, user: request.user, 'pr': rooms[0].room_type.price}
     values.update(csrf(request))
     if 'patient_id' in request.session:
         patient_id = request.session['patient_id']
@@ -1156,4 +1158,4 @@ def order(request):
         patient_form = PatientForm()
         values['patient_form'] = patient_form
         
-    return render_to_response('pansionat/order.html', values)
+    return render_to_response('pansionat/order.html', MenuRequestContext(request, values))
