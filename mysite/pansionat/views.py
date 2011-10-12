@@ -179,7 +179,6 @@ def patient_new(request):
 @login_required
 def patient_save(request):
     if request.method == 'POST':
-        print 'POST'
         patient_form = None
         patient_id = request.POST.get('patient_id')
         if patient_id is None:
@@ -432,14 +431,11 @@ def medical_procedures_schedule_save(request):
                 checked = request.POST.get('slot_'+str(c_day)+"_"+str(slot))
                 #print str(already)+"/"+str(checked)
                 if checked=="True":
-                    print "checked "+str(slot)
                     if not already:
                         omp = OrderMedicalProcedureSchedule(mp_type=mp, p_date=d,slot=slot, order=order)
-                        print "save "+str(slot)
                         omp.save()
                 else:
                     if already:
-                        print "delete "+str(slot)
                         scheduled[0].delete()
                 t += tdelta
                 slot +=1
@@ -473,7 +469,11 @@ def medical_procedures(request, order_id):
         choosed_values[mp] = (value,add_info.get(mp,""),os.get(mp.id, ""))
 
     values = {'choosed_values': choosed_values, 'order_id': order_id, 'patient_name': ord.patient.fio()}
-    return render_to_response('pansionat/mp.html', MenuRequestContext(request, values))
+    user = request.user
+    if user.has_perm('pansionat.add_ordermedicalprocedure'):
+        return render_to_response('pansionat/mp.html', MenuRequestContext(request, values))
+    else:
+        return render_to_response('pansionat/mpreadonly.html', MenuRequestContext(request, values))
 
 @login_required
 def medical_procedures_print(request, order_id):
@@ -539,6 +539,7 @@ def schedule_print(request):
     return fill_excel_template(template_filename, tel)
 
 @login_required
+@permission_required('pansionat.add_ordermedicalprocedure', login_url='/forbidden/')
 def mp_save(request):
     if request.method == 'POST':
         order_id = request.POST.get('order_id')
@@ -559,7 +560,11 @@ def mp_save(request):
             was_checked = len(objects) != 0
             if checked[f]:
                 if not was_checked:
-                    omp = OrderMedicalProcedure(order = order, mp_type = f, times = times[f], add_info=add_info[f])
+                    t = times[f]
+                    if t == "":
+                        delt = order.end_date - order.start_date
+                        t = delt.days+1
+                    omp = OrderMedicalProcedure(order = order, mp_type = f, times = t, add_info=add_info[f])
                     omp.save()
                 else:
                     if times[f]!=objects[0].times or add_info[f]!=objects[0].add_info:
@@ -952,8 +957,6 @@ def room_with_orders(start_date, end_date, room_type, room_book):
 
     ordered_rooms = [] 
 
-    print connection.queries
-    
     for room in room_list:
         order_rooms = room.order_set.filter(Q(start_date__lte = start_date,\
                         end_date__gte = end_date) | \

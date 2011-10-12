@@ -1,7 +1,7 @@
 # coding: utf-8
 import datetime
 from django.db import connection
-from mysite.pansionat.models import Patient, Customer, Order, Occupied, Room, RoomType, EmployerRoleHistory, Role, Employer, IllHistoryFieldTypeGroup, IllHistoryFieldType, MedicalProcedureType, OrderMedicalProcedure, OrderMedicalProcedureSchedule
+from mysite.pansionat.models import Patient, Customer, Order, Occupied, Room, RoomType, EmployerRoleHistory, Role, Employer, IllHistoryFieldTypeGroup, IllHistoryFieldType, MedicalProcedureType, OrderMedicalProcedure, OrderMedicalProcedureSchedule, RoomBook, Book
 
 def nextmonthfirstday(year, month):
     if month==12:
@@ -111,6 +111,20 @@ def initbase(doit):
     c6.save()
     c7 = Customer(name = 'ЦРБ', inn = 7)
     c7.save()
+    r = Room.objects.get(name = '12А')
+    o1 = Order(room = r, code = '1290', start_date=datetime.date(2011,10,11),end_date=datetime.date(2011,10,17), patient = p1, customer = c1, directive = c5, price = 12345)
+    o1.save()
+    r = Room.objects.get(name = '12А')
+    o1 = Order(room = r, code = '1291', start_date=datetime.date(2011,10,11),end_date=datetime.date(2011,10,24), patient = p2, customer = c2, directive = c5, price = 12000)
+    o1.save()
+    r = Room.objects.get(name = '12Б')
+    o1 = Order(room = r, code = '1292', start_date=datetime.date(2011,10,11),end_date=datetime.date(2011,10,17), patient = p3, customer = c1, directive = c5, price = 15000)
+    o1.save()
+    book = Book(start_date=datetime.date(2011,10,11),end_date=datetime.date(2011,10,17),name='Аяцков',phone='5551234',description='вряд ли')
+    book.save()
+    r = Room.objects.get(name = '13Б')
+    rb = RoomBook(book = book, room = r)
+    rb.save()
     r1 = Room.objects.get(name = '1СК')
     r2 = Room.objects.get(name = '1Д')
     r3 = Room.objects.get(name = '33Б')
@@ -165,8 +179,19 @@ def initroomtypes():
                    description = 'телевизор, холодильник',\
                    places = 3, price = 950, price_alone = 0)
     rt7.save()
-    r1 = Room(name='1СК',room_type=rt1)
-    r1.save()
+    rt1list = ['1СК','12А','12Б','13А','13Б','14А','14Б',\
+                 '15А','15Б','16','17А','17Б',\
+                 '19А','19Б','20А','20Б','21А','21Б',\
+                 '22А','22Б','23А','23Б','24А','24Б',\
+                 '25А','25Б','26А','26Б','27А','27Б',\
+                 '28А','28Б','28В']
+    for name in rt1list:
+        r1 = Room(name=name,room_type=rt1)
+        r1.save()
+    rt5list = ['18','29','31','32']
+    for name in rt5list:
+        r1 = Room(name=name,room_type=rt5)
+        r1.save()
     r2 = Room(name='1Д',room_type=rt2)
     r2.save()
     r3 = Room(name='33Б',room_type=rt2)
@@ -212,11 +237,13 @@ def initroles():
 def initp():
     mpt  = MedicalProcedureType(name = 'Грязь на область', order = 1, duration = 30, start_time=datetime.time(8), finish_time = datetime.time(16), capacity = 2, optional='Живота,Головы,Ноги')
     mpt.save()
-    mpt1  = MedicalProcedureType(name = 'Подводное вытяжение в минеральной воде', order = 2, duration = 30, start_time=datetime.time(8), finish_time = datetime.time(17), capacity = 2)
+    mpt1  = MedicalProcedureType(name = 'Подводное вытяжение в минеральной воде', order = 2, duration = 45, start_time=datetime.time(8), finish_time = datetime.time(17), capacity = 2)
     mpt1.save()
     orders = Order.objects.filter(code = '1266')
     ord = orders[0]
     omp = OrderMedicalProcedure(order = ord, mp_type = mpt, times = 10)
+    omp.save()
+    omp = OrderMedicalProcedure(order = ord, mp_type = mpt1, times = 5)
     omp.save()
     for i in xrange(2,7):
         omps = OrderMedicalProcedureSchedule(order = ord, mp_type = mpt, p_date = datetime.date(2007,7,i), slot = 2)

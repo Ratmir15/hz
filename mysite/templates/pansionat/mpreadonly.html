@@ -39,41 +39,18 @@
                 <tr>
                     <th>
                         <label for="id_add_field_{{ field.order }}">{{ field.name }}</label>
-                        {% if field.optional %}
-                            {% for val in field.optional_values %}
-                                <a href="#" onclick="$('#id_addinfo_field_{{ field.order }}').val(this.innerHTML); return false;">{{ val }}</a>&nbsp;
-                            {% endfor %}
-                        {% endif %}
                     </th>
                     <td>
-                        <input type="text" value="{{ value.1.1 }}" id="id_addinfo_field_{{ field.order }}" name="id_addinfo_field_{{ field.order }}" onchange="$('#id_add_field_{{ field.order }}')[0].checked=true;">
+                        {{ value.1.1 }}
                     </td>
                 <td>
-                    <input type="text" value="{{ value.1.0 }}" id="times_add_field_{{ field.order }}" name="times_field_{{ field.order }}" onchange="$('#id_add_field_{{ field.order }}')[0].checked=true;" >
+                    {{ value.1.0 }}
                 </td>
                     <td>
                         {{ value.2 }}
                     </td>
-                    <td>
-                        <input type="checkbox" value="1" id="id_add_field_{{ field.order }}" name="add_field_{{ field.order }}"
-                               {% if value.0 %}
-                               checked
-                                {% endif %}
-                                onclick="if (!this.checked) { $('#id_addinfo_field_{{ field.order }}').val('');$('#times_add_field_{{ field.order }}').val(''); };"
-                                 >
-                    </td>
-                <td>
-                    {% if value.0 %}
-                    <a href="/mp/{{ order_id }}/{{ field.order }}"><img style='border:0px;' src="/static/admin/img/admin/icon_clock.gif" alt="Часики"/></a>
-                    {% endif %}
-                </td>
                 </tr>
             {% endfor %}
-            <tr>
-                <td colspan="2">
-                    <input type="submit" value="Сохранить">
-                </td>
-            </tr>
         </table>
     </form>
 {%  endblock  %}

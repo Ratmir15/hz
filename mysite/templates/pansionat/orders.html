@@ -32,7 +32,7 @@
     <th>Клиент</th>
     <th>Дата заезда</th>
     <th>Дата выезда</th>
-    <th>Комната</th>
+    <th>К</th>
     <th>Пациент</th>
     <th>Сумма(руб)</th>
     <th></th>
@@ -62,11 +62,11 @@
                     {{ occupied.price }}
                 </td>
                     <td>
-                        <a href="/illhistory/{{ occupied.id }}/">История болезни</a>/<a href="/mp/{{ occupied.id }}/">Лист назначений</a>
+                        <a href="/illhistory/{{ occupied.id }}/">История болезни</a>/<a href="/mp/{{ occupied.id }}/">Процедуры</a>
                     </td>
                 <td>
                     <a href="nakl/{{ occupied.id }}/">Накладная</a>/
-                        <a href="sf/{{ occupied.id }}/">Счет-фактура</a>/
+                        <a href="sf/{{ occupied.id }}/">Сч-ф</a>/
                         <a href="pko/{{ occupied.id }}/">ПКО</a>/
                         <a href="rootik/{{ occupied.id }}/">Квиток</a>/
                         <a href="zayava/{{ occupied.id }}/">Заявление</a>
