@@ -113,6 +113,7 @@ def orders(request):
     occupied_list = Order.objects.all()
     t = loader.get_template('pansionat/orders.html')
     c = MenuRequestContext(request, {
+        'diet_en': request.user.has_perm('pansionat.add_orderdiet'),
     'occupied_list': occupied_list,
 #   'menu_list': getMenuItems(request)
     })
@@ -539,6 +540,7 @@ def schedule_print(request):
     return fill_excel_template(template_filename, tel)
 
 @login_required
+@permission_required('pansionat.add_orderdiet', login_url='/forbidden/')
 def diets_print(request):
     dt = request.POST.get("start_date","")
     dtv = dt.split(".")
@@ -637,6 +639,7 @@ def ill_history_edit(request, order_id):
     return render_to_response('pansionat/illhistory.html', MenuRequestContext(request, values))
 
 @login_required
+@permission_required('pansionat.add_orderdiet', login_url='/forbidden/')
 def orderdiet(request, order_id):
     ord = Order.objects.get(id = order_id)
     orderdiets = OrderDiet.objects.filter(order = ord)
@@ -654,6 +657,7 @@ def orderdiet(request, order_id):
     return render_to_response('pansionat/diet.html', MenuRequestContext(request, values))
 
 @login_required
+@permission_required('pansionat.add_orderdiet', login_url='/forbidden/')
 def orderdiet_save(request):
     if request.method == 'POST':
         orderdiet_id = request.POST.get('orderdiet_id')
