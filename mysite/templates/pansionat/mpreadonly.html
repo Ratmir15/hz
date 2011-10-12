@@ -28,11 +28,8 @@
 
 {% block allcontent %}
     <h1>Медицинские процедуры</h1>
-    <form action = "/mp/save/" method="POST">
-        {% csrf_token %}
         <table border="0" id = "occupied" class = "display">
-        <tr><td colspan="3">{{ patient_name }}</td><td><a href="/mp/{{ order_id }}/print/">печать</a></td><td align="right" colspan="2"><input type="submit" value="Сохранить">
-                </td></tr>
+        <tr><td colspan="3">{{ patient_name }}</td><td colspan="3"><a href="/mp/{{ order_id }}/print/">печать</a></td></tr>
         <tr><th>Название</th><th>Доп. инфо</th><th>Кол-во</th><th>Назначено</th><th></th></tr>
             <input type="hidden" name="order_id" value="{{ order_id }}"/>
             {% for field, value in choosed_values.items %}
@@ -52,5 +49,4 @@
                 </tr>
             {% endfor %}
         </table>
-    </form>
 {%  endblock  %}
