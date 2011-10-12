@@ -5,7 +5,7 @@
 {% block allcontent %}
     <h1>Записи истории болезни</h1>
     <h2>{{ order.patient.fio }}</h2>
-    <h4><a href="/illhistory/{{ ill_history.id }}">история болезни</a></h4>
+    <h4><a href="/illhistory/{{ ill_history.order.id }}">история болезни</a></h4>
     <table border="0" id = "datagrid" class = "display">
     <thead>
     <th>Дата</th>

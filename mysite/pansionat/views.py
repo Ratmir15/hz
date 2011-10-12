@@ -256,7 +256,7 @@ def record_save(request):
         form = RecordForm(request.POST, instance = obj)
         if form.is_valid():
             obj = form.save()
-            return records(request, obj.ill_history.id)
+            return records(request, obj.ill_history.order.id)
         else:
             values = {'form' : form, 'object_id' : object_id}
             return render_to_response('pansionat/record.html', MenuRequestContext(request, values))
