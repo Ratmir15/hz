@@ -1048,18 +1048,24 @@ def room_with_orders(start_date, end_date, room_type, room_book):
                         book__start_date__lte = end_date) | \
         Q(book__end_date__gte = start_date,\
                         book__end_date__lte = end_date))
+        cnt = 0
+        for ord in order_rooms:
+            if ord.is_with_child:
+                cnt += 2
+            else:
+                cnt += 1
         #booked_rooms = room.roombook_set.filter(book__start_date__lte = start_date,\
         #                book__end_date__gte = end_date)
         if room_book == 'Booked':
-            append = room.room_type.places <= (len(order_rooms) + len(booked_rooms))
+            append = room.room_type.places <= (cnt + len(booked_rooms))
         elif room_book == 'NotBooked':
-            append = room.room_type.places > (len(order_rooms) + len(booked_rooms))
+            append = room.room_type.places > (cnt + len(booked_rooms))
         elif room_book == 'Empty':
-            append = (len(order_rooms) + len(booked_rooms)) == 0
+            append = (cnt + len(booked_rooms)) == 0
         else:
             append = True
         if append:
-            ordered_rooms.append((room, order_rooms, booked_rooms, len(order_rooms)>0 ,len(booked_rooms)>0))
+            ordered_rooms.append((room, order_rooms, booked_rooms, cnt>0 ,len(booked_rooms)>0))
 
     return ordered_rooms
 
@@ -1207,9 +1213,31 @@ def order(request):
         request.session['book_message'] = 'Вы должны выбрать комнату для заселения'
         return redirect('/rooms')
 
+    start_date = strptime(request.session['start_date'],'%d.%m.%Y')
+    end_date = strptime(request.session['end_date'],'%d.%m.%Y')
     period = strptime(request.session['end_date'],'%d.%m.%Y') - strptime(request.session['start_date'],'%d.%m.%Y')
     price = rooms[0].room_type.price * (period.days + 1)
-    
+    room = rooms[0]
+    order_rooms = room.order_set.filter(Q(start_date__lte = start_date,\
+                    end_date__gte = end_date) | \
+    Q(start_date__gte = start_date,\
+                    start_date__lte = end_date) | \
+    Q(end_date__gte = start_date,\
+                    end_date__lte = end_date))
+    booked_rooms = room.roombook_set.filter(Q(book__start_date__lte = start_date,\
+                    book__end_date__gte = end_date) | \
+    Q(book__start_date__gte = start_date,\
+                    book__start_date__lte = end_date) | \
+    Q(book__end_date__gte = start_date,\
+                    book__end_date__lte = end_date))
+    cnt = 0
+    for ord in order_rooms:
+        if ord.is_with_child:
+            cnt += 2
+        else:
+            cnt += 1
+    pl = room.room_type.places - (cnt + len(booked_rooms))
+
     order_form = OrderForm(initial={'start_date' : request.session['start_date'],\
                                     'end_date' : request.session['end_date'],\
                                     'price': price})
@@ -1234,7 +1262,7 @@ def order(request):
                 order.save()
                 return redirect('/rooms')
 
-    values = {'order_form': order_form, 'rooms': rooms, user: request.user, 'pr': int(rooms[0].room_type.price)}
+    values = {'order_form': order_form, 'rooms': rooms, user: request.user, 'pr': int(rooms[0].room_type.price), 'pl': int(pl)}
     values.update(csrf(request))
     if 'patient_id' in request.session:
         patient_id = request.session['patient_id']

@@ -97,6 +97,11 @@ def initbase(doit):
                 passport_whom = 'ОВД ШЕМЫШЕЙКА',passport_number='56 07 736141',
                 address = 'ШЕМЫШ.Р-Н С.МАЧКАССЫ УЛ.МОЛОДЕЖНАЯ 5. 28-1-34Д.Т.')
     p4.save()
+    p5 = Patient(family = 'Хуртин',name = 'Олег', sname = 'Ольгович',
+                birth_date=datetime.date(1963,2,15),grade='Программист',
+                passport_whom = 'ОВД ШЕМЫШЕЙКА',passport_number='56 07 736142',
+                address = 'ШЕМЫШ.Р-Н С.МАЧКАССЫ УЛ.МОЛОДЕЖНАЯ 5. 28-1-34Д.Т.')
+    p5.save()
     c1 = Customer(name = 'Кожвендиспансер', inn = 1)
     c1.save()
     c2 = Customer(name = 'Администрация окт. р-на', inn = 2)
@@ -119,6 +124,9 @@ def initbase(doit):
     o1.save()
     r = Room.objects.get(name = '12Б')
     o1 = Order(room = r, code = '1292', start_date=datetime.date(2011,10,11),end_date=datetime.date(2011,10,17), patient = p3, customer = c1, directive = c5, price = 15000)
+    o1.save()
+    r = Room.objects.get(name = '14А')
+    o1 = Order(room = r, code = '1515', start_date=datetime.date(2011,10,11),end_date=datetime.date(2011,10,17), patient = p5, customer = c1, directive = c5, price = 15000, is_with_child = True)
     o1.save()
     book = Book(start_date=datetime.date(2011,10,11),end_date=datetime.date(2011,10,17),name='Аяцков',phone='5551234',description='вряд ли')
     book.save()

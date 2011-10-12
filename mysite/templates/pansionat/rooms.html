@@ -124,6 +124,7 @@
                                                 <tr><td>{{ order.code }}</td>
                                                 <td>{{ order.start_date_n }}</td>
                                                 <td>{{ order.end_date_n }}</td>
+                                                <td>{% if order.is_with_child %}МД{% endif %}</td>
                                                 <td><a href="/patients/{{ order.patient.id }}/">{{ order.patient.family  }}</a></td>
                                                 </tr>
                                             {% endfor %}

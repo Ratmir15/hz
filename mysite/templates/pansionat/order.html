@@ -25,9 +25,36 @@
                     function() {
                         sd = $('#id_start_date').datepicker("getDate");
                         ed = $('#id_end_date').datepicker("getDate");
-                        $('#id_price').val(Number($('#pr').val())*(1+((ed-sd)/86400000)));
+                        price = Number($('#pr').val());
+                        if ($('#id_is_with_child')[0].checked) {
+                            price += Number($('#md').val())
+                        }
+                        $('#id_price').val(price*(1+((ed-sd)/86400000)));
+                });
+                $('#id_end_date').change(
+                    function() {
+                        sd = $('#id_start_date').datepicker("getDate");
+                        ed = $('#id_end_date').datepicker("getDate");
+                        price = Number($('#pr').val());
+                        if ($('#id_is_with_child')[0].checked) {
+                            price += Number($('#md').val())
+                        }
+                        $('#id_price').val(price*(1+((ed-sd)/86400000)));
+                });
+                $('#id_is_with_child').change(
+                    function() {
+                        sd = $('#id_start_date').datepicker("getDate");
+                        ed = $('#id_end_date').datepicker("getDate");
+                        price = Number($('#pr').val());
+                        if ($('#id_is_with_child')[0].checked) {
+                            price += Number($('#md').val())
+                        }
+                        $('#id_price').val(price*(1+((ed-sd)/86400000)));
                 });
                 $('input:submit').button()
+                if ({{ pl }} < 2) {
+                    $('#id_is_with_child').attr("disabled", true);
+                }
                 } );
         </script> 
 {%  endblock  %}
@@ -35,7 +62,8 @@
             <form action="/order/" method="post">
                 {% csrf_token %}
                 <table border = "0">
-                    {{ order_form.as_table }}            
+                    <tr><td colspan="2">Свободных мест: {{ pl }}</td></tr>
+                    {{ order_form.as_table }}
                 </table>
                 {% if patient_form %}
                     <table border = "0">
@@ -43,6 +71,7 @@
                     </table>
                 {% endif %}
                 <input type="hidden" id="pr" name="pr" value="{{ pr }}"/>
+                <input type="hidden" id="md" name="md" value="730"/>
                 <input type="submit" value="Сформировать заказ" />
             </form>
         {% endblock %}
