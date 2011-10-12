@@ -1148,7 +1148,7 @@ def order(request):
                 order.save()
                 return redirect('/rooms')
 
-    values = {'order_form': order_form, 'rooms': rooms, user: request.user, 'pr': rooms[0].room_type.price}
+    values = {'order_form': order_form, 'rooms': rooms, user: request.user, 'pr': int(rooms[0].room_type.price)}
     values.update(csrf(request))
     if 'patient_id' in request.session:
         patient_id = request.session['patient_id']
