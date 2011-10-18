@@ -1020,6 +1020,7 @@ def rooms(request):
               'end_date' : end_date.strftime('%d.%m.%Y'),\
               'room_type' : room_type,
               'book_type' : book_type,
+              'msg' : int(request.GET.get('msg',0)),
               'user' : request.user}
     values.update(csrf(request))
     if 'patient_id' in request.GET:
@@ -1220,10 +1221,10 @@ def order(request):
             rooms = request.session['rooms']
         else:
             request.session['book_message'] = 'Вы можите заселить только в одну комнату'
-            return redirect('/rooms')
+            return redirect('/rooms?msg=1')
     else:
         request.session['book_message'] = 'Вы должны выбрать комнату для заселения'
-        return redirect('/rooms')
+        return redirect('/rooms?msg=2')
 
     start_date = strptime(request.session['start_date'],'%d.%m.%Y')
     end_date = strptime(request.session['end_date'],'%d.%m.%Y')

@@ -53,6 +53,12 @@
         <form method="POST">
             {% csrf_token %}
             <table border="0">
+                {% if msg == 1 %}
+                    <tr><td colspan="4"><h3>Вы можете заселить только в одну комнату</h3></td></tr>
+                {%  endif %}
+                {% if msg == 2 %}
+                    <tr><td colspan="4"><h3>Вы должны выбрать комнату для заселения</h3></td></tr>
+                {%  endif %}
                 <tr>
                     <td>Дата заселения:</td>
                     <td><input type="text" name="start_date" class = "datepicker" value = "{{ start_date }}"></td>
