@@ -936,6 +936,12 @@ def delbook(request, roombook_id):
     return redirect('/rooms/')
 
 @login_required
+def delorder(request, order_id):
+    ord = Order.objects.get(id=order_id)
+    ord.delete()
+    return redirect('/rooms/')
+
+@login_required
 def zayava(request, occupied_id):
     order = Order.objects.get(id=occupied_id)
     template_filename = 'zayava.xls'

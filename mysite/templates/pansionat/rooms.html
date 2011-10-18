@@ -132,13 +132,14 @@
                                                 <td>{{ order.end_date_n }}</td>
                                                 <td>{% if order.is_with_child %}МД{% endif %}</td>
                                                 <td><a href="/patients/{{ order.patient.id }}/">{{ order.patient.family  }}</a></td>
+                                                <td><a style="font-size: 8px;" href="/order/delete/{{ order.id }}">удалить</a></td>
                                                 </tr>
                                             {% endfor %}
                                             {% if book_flag %}
                                                 <tr><th colspan="4">Бронь</th></tr>
                                             {% endif %}
                                             {% for roombook in roombook_set %}
-                                                <tr><td colspan="5">{{ roombook.book.phone }} {{ roombook.book.start_date_n }} {{ roombook.book.end_date_n }} {{ roombook.book.name }}<a style="font-size: 8px;" href="/delbook/{{ roombook.id }}">удалить</a></td></tr>
+                                                <tr><td colspan="5">{{ roombook.book.phone }} {{ roombook.book.start_date_n }} {{ roombook.book.end_date_n }} {{ roombook.book.name }} <a style="font-size: 8px;" href="/delbook/{{ roombook.id }}">удалить</a></td></tr>
                                             {% endfor %}
                                             </table>
                                         </td>
