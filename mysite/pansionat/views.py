@@ -920,6 +920,12 @@ def pko(request, occupied_id):
     return fill_excel_template(template_filename, tel)
 
 @login_required
+def delbook(request, roombook_id):
+    roombook = RoomBook.objects.get(id=roombook_id)
+    roombook.delete()
+    return redirect('/rooms/')
+
+@login_required
 def zayava(request, occupied_id):
     order = Order.objects.get(id=occupied_id)
     template_filename = 'zayava.xls'

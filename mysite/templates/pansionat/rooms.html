@@ -132,7 +132,7 @@
                                                 <tr><th colspan="4">Бронь</th></tr>
                                             {% endif %}
                                             {% for roombook in roombook_set %}
-                                                <tr><td colspan="5">{{ roombook.book.phone }} {{ roombook.book.start_date_n }} {{ roombook.book.end_date_n }} {{ roombook.book.name }}</td></tr>
+                                                <tr><td colspan="5">{{ roombook.book.phone }} {{ roombook.book.start_date_n }} {{ roombook.book.end_date_n }} {{ roombook.book.name }}<a style="font-size: 8px;" href="/delbook/{{ roombook.id }}">удалить</a></td></tr>
                                             {% endfor %}
                                             </table>
                                         </td>
