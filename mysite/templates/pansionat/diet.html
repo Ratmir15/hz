@@ -37,13 +37,21 @@
             {% endif %}
             <tr><td>Тип диеты:</td>
                     <td>
-                        <select name="diet_type">
+                    <script type="text/javascript">
+                        //function changeDT() {
+                            var output = {};
+                            {% for type, info in types %}
+                                output[{{ type.id }}] = '{{ info }}'
+                            {% endfor %}
+                        //}
+                    </script>
+                        <select name="diet_type" onchange="$('#add_info')[0].innerHTML = output[this.value];">
                             {% if diet_type == None %}
                                 <option value="" selected="selected">---------</option>
                             {% else %}
                                 <option value="">---------</option>
                             {% endif %}
-                            {% for type in types%}
+                            {% for type, set_d in types%}
                                 {% if diet_type != type.id %}
                                     <option value = "{{ type.id }}">{{ type.name }}</option>
                                 {% else %}
@@ -52,6 +60,11 @@
                             {% endfor %}
                         </select>
 </td></tr>
+            <tr>
+                <td colspan="2">
+                    <span id="add_info"></span>
+                </td>
+            </tr>
             <tr>
                 <td colspan="2">
                     <input type="submit" value="Сохранить">

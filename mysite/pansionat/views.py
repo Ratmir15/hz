@@ -655,7 +655,17 @@ def orderdiet(request, order_id):
 
     values['order_id'] = order_id
     values['patient_name'] = ord.patient.fio()
-    values['types'] = Diet.objects.all()
+    diets = Diet.objects.all()
+    diet_ext = []
+    for diet in diets:
+        s = ""
+        for dietitem in diet.dietitems_set.filter(start_date__lte = ord.start_date, end_date__gte = ord.start_date):
+            if s=="":
+                s = dietitem.item.name
+            else:
+                s += ',' + dietitem.item.name
+        diet_ext.append((diet, s))
+    values['types'] = diet_ext
     return render_to_response('pansionat/diet.html', MenuRequestContext(request, values))
 
 @login_required

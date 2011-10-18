@@ -1,7 +1,7 @@
 # coding: utf-8
 import datetime
 from django.db import connection
-from mysite.pansionat.models import Patient, Customer, Order, Occupied, Room, RoomType, EmployerRoleHistory, Role, Employer, IllHistoryFieldTypeGroup, IllHistoryFieldType, MedicalProcedureType, OrderMedicalProcedure, OrderMedicalProcedureSchedule, RoomBook, Book, Diet
+from mysite.pansionat.models import Patient, Customer, Order, Occupied, Room, RoomType, EmployerRoleHistory, Role, Employer, IllHistoryFieldTypeGroup, IllHistoryFieldType, MedicalProcedureType, OrderMedicalProcedure, OrderMedicalProcedureSchedule, RoomBook, Book, Diet, Item, DietItems
 
 def nextmonthfirstday(year, month):
     if month==12:
@@ -24,53 +24,53 @@ def initbase(doit):
     ihftg4 = IllHistoryFieldTypeGroup(description = 'Сердечно-сосудистая система', order = 3)
     ihftg4.save()
 
-    ihft1 = IllHistoryFieldType(description = 'С каким диагнозом прибыл', lines = 3, defval ='',\
+    ihft1 = IllHistoryFieldType(description = 'С каким диагнозом прибыл', lines = 3, defval ='',
                                 order = 0, group = ihftg1)
     ihft1.save()
-    ihft2 = IllHistoryFieldType(description = 'Диагноз санатория, а) основной', lines = 3, defval ='',\
+    ihft2 = IllHistoryFieldType(description = 'Диагноз санатория, а) основной', lines = 3, defval ='',
                                 order = 1, group = ihftg1)
     ihft2.save()
-    ihft3 = IllHistoryFieldType(description = 'б) сопутствующего заболевания', lines = 3, defval ='',\
+    ihft3 = IllHistoryFieldType(description = 'б) сопутствующего заболевания', lines = 3, defval ='',
                                 order = 2, group = ihftg1)
     ihft3.save()
-    ihft4 = IllHistoryFieldType(description = 'Условия труда и быта больного', lines = 6, defval ='',\
+    ihft4 = IllHistoryFieldType(description = 'Условия труда и быта больного', lines = 6, defval ='',
                                 order = 3, group = ihftg1)
     ihft4.save()
-    ihft5 = IllHistoryFieldType(description = 'Жалобы больного', lines = 8, defval ='',\
+    ihft5 = IllHistoryFieldType(description = 'Жалобы больного', lines = 8, defval ='',
                                 order = 4, group = ihftg1)
     ihft5.save()
-    ihft6 = IllHistoryFieldType(description = 'Общий анамнез', lines = 5, defval ='',\
+    ihft6 = IllHistoryFieldType(description = 'Общий анамнез', lines = 5, defval ='',
                                 order = 5, group = ihftg1)
     ihft6.save()
-    ihft7 = IllHistoryFieldType(description = 'Начало и развитие настоящего заболевания', lines = 5, defval ='',\
+    ihft7 = IllHistoryFieldType(description = 'Начало и развитие настоящего заболевания', lines = 5, defval ='',
                                 order = 6, group = ihftg1)
     ihft7.save()
 
-    ihft = IllHistoryFieldType(description = 'Состояние удовлетворительное', lines = 1, defval ='',\
+    ihft = IllHistoryFieldType(description = 'Состояние удовлетворительное', lines = 1, defval ='',
                                 order = 0, group = ihftg2)
     ihft.save()
-    ihft = IllHistoryFieldType(description = 'Телосложение', lines = 1, defval ='правильное,неправильное',\
+    ihft = IllHistoryFieldType(description = 'Телосложение', lines = 1, defval ='правильное,неправильное',
                                 order = 1, group = ihftg2)
     ihft.save()
-    ihft = IllHistoryFieldType(description = '', lines = 1, defval ='Астеник, нормастеник, гиперстеник',\
+    ihft = IllHistoryFieldType(description = '', lines = 1, defval ='Астеник, нормастеник, гиперстеник',
                                 order = 2, group = ihftg2)
     ihft.save()
-    ihft = IllHistoryFieldType(description = 'Питание', lines = 1, defval ='удовлетворительное, повышенное, пониженное',\
+    ihft = IllHistoryFieldType(description = 'Питание', lines = 1, defval ='удовлетворительное, повышенное, пониженное',
                                 order = 3, group = ihftg2)
     ihft.save()
-    ihft = IllHistoryFieldType(description = 'Кожные покровы', lines = 2, defval ='нормальной окраски, бледные, гиперемированы, желтушные',\
+    ihft = IllHistoryFieldType(description = 'Кожные покровы', lines = 2, defval ='нормальной окраски, бледные, гиперемированы, желтушные',
                                 order = 4, group = ihftg2)
     ihft.save()
-    ihft = IllHistoryFieldType(description = 'Щитовидная железа', lines = 1, defval ='увеличена, не увеличена',\
+    ihft = IllHistoryFieldType(description = 'Щитовидная железа', lines = 1, defval ='увеличена, не увеличена',
                                 order = 5, group = ihftg2)
     ihft.save()
-    ihft = IllHistoryFieldType(description = 'Региональные лимфатические железы-шейные, подмышечные, паховые', lines = 3, defval ='не увеличены, увеличены, мягкие, уплотненные',\
+    ihft = IllHistoryFieldType(description = 'Региональные лимфатические железы-шейные, подмышечные, паховые', lines = 3, defval ='не увеличены, увеличены, мягкие, уплотненные',
                                 order = 6, group = ihftg2)
     ihft.save()
-    ihft = IllHistoryFieldType(description = 'при пальпации', lines = 1, defval ='безболезненные, болезненные',\
+    ihft = IllHistoryFieldType(description = 'при пальпации', lines = 1, defval ='безболезненные, болезненные',
                                 order = 7, group = ihftg2)
     ihft.save()
-    ihft = IllHistoryFieldType(description = 'Косто-мышечная система', lines = 1, defval ='без видимых изменений',\
+    ihft = IllHistoryFieldType(description = 'Косто-мышечная система', lines = 1, defval ='без видимых изменений',
                                 order = 8, group = ihftg2)
     ihft.save()
 
@@ -155,43 +155,43 @@ def initbase(doit):
     oc4.save()
 
 def initroomtypes():
-    rt1 = RoomType(name = 'Двухместный номер блочный повышенной комфортности',\
-                   description = 'телевизор, холодильник, душевая кабина, кондиционер',\
+    rt1 = RoomType(name = 'Двухместный номер блочный повышенной комфортности',
+                   description = 'телевизор, холодильник, душевая кабина, кондиционер',
                    places = 2, price = 1310, price_alone = 2120)
     rt1.save()
-    rt2 = RoomType(name = 'Двухместный номер стандартный',\
-                   description = 'телевизор, холодильник',\
+    rt2 = RoomType(name = 'Двухместный номер стандартный',
+                   description = 'телевизор, холодильник',
                    places = 2, price = 1370, price_alone = 2230)
     rt2.save()
-    rt3 = RoomType(name = 'Двухместный номер 1 категории',\
-                   description = 'телевизор, холодильник, душевая кабина',\
+    rt3 = RoomType(name = 'Двухместный номер 1 категории',
+                   description = 'телевизор, холодильник, душевая кабина',
                    places = 2, price = 1580, price_alone = 2650)
     rt3.save()
-    rt4 = RoomType(name = 'Двухместный номер повышенной комфортности',\
-                   description = 'телевизор, холодильник, кондиционер',\
+    rt4 = RoomType(name = 'Двухместный номер повышенной комфортности',
+                   description = 'телевизор, холодильник, кондиционер',
                    places = 2, price = 1730, price_alone = 2960)
     rt4.save()
-    rt5 = RoomType(name = 'Двухкомнатный номер «Люкс»',\
-                   description = 'телевизор, холодильник, душевая кабина, кондиционер',\
+    rt5 = RoomType(name = 'Двухкомнатный номер «Люкс»',
+                   description = 'телевизор, холодильник, душевая кабина, кондиционер',
                    places = 2, price = 2000, price_alone = 4000)
     rt5.save()
-    rt6 = RoomType(name = 'Двухкомнатный номер «Люкс»',\
-                   description = 'телевизор, холодильник, душевая кабина',\
+    rt6 = RoomType(name = 'Двухкомнатный номер «Люкс»',
+                   description = 'телевизор, холодильник, душевая кабина',
                    places = 2, price = 1750, price_alone = 3500)
     rt6.save()
-    rt7 = RoomType(name = 'Домики (двухместный номер)',\
-                   description = 'телевизор, холодильник',\
+    rt7 = RoomType(name = 'Домики (двухместный номер)',
+                   description = 'телевизор, холодильник',
                    places = 2, price = 1050, price_alone = 1600)
     rt7.save()
-    rt7 = RoomType(name = 'Домики (трехместный номер)',\
-                   description = 'телевизор, холодильник',\
+    rt7 = RoomType(name = 'Домики (трехместный номер)',
+                   description = 'телевизор, холодильник',
                    places = 3, price = 950, price_alone = 0)
     rt7.save()
-    rt1list = ['1СК','12А','12Б','13А','13Б','14А','14Б',\
-                 '15А','15Б','16','17А','17Б',\
-                 '19А','19Б','20А','20Б','21А','21Б',\
-                 '22А','22Б','23А','23Б','24А','24Б',\
-                 '25А','25Б','26А','26Б','27А','27Б',\
+    rt1list = ['1СК','12А','12Б','13А','13Б','14А','14Б',
+                 '15А','15Б','16','17А','17Б',
+                 '19А','19Б','20А','20Б','21А','21Б',
+                 '22А','22Б','23А','23Б','24А','24Б',
+                 '25А','25Б','26А','26Б','27А','27Б',
                  '28А','28Б','28В']
     for name in rt1list:
         r1 = Room(name=name,room_type=rt1)
@@ -243,12 +243,36 @@ def initroles():
     erh4.save()
 
 def initdiet():
-    d  = Diet(name = 'Диета №1 (вегетерианская)')
-    d.save()
-    d  = Diet(name = 'Диета №2 (легкая)')
-    d.save()
-    d  = Diet(name = 'Диета №3 (питательная)')
-    d.save()
+    d1  = Diet(name = 'Диета №1 (вегетерианская)')
+    d1.save()
+    d2  = Diet(name = 'Диета №2 (легкая)')
+    d2.save()
+    d3  = Diet(name = 'Диета №3 (питательная)')
+    d3.save()
+    i1 = Item(name = 'Рис с овощами')
+    i1.save()
+    i2 = Item(name = 'Макароны по флотски')
+    i2.save()
+    i3 = Item(name = 'Спагетти с сосиской')
+    i3.save()
+    i4 = Item(name = 'Суп грибной')
+    i4.save()
+    i5 = Item(name = 'Лапша куриная')
+    i5.save()
+    i6 = Item(name = 'Щи')
+    i6.save()
+    di = DietItems(diet = d1, item = i1, start_date = datetime.date(2007,7,1), end_date = datetime.date(2015,7,1))
+    di.save()
+    di = DietItems(diet = d2, item = i2, start_date = datetime.date(2007,7,1), end_date = datetime.date(2015,7,1))
+    di.save()
+    di = DietItems(diet = d3, item = i3, start_date = datetime.date(2007,7,1), end_date = datetime.date(2015,7,1))
+    di.save()
+    di = DietItems(diet = d1, item = i4, start_date = datetime.date(2007,7,1), end_date = datetime.date(2015,7,1))
+    di.save()
+    di = DietItems(diet = d2, item = i5, start_date = datetime.date(2007,7,1), end_date = datetime.date(2015,7,1))
+    di.save()
+    di = DietItems(diet = d3, item = i6, start_date = datetime.date(2007,7,1), end_date = datetime.date(2015,7,1))
+    di.save()
 
 def initp():
     mpt  = MedicalProcedureType(name = 'Грязь на область', order = 1, duration = 30, start_time=datetime.time(8), finish_time = datetime.time(16), capacity = 2, optional='Живота,Головы,Ноги')
