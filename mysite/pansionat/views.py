@@ -76,14 +76,15 @@ def getMenuItems(request):
         i.href = "/rooms/"
         i.label = "Номера"
         items.append(i)
-    i = MenuItem()
-    i.href = "/orders/"
-    i.label = "Путевки"
-    items.append(i)
-    i = MenuItem()
-    i.href = "/reports/"
-    i.label = "Отчеты"
-    items.append(i)
+    if user.is_authenticated():
+        i = MenuItem()
+        i.href = "/orders/"
+        i.label = "Путевки"
+        items.append(i)
+        i = MenuItem()
+        i.href = "/reports/"
+        i.label = "Отчеты"
+        items.append(i)
     return items
 
 @login_required
