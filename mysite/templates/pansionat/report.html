@@ -1,0 +1,27 @@
+{% extends "pansionat/index.html" %}
+
+{% block title %} Отчет {%  endblock  %}
+
+{% block head %}
+    <style type="text/css">
+        @import "/static/jquery-ui/themes/base/jquery.ui.all.css";
+    </style>
+    <script src="/static/dataTables/media/js/jquery.js"></script>
+    <script src="/static/dataTables/media/js/jquery.dataTables.js"></script>
+    <script src="/static/jquery-ui/ui/jquery.ui.core.js"></script>
+    <script src="/static/jquery-ui/ui/jquery.ui.widget.js"></script>
+    <script src="/static/jquery-ui/ui/jquery.ui.datepicker.js"></script>
+    <script src="/static/jquery-ui/ui/i18n/jquery.ui.datepicker-ru.js"></script>
+    <script src="/static/jquery-ui/ui/jquery.ui.button.js"></script>
+
+<link rel="stylesheet" href="/static/Refresh.css" type="text/css" />
+ {%  endblock  %}
+
+{% block allcontent %}
+    <form action="/processreport/{{ tp }}/" method="POST">
+    {% csrf_token %}
+    <h1>{{ metadata.0 }}</h1>
+    <table>{{ metadata.1.as_table }}</table>
+    <input type="submit" value="Сформировать">
+    </form>
+ {%  endblock  %}
