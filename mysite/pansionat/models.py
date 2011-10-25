@@ -316,6 +316,19 @@ class Book(models.Model):
     def end_date_n(self):
         return self.end_date.strftime('%Y.%m.%d')
 
+class OrderDay(models.Model):
+    room = models.ForeignKey(Room, verbose_name = 'Комната')
+    busydate = models.DateField(verbose_name = 'Дата')
+    order = models.ForeignKey(Order, verbose_name = 'Заказ', null=True)
+    book = models.ForeignKey(Book, verbose_name = 'Бронь', null=True)
+    is_with_child = models.BooleanField(verbose_name = 'Мать и дитя')
+    def busydate_n(self):
+        return self.busydate.strftime('%Y.%m.%d')
+
+    class Meta:
+        verbose_name = 'День заказа'
+        verbose_name_plural = 'Дни заказов'
+
 class RoomBook(models.Model):
     room = models.ForeignKey(Room)
     book = models.ForeignKey(Book)

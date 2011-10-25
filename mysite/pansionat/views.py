@@ -21,9 +21,9 @@ from django.shortcuts import redirect
 import logging
 from django.template.context import RequestContext
 from mysite.pansionat import gavnetso
-from mysite.pansionat.models import IllHistory, Customer, IllHistoryFieldType, IllHistoryFieldValue, IllHistoryRecord, OrderMedicalProcedure, MedicalProcedureType, OrderMedicalProcedureSchedule, Occupied, IllHistoryFieldTypeGroup, EmployerRoleHistory, Role, Employer, OrderDiet, Diet
+from mysite.pansionat.models import IllHistory, Customer, IllHistoryFieldType, IllHistoryFieldValue, IllHistoryRecord, OrderMedicalProcedure, MedicalProcedureType, OrderMedicalProcedureSchedule, Occupied, IllHistoryFieldTypeGroup, EmployerRoleHistory, Role, Employer, OrderDiet, Diet, OrderDay
 from pytils import numeral
-from mysite.pansionat.gavnetso import monthlabel, nextmonthfirstday, initbase, initroles, initroomtypes, initp, initdiet
+from mysite.pansionat.gavnetso import monthlabel, nextmonthfirstday, initbase, initroles, initroomtypes, initp, initdiet, fillBookDays, fillOrderDays
 import datetime
 import time
 from django import forms
@@ -939,6 +939,7 @@ def delbook(request, roombook_id):
 @login_required
 def delorder(request, order_id):
     ord = Order.objects.get(id=order_id)
+    clearOrderDays(ord)
     ord.delete()
     return redirect('/rooms/')
 
@@ -1046,56 +1047,57 @@ def rooms(request):
         values['patient'] = patient
     return render_to_response('pansionat/rooms.html', MenuRequestContext(request, values))
 
+def room_availability(room, start_date, end_date):
+    order_rooms = room.orderday_set.filter(busydate__range = (start_date, end_date)).order_by('busydate')
+
+    cnt = 0
+    orders = set()
+    booked = set()
+    cd = ""
+    l_cnt = 0
+    max = 0
+    for ord_days in order_rooms:
+        if ord_days.order is None:
+            booked.add(ord_days.book)
+        else:
+            orders.add(ord_days.order)
+        if cd != ord_days.busydate:
+            l_cnt = 0
+            cd = ord_days.busydate
+
+        if ord_days.is_with_child:
+            cnt += 2
+            l_cnt += 2
+        else:
+            cnt += 1
+            l_cnt += 1
+        if max < l_cnt:
+            max = l_cnt
+            print ord_days.busydate_n()+ ":" + str(l_cnt)
+    return orders, booked, max
+
 def room_with_orders(start_date, end_date, room_type, room_book):
-    room_list = None
-    
+
     if not room_type is None:
         room_list = Room.objects.filter(room_type__id = room_type)
     else:
         room_list = Room.objects.all()
 
-    #if room_book == 'Booked':
-    #    room_list = room_list.annotate(book_count = Count('roombook'),\
-    #        order_count = Count('order')).filter(\
-    #            room_type__places__lte = F('book_count') + F('order_count'))
-    #elif room_book == 'NotBooked' :
-    #    room_list = room_list.annotate(book_count = Count('roombook'),\
-    #        order_count = Count('order')).filter(\
-    #            room_type__places__gt = F('book_count') + F('order_count'))
-
     ordered_rooms = [] 
 
     for room in room_list:
-        order_rooms = room.order_set.filter(Q(start_date__lte = start_date,\
-                        end_date__gte = end_date) | \
-        Q(start_date__gte = start_date,\
-                        start_date__lte = end_date) | \
-        Q(end_date__gte = start_date,\
-                        end_date__lte = end_date))
-        booked_rooms = room.roombook_set.filter(Q(book__start_date__lte = start_date,\
-                        book__end_date__gte = end_date) | \
-        Q(book__start_date__gte = start_date,\
-                        book__start_date__lte = end_date) | \
-        Q(book__end_date__gte = start_date,\
-                        book__end_date__lte = end_date))
-        cnt = 0
-        for ord in order_rooms:
-            if ord.is_with_child:
-                cnt += 2
-            else:
-                cnt += 1
-        #booked_rooms = room.roombook_set.filter(book__start_date__lte = start_date,\
-        #                book__end_date__gte = end_date)
+        (orders, booked, max) = room_availability(room, start_date, end_date)
+
         if room_book == 'Booked':
-            append = room.room_type.places <= (cnt + len(booked_rooms))
+            append = room.room_type.places <= max
         elif room_book == 'NotBooked':
-            append = room.room_type.places > (cnt + len(booked_rooms))
+            append = room.room_type.places > max
         elif room_book == 'Empty':
-            append = (cnt + len(booked_rooms)) == 0
+            append = max == 0
         else:
             append = True
         if append:
-            ordered_rooms.append((room, order_rooms, booked_rooms, cnt>0 ,len(booked_rooms)>0))
+            ordered_rooms.append((room, orders, booked, len(orders)>0 ,len(booked)>0, max))
 
     return ordered_rooms
 
@@ -1171,10 +1173,11 @@ def bookit(request):
             book.save()
             if not form.cleaned_data['is_type']:
                 for room in request.session['rooms']:
-                    room_book = RoomBook()
-                    room_book.room = room
-                    room_book.book = book
-                    room_book.save()
+                    fillBookDays(book, room)
+#                    room_book = RoomBook()
+#                    room_book.room = room
+#                    room_book.book = book
+#                    room_book.save()
             else:
                 #TODO: handle room type booking 
                 pass
@@ -1285,6 +1288,12 @@ class IllHistoryForm(ModelForm):
             'conditions': Textarea(attrs={'cols': 80, 'rows': 20}),
         }
 
+
+def clearOrderDays(order):
+    ods = OrderDay.objects.filter(order = order)
+    for od in ods:
+        od.delete()
+
 def order(request):
     if request.session.has_key('rooms'):
         if len(request.session['rooms']) == 1:
@@ -1301,25 +1310,9 @@ def order(request):
     period = strptime(request.session['end_date'],'%d.%m.%Y') - strptime(request.session['start_date'],'%d.%m.%Y')
     price = rooms[0].room_type.price * (period.days + 1)
     room = rooms[0]
-    order_rooms = room.order_set.filter(Q(start_date__lte = start_date,\
-                    end_date__gte = end_date) | \
-    Q(start_date__gte = start_date,\
-                    start_date__lte = end_date) | \
-    Q(end_date__gte = start_date,\
-                    end_date__lte = end_date))
-    booked_rooms = room.roombook_set.filter(Q(book__start_date__lte = start_date,\
-                    book__end_date__gte = end_date) | \
-    Q(book__start_date__gte = start_date,\
-                    book__start_date__lte = end_date) | \
-    Q(book__end_date__gte = start_date,\
-                    book__end_date__lte = end_date))
-    cnt = 0
-    for ord in order_rooms:
-        if ord.is_with_child:
-            cnt += 2
-        else:
-            cnt += 1
-    pl = room.room_type.places - (cnt + len(booked_rooms))
+    (orders, booked, max) = room_availability(room, start_date, end_date)
+
+    pl = room.room_type.places - max
 
     order_form = OrderForm(initial={'start_date' : request.session['start_date'],\
                                     'end_date' : request.session['end_date'],\
@@ -1343,6 +1336,7 @@ def order(request):
                 order.patient = patient
                 order.room = rooms[0] # Get first element because len of array should be 1
                 order.save()
+                fillOrderDays(order)
                 return redirect('/rooms')
 
     values = {'order_form': order_form, 'rooms': rooms, user: request.user, 'pr': int(rooms[0].room_type.price), 'pl': int(pl)}

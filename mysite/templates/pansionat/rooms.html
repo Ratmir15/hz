@@ -106,21 +106,19 @@
                             <thead>
                                 <tr>
                                     <th>&nbsp;</th>
-                                    <th>Имя комнаты</th>
+                                    <th>Номер</th>
                                     <th>Тип комнаты</th>
-                                    <th>Описание</th>
                                     <th>Кол-во мест</th>
                                     <th>Заселенные/Забронированые</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                {% for room, orders, roombook_set, order_flag, book_flag in book_list %}
+                                {% for room, orders, roombook_set, order_flag, book_flag, busy in book_list %}
                                     <tr>
                                         <td> <input type="checkbox" name="rooms" value="{{ room.id }}"/></td>
                                         <td> {{ room.name  }} </td>
                                         <td> {{ room.room_type.name}} </td>
-                                        <td> {{ room.description }} </td>
-                                        <td> {{ room.room_type.places }} </td>
+                                        <td> {{ room.room_type.places }}/{{ busy }} </td>
                                         <td>
                                             <table>
                                             {% if order_flag %}
@@ -138,8 +136,8 @@
                                             {% if book_flag %}
                                                 <tr><th colspan="4">Бронь</th></tr>
                                             {% endif %}
-                                            {% for roombook in roombook_set %}
-                                                <tr><td colspan="5">{{ roombook.book.phone }} {{ roombook.book.start_date_n }} {{ roombook.book.end_date_n }} {{ roombook.book.name }} <a style="font-size: 8px;" href="/delbook/{{ roombook.id }}">удалить</a></td></tr>
+                                            {% for book in roombook_set %}
+                                                <tr><td colspan="5">{{ book.phone }} {{ book.start_date_n }} {{ book.end_date_n }} {{ book.name }} <a style="font-size: 8px;" href="/delbook/{{ roombook.id }}">удалить</a></td></tr>
                                             {% endfor %}
                                             </table>
                                         </td>

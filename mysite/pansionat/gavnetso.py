@@ -1,7 +1,7 @@
 # coding: utf-8
 import datetime
 from django.db import connection
-from mysite.pansionat.models import Patient, Customer, Order, Occupied, Room, RoomType, EmployerRoleHistory, Role, Employer, IllHistoryFieldTypeGroup, IllHistoryFieldType, MedicalProcedureType, OrderMedicalProcedure, OrderMedicalProcedureSchedule, RoomBook, Book, Diet, Item, DietItems
+from mysite.pansionat.models import Patient, Customer, Order, Occupied, Room, RoomType, EmployerRoleHistory, Role, Employer, IllHistoryFieldTypeGroup, IllHistoryFieldType, MedicalProcedureType, OrderMedicalProcedure, OrderMedicalProcedureSchedule, RoomBook, Book, Diet, Item, DietItems, OrderDay
 
 def nextmonthfirstday(year, month):
     if month==12:
@@ -47,60 +47,60 @@ def initbase(doit):
     ihft7.save()
 
     ihft = IllHistoryFieldType(description = 'Состояние удовлетворительное', lines = 1, defval ='',
-                                order = 0, group = ihftg2)
+                               order = 0, group = ihftg2)
     ihft.save()
     ihft = IllHistoryFieldType(description = 'Телосложение', lines = 1, defval ='правильное,неправильное',
-                                order = 1, group = ihftg2)
+                               order = 1, group = ihftg2)
     ihft.save()
     ihft = IllHistoryFieldType(description = '', lines = 1, defval ='Астеник, нормастеник, гиперстеник',
-                                order = 2, group = ihftg2)
+                               order = 2, group = ihftg2)
     ihft.save()
     ihft = IllHistoryFieldType(description = 'Питание', lines = 1, defval ='удовлетворительное, повышенное, пониженное',
-                                order = 3, group = ihftg2)
+                               order = 3, group = ihftg2)
     ihft.save()
     ihft = IllHistoryFieldType(description = 'Кожные покровы', lines = 2, defval ='нормальной окраски, бледные, гиперемированы, желтушные',
-                                order = 4, group = ihftg2)
+                               order = 4, group = ihftg2)
     ihft.save()
     ihft = IllHistoryFieldType(description = 'Щитовидная железа', lines = 1, defval ='увеличена, не увеличена',
-                                order = 5, group = ihftg2)
+                               order = 5, group = ihftg2)
     ihft.save()
     ihft = IllHistoryFieldType(description = 'Региональные лимфатические железы-шейные, подмышечные, паховые', lines = 3, defval ='не увеличены, увеличены, мягкие, уплотненные',
-                                order = 6, group = ihftg2)
+                               order = 6, group = ihftg2)
     ihft.save()
     ihft = IllHistoryFieldType(description = 'при пальпации', lines = 1, defval ='безболезненные, болезненные',
-                                order = 7, group = ihftg2)
+                               order = 7, group = ihftg2)
     ihft.save()
     ihft = IllHistoryFieldType(description = 'Косто-мышечная система', lines = 1, defval ='без видимых изменений',
-                                order = 8, group = ihftg2)
+                               order = 8, group = ihftg2)
     ihft.save()
 
 
 
 
     p1 = Patient(family = 'Харитонова',name = 'Ульяна', sname = 'Яковлевна',
-                birth_date=datetime.date(1964,8,21),grade='Доярка',
-                passport_whom = 'ОВД ОКТ Р-НА',passport_number='63 04 658348',
-                address = 'г. Пенза, ул. Кулибина 61-39')
+                 birth_date=datetime.date(1964,8,21),grade='Доярка',
+                 passport_whom = 'ОВД ОКТ Р-НА',passport_number='63 04 658348',
+                 address = 'г. Пенза, ул. Кулибина 61-39')
     p1.save()
     p2 = Patient(family = 'Ленин',name = 'Владимир', sname = 'Ильич',
-                birth_date=datetime.date(1870,4,22),grade='Лидер',
-                passport_whom = 'ОВД ФРУНЗ Р-НА',passport_number='63 04 611148',
-                address = 'г. Пенза, ул. Маяковского 61-39')
+                 birth_date=datetime.date(1870,4,22),grade='Лидер',
+                 passport_whom = 'ОВД ФРУНЗ Р-НА',passport_number='63 04 611148',
+                 address = 'г. Пенза, ул. Маяковского 61-39')
     p2.save()
     p3 = Patient(family = 'Комарова',name = 'Ирина', sname = 'Викторовна',
-                birth_date=datetime.date(1964,8,21),grade='Зав сект',
-                passport_whom = 'ОВД ОКТ Р-НА',passport_number='56 09 876408',
-                address = 'Г.ПЕНЗА УЛ.КУЛИБИНА 11-39 71-55-45')
+                 birth_date=datetime.date(1964,8,21),grade='Зав сект',
+                 passport_whom = 'ОВД ОКТ Р-НА',passport_number='56 09 876408',
+                 address = 'Г.ПЕНЗА УЛ.КУЛИБИНА 11-39 71-55-45')
     p3.save()
     p4 = Patient(family = 'Бурмистрова',name = 'Валентина', sname = 'Ивановна',
-                birth_date=datetime.date(1963,2,15),grade='Бухгалтер',
-                passport_whom = 'ОВД ШЕМЫШЕЙКА',passport_number='56 07 736141',
-                address = 'ШЕМЫШ.Р-Н С.МАЧКАССЫ УЛ.МОЛОДЕЖНАЯ 5. 28-1-34Д.Т.')
+                 birth_date=datetime.date(1963,2,15),grade='Бухгалтер',
+                 passport_whom = 'ОВД ШЕМЫШЕЙКА',passport_number='56 07 736141',
+                 address = 'ШЕМЫШ.Р-Н С.МАЧКАССЫ УЛ.МОЛОДЕЖНАЯ 5. 28-1-34Д.Т.')
     p4.save()
     p5 = Patient(family = 'Хуртин',name = 'Олег', sname = 'Ольгович',
-                birth_date=datetime.date(1963,2,15),grade='Программист',
-                passport_whom = 'ОВД ШЕМЫШЕЙКА',passport_number='56 07 736142',
-                address = 'ШЕМЫШ.Р-Н С.МАЧКАССЫ УЛ.МОЛОДЕЖНАЯ 5. 28-1-34Д.Т.')
+                 birth_date=datetime.date(1963,2,15),grade='Программист',
+                 passport_whom = 'ОВД ШЕМЫШЕЙКА',passport_number='56 07 736142',
+                 address = 'ШЕМЫШ.Р-Н С.МАЧКАССЫ УЛ.МОЛОДЕЖНАЯ 5. 28-1-34Д.Т.')
     p5.save()
     c1 = Customer(name = 'Кожвендиспансер', inn = 1)
     c1.save()
@@ -119,32 +119,40 @@ def initbase(doit):
     r = Room.objects.get(name = '12А')
     o1 = Order(room = r, code = '1290', start_date=datetime.date(2011,10,18),end_date=datetime.date(2011,10,24), patient = p1, customer = c1, directive = c5, price = 12345)
     o1.save()
+    fillOrderDays(o1)
     r = Room.objects.get(name = '12А')
     o1 = Order(room = r, code = '1291', start_date=datetime.date(2011,10,18),end_date=datetime.date(2011,10,31), patient = p2, customer = c2, directive = c5, price = 12000)
     o1.save()
+    fillOrderDays(o1)
     r = Room.objects.get(name = '12Б')
-    o1 = Order(room = r, code = '1292', start_date=datetime.date(2011,10,18),end_date=datetime.date(2011,10,24), patient = p3, customer = c1, directive = c5, price = 15000)
-    o1.save()
+    for i in xrange(18,25):
+        o1 = Order(room = r, code = '1292'+str(i), start_date=datetime.date(2011,10,i),end_date=datetime.date(2011,10,i), patient = p3, customer = c1, directive = c5, price = 15000)
+        o1.save()
+        fillOrderDays(o1)
     r = Room.objects.get(name = '14А')
     o1 = Order(room = r, code = '1515', start_date=datetime.date(2011,10,18),end_date=datetime.date(2011,10,24), patient = p5, customer = c1, directive = c5, price = 15000, is_with_child = True)
     o1.save()
+    fillOrderDays(o1)
     book = Book(start_date=datetime.date(2011,10,18),end_date=datetime.date(2011,10,24),name='Аяцков',phone='5551234',description='вряд ли')
     book.save()
     r = Room.objects.get(name = '13Б')
-    rb = RoomBook(book = book, room = r)
-    rb.save()
+    fillBookDays(book, r)
     r1 = Room.objects.get(name = '1СК')
     r2 = Room.objects.get(name = '1Д')
     r3 = Room.objects.get(name = '33Б')
     r4 = Room.objects.get(name = '2Д')
     o1 = Order(room = r1, code = '1266', start_date=datetime.date(2007,7,2),end_date=datetime.date(2007,7,15), patient = p1, customer = c1, directive = c5, price = 12345)
     o1.save()
+    fillOrderDays(o1)
     o2 = Order(room = r2,code = '1267', start_date=datetime.date(2007,7,2),end_date=datetime.date(2007,7,15), patient = p2, customer = c2, directive = c5, price = 11000)
     o2.save()
+    fillOrderDays(o2)
     o3 = Order(room = r3, code = '1268', start_date=datetime.date(2007,7,2),end_date=datetime.date(2007,7,15), patient = p3, customer = c3, directive = c6, price = 19000)
     o3.save()
+    fillOrderDays(o3)
     o4 = Order(room = r4, code = '1269', start_date=datetime.date(2007,7,4),end_date=datetime.date(2007,7,15), patient = p4, customer = c4, directive = c6, price = 12000)
     o4.save()
+    fillOrderDays(o4)
     oc1 = Occupied(order = o1, room = r1, start_date=datetime.date(2007,7,1),end_date=datetime.date(2007,7,15), description = 'первый')
     oc1.save()
     oc2 = Occupied(order = o2, room = r2, start_date=datetime.date(2007,7,2),end_date=datetime.date(2007,7,15), description = 'второй')
@@ -188,11 +196,11 @@ def initroomtypes():
                    places = 3, price = 950, price_alone = 0)
     rt7.save()
     rt1list = ['1СК','12А','12Б','13А','13Б','14А','14Б',
-                 '15А','15Б','16','17А','17Б',
-                 '19А','19Б','20А','20Б','21А','21Б',
-                 '22А','22Б','23А','23Б','24А','24Б',
-                 '25А','25Б','26А','26Б','27А','27Б',
-                 '28А','28Б','28В']
+               '15А','15Б','16','17А','17Б',
+               '19А','19Б','20А','20Б','21А','21Б',
+               '22А','22Б','23А','23Б','24А','24Б',
+               '25А','25Б','26А','26Б','27А','27Б',
+               '28А','28Б','28В']
     for name in rt1list:
         r1 = Room(name=name,room_type=rt1)
         r1.save()
@@ -215,6 +223,21 @@ def initroomtypes():
     r4 = Room(name='2НК',room_type=rt3)
     r4.save()
 
+def fillOrderDays(order):
+    date = order.start_date
+    delta = datetime.timedelta(days=1)
+    while date<= order.end_date:
+        orderDay = OrderDay(order = order, busydate = date, room = order.room)
+        orderDay.save()
+        date += delta
+
+def fillBookDays(book, room):
+    date = book.start_date
+    delta = datetime.timedelta(days=1)
+    while date<= book.end_date:
+        orderDay = OrderDay(book = book, busydate = date, room = room)
+        orderDay.save()
+        date += delta
 
 def initroles():
     role1 = Role(name = 'Директор')
