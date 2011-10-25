@@ -106,24 +106,28 @@ def clients(request):
 	})
 	return HttpResponse(t.render(c))
 
+class MenuRequestContext(RequestContext):
+    def __init__(self, request, dict=None, processors=None, current_app=None, use_l10n=None):
+        dict['menu_list'] = getMenuItems(request)
+        RequestContext.__init__(self, request, dict, processors, current_app=current_app, use_l10n=use_l10n)
+
 @login_required
 def orders(request):
 #    print request.user
 #    if not request.user.is_authenticated():
 #        return HttpResponseRedirect('/login/?next=%s' % request.path)
-    occupied_list = Order.objects.all()
+    occupied_list = Order.objects.all().values("id","code","putevka","room__name","patient__family","patient__name","patient__sname","start_date","end_date","customer__name","price").order_by("id")
     t = loader.get_template('pansionat/orders.html')
     c = MenuRequestContext(request, {
         'diet_en': request.user.has_perm('pansionat.add_orderdiet'),
-    'occupied_list': occupied_list,
-#   'menu_list': getMenuItems(request)
+        'occupied_list': occupied_list,
+        #   'menu_list': getMenuItems(request)
     })
-    return HttpResponse(t.render(c))
-
-class MenuRequestContext(RequestContext):
-    def __init__(self, request, dict=None, processors=None, current_app=None, use_l10n=None):
-        dict['menu_list'] = getMenuItems(request)
-        RequestContext.__init__(self, request, dict, processors, current_app=current_app, use_l10n=use_l10n)
+    resp = HttpResponse(t.render(c))
+    #qs = connection.queries
+    #for q in qs:
+    #    print q
+    return resp
 
 def my_view(request):
     username = request.POST.get('username','')

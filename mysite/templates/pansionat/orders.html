@@ -48,19 +48,19 @@
                         {{ occupied.putevka }}
                     </td>
                 <td>
-                    {{ occupied.customer.name }}
+                    {{ occupied.customer__name }}
                 </td>
                 <td>
-                    {{ occupied.start_date_n }}
+                    {{ occupied.start_date }}
                 </td>
                     <td>
-                        {{ occupied.end_date_n }}
+                        {{ occupied.end_date }}
                     </td>
                     <td>
-                        {{ occupied.room.name }}
+                        {{ occupied.room__name }}
                     </td>
                     <td>
-                        {{ occupied.patient.fio }}
+                        {{ occupied.patient__family }} {{ occupied.patient__name }} {{ occupied.patient__sname }}
                     </td>
                 <td>
                     {{ occupied.price }}
