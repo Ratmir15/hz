@@ -29,6 +29,7 @@
     <table border="0" id = "occupied" class = "display">
     <thead>
     <th>Код</th>
+    <th>Путевка</th>
     <th>Клиент</th>
     <th>Дата заезда</th>
     <th>Дата выезда</th>
@@ -43,6 +44,9 @@
                 <td>
                     {{ occupied.code }}
                 </td>
+                    <td>
+                        {{ occupied.putevka }}
+                    </td>
                 <td>
                     {{ occupied.customer.name }}
                 </td>

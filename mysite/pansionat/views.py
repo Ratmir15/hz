@@ -23,7 +23,7 @@ from django.template.context import RequestContext
 from mysite.pansionat import gavnetso
 from mysite.pansionat.models import IllHistory, Customer, IllHistoryFieldType, IllHistoryFieldValue, IllHistoryRecord, OrderMedicalProcedure, MedicalProcedureType, OrderMedicalProcedureSchedule, Occupied, IllHistoryFieldTypeGroup, EmployerRoleHistory, Role, Employer, OrderDiet, Diet, OrderDay
 from pytils import numeral
-from mysite.pansionat.gavnetso import monthlabel, nextmonthfirstday, initbase, initroles, initroomtypes, initp, initdiet, fillBookDays, fillOrderDays
+from mysite.pansionat.gavnetso import monthlabel, nextmonthfirstday, initbase, initroles, initroomtypes, initp, initdiet, fillBookDays, fillOrderDays, inithistory
 import datetime
 import time
 from django import forms
@@ -762,6 +762,7 @@ def clear(request):
 
 @login_required
 def init(request):
+    inithistory("201105.xls")
     list = RoomType.objects.all()
     if not len(list):
         initroomtypes()

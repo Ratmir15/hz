@@ -1,6 +1,9 @@
 # coding: utf-8
 import datetime
+import decimal
 from django.db import connection
+from xlrd import open_workbook
+from mysite import settings
 from mysite.pansionat.models import Patient, Customer, Order, Occupied, Room, RoomType, EmployerRoleHistory, Role, Employer, IllHistoryFieldTypeGroup, IllHistoryFieldType, MedicalProcedureType, OrderMedicalProcedure, OrderMedicalProcedureSchedule, RoomBook, Book, Diet, Item, DietItems, OrderDay
 
 def nextmonthfirstday(year, month):
@@ -11,6 +14,125 @@ def nextmonthfirstday(year, month):
         newmonth = month + 1
         newyear = year
     return datetime.date(int(newyear), int(newmonth), 1)
+
+def initfromfile(filename):
+    rb = open_workbook(settings.STATIC_ROOT + '/xls/' + filename,formatting_info=True)
+    rsh = rb.sheet_by_index(0)
+    for rrowx in xrange(rsh.nrows):
+        i = 0
+        for col in xrange(rsh.ncols):
+            v = rsh.cell_value(rrowx,col)
+            print str(rrowx)+":"+str(col)+unicode(v)
+
+def inithistory(filename):
+    rt1 = RoomType(name = 'Двухместный номер блочный повышенной комфортности',
+                   description = 'телевизор, холодильник, душевая кабина, кондиционер',
+                   places = 2, price = 1310, price_alone = 2120)
+    rt1.save()
+    columns = {"n1":0,"n2":2,"d1":6,"put":9,"fio":11,"d":12,"cv":13,"price":17,"c":20,"dr":22,"pd":24,"address":26,"room":28}
+    columns2 = {"n1":0,"n2":2,"d1":6,"put":9,"fio":11,"d":12,"cv":13,"price":16,"c":20,"dr":22,"pd":24,"address":26,"room":28}
+    rb = open_workbook(settings.STATIC_ROOT + '/xls/' + filename,formatting_info=True)
+    rsh = rb.sheet_by_index(0)
+
+    mc_map = {}
+    for crange in rsh.merged_cells:
+        rlo, rhi, clo, chi = crange
+        if not clo:
+            mc_map[rlo] = rhi
+
+
+    for rrowx in xrange(rsh.nrows):
+        if rrowx==849:
+            columns = columns2
+        v = rsh.cell_value(rrowx,columns["n1"])
+        if v != "":
+            n = rsh.cell_value(rrowx,columns["n2"])
+            ns = unicode(n).split(" ")
+            reab = False
+            if len(ns)>1:
+                n = ns[0]
+                if ns[1]=="Р":
+                    reab = True
+            code = int(n)
+            putevka = str(rsh.cell_value(rrowx,columns["put"]))
+            putevkas = putevka.split('.')
+            if len(putevkas)>1:
+                putevka = putevkas[0]
+            while len(putevka)<6:
+                putevka = "0"+putevka
+            rhi = mc_map.get(rrowx,rrowx)
+            pdall = unicode(rsh.cell_value(rrowx,columns["pd"]))
+            cr = rrowx
+            while cr<rhi-1:
+                cr +=1
+                pdall = pdall + " "+unicode(rsh.cell_value(cr,columns["pd"]))
+            pdd = pdall.split(" ")
+            try:
+                pd0 = str(int(round(float(pdd[0]))))
+                pd1 = str(int(round(float(pdd[1]))))
+                pd2 = str(int(round(float(pdd[2]))))
+                q = True
+            except UnicodeEncodeError:
+                q = False
+
+            if q:
+                pn = str(int(round(float(pdd[0]))))+" "+str(int(round(float(pdd[1]))))+" "+str(int(round(float(pdd[2]))))
+                cnt = 3
+                pv = pdd[cnt]
+                while cnt<len(pdd)-1:
+                    cnt += 1
+                    pv = pv + " "+ pdd[cnt]
+                fio = rsh.cell_value(rrowx,columns["fio"])
+                cr = rrowx
+                while cr<rhi-1:
+                    cr +=1
+                    fio = fio + " "+unicode(rsh.cell_value(cr,columns["fio"]))
+                fios = fio.split(" ")
+                if len(fios)==3:
+                    family,name, sname = fio.split(" ")
+                else:
+                    family = fios[0]
+                    name = fios[1]
+                    sname = fios[2]
+                objs = Patient.objects.filter(passport_number = pn)
+                if len(objs)>0:
+                    p = objs[0]
+                else:
+                    p = Patient(family = family,name = name, sname = sname, passport_number = pn, passport_whom = pv)
+                    p.save()
+                c_name = rsh.cell_value(rrowx,columns["c"])
+                cust = Customer(name=c_name)
+                cust.save()
+                roomname = rsh.cell_value(rrowx,columns["room"])
+                objs = Room.objects.filter(name = roomname)
+                if len(objs)>0:
+                    room = objs[0]
+                else:
+                    room = Room(name=roomname, room_type = rt1)
+                    room.save()
+                dirname = rsh.cell_value(rrowx,columns["cv"])
+                objs = Customer.objects.filter(shortname = dirname)
+                if len(objs)>0:
+                    dir = objs[0]
+                else:
+                    dir = Customer(name=dirname, shortname = dirname)
+                    dir.save()
+                std = str(rsh.cell_value(rrowx,columns["d1"]))
+                dts = std.split(".")
+                start_date = datetime.date(day=int(dts[0]),month=int(dts[1]),year=2011)
+                end_date = datetime.date(day=int(dts[0]),month=int(dts[1]),year=2011)
+                pr = str(rsh.cell_value(rrowx,columns["price"]))
+                prs = pr.split(',')
+                if len(prs)>1:
+                    pr = prs[0]+'.'+prs[1]
+                price = decimal.Decimal(pr)
+                order = Order(code = code, putevka = putevka, patient = p, customer = cust,
+                              room = room, directive = dir, start_date = start_date, end_date = end_date,
+                              price = price, reab = reab)
+                order.save()
+    # TODO WTF is_with_child = models.BooleanField(verbose_name = 'Мать и дитя')
+    # TODO WTF payd_by_patient = models.BooleanField(verbose_name = 'Оплачивается пациентом')
+
 
 def initbase(doit):
     if not doit:
