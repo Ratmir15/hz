@@ -178,7 +178,7 @@ class Room (models.Model):
         verbose_name_plural = 'Комнаты'
 
 class Order(models.Model):
-    code = models.CharField(max_length = 10, verbose_name = 'Номер заказа')
+    code = models.IntegerField(verbose_name = 'Номер заказа')
     putevka = models.CharField(max_length = 6, verbose_name = 'Номер путевки')
     patient = models.ForeignKey(Patient)
     customer = models.ForeignKey(Customer, verbose_name = 'Предприятие', blank=True)

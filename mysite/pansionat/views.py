@@ -5,7 +5,7 @@ import user
 from django.contrib.auth import logout, login, authenticate
 from django.contrib.auth.decorators import login_required, permission_required
 from django.db import connection
-from django.db.models.aggregates import Count, Sum
+from django.db.models.aggregates import Count, Sum, Max
 from django.db.models.base import Model
 from django.forms.widgets import Textarea
 
@@ -1370,9 +1370,12 @@ def order(request):
 
     pl = room.room_type.places - max
 
+    code = Order.objects.filter(start_date__year = start_date.year).aggregate(Max("code"))
+
     order_form = OrderForm(initial={'start_date' : request.session['start_date'],\
                                     'end_date' : request.session['end_date'],\
-                                    'price': price})
+                                    'price': price,
+                                    'code': code['code__max']+1})
     if request.method == 'POST':
         order_form = OrderForm(request.POST)
         patient_form = None
