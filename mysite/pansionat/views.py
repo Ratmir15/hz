@@ -111,17 +111,18 @@ class MenuRequestContext(RequestContext):
         dict['menu_list'] = getMenuItems(request)
         RequestContext.__init__(self, request, dict, processors, current_app=current_app, use_l10n=use_l10n)
 
+def ordertr(item):
+    item["start_date"] = item["start_date"].strftime('%Y.%m.%d')
+    item["end_date"] = item["end_date"].strftime('%Y.%m.%d')
+    return item
+
 @login_required
 def orders(request):
-#    print request.user
-#    if not request.user.is_authenticated():
-#        return HttpResponseRedirect('/login/?next=%s' % request.path)
     occupied_list = Order.objects.all().values("id","code","putevka","room__name","patient__family","patient__name","patient__sname","start_date","end_date","customer__name","price").order_by("id")
     t = loader.get_template('pansionat/orders.html')
     c = MenuRequestContext(request, {
         'diet_en': request.user.has_perm('pansionat.add_orderdiet'),
-        'occupied_list': occupied_list,
-        #   'menu_list': getMenuItems(request)
+        'occupied_list': map(ordertr, occupied_list),
     })
     resp = HttpResponse(t.render(c))
     #qs = connection.queries
