@@ -76,19 +76,64 @@ def ordertr(item):
     item["end_date"] = item["end_date"].strftime('%Y.%m.%d')
     return item
 
+
+def return_order_menu(form, request):
+    t = loader.get_template('pansionat/ordersmenu.html')
+    months = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12']
+    year = datetime.date.today().year
+    c = MenuRequestContext(request, {
+        "months": months,
+        "year": year,
+        "today": datetime.date.today(),
+        "form": form
+    })
+    resp = HttpResponse(t.render(c))
+    return resp
+
+
 @login_required
-def orders(request):
-    occupied_list = Order.objects.all().values("id","code","putevka","room__name","patient__family","patient__name","patient__sname","start_date","end_date","customer__name","price").order_by("id")
+def ordersmenu(request):
+    form = DateFilterForm()
+    return return_order_menu(form, request)
+
+
+def return_orders_list(occupied_list, request):
     t = loader.get_template('pansionat/orders.html')
     c = MenuRequestContext(request, {
         'diet_en': request.user.has_perm('pansionat.add_orderdiet'),
         'occupied_list': map(ordertr, occupied_list),
-    })
+        })
     resp = HttpResponse(t.render(c))
     #qs = connection.queries
     #for q in qs:
     #    print q
     return resp
+
+@login_required
+def orders_by_month(request, year, month):
+    intyear = int(year)
+    intmonth = int(month)
+    cd = datetime.date(intyear, intmonth,1)
+    fd = nextmonthfirstday(intyear, intmonth)
+    occupied_list = Order.objects.filter(start_date__range=(cd,fd)).values("id","code","putevka","room__name","patient__family","patient__name","patient__sname","start_date","end_date","customer__name","price").order_by("id")
+    return return_orders_list(occupied_list, request)
+
+
+@login_required
+def filterorders(request):
+    form = DateFilterForm(request.POST)
+    if form.is_valid():
+        cd = form.cleaned_data.get("start_date",datetime.date.today())
+        fd = form.cleaned_data.get("end_date",datetime.date.today())
+        occupied_list = Order.objects.filter(start_date__range=(cd,fd)).values("id","code","putevka","room__name","patient__family","patient__name","patient__sname","start_date","end_date","customer__name","price").order_by("id")
+        return return_orders_list(occupied_list, request)
+    else:
+        return return_order_menu(form, request)
+
+@login_required
+def orders(request):
+    occupied_list = Order.objects.all().values("id","code","putevka","room__name","patient__family","patient__name","patient__sname","start_date","end_date","customer__name","price").order_by("id")
+    return return_orders_list(occupied_list, request)
 
 @login_required
 def books(request):
@@ -1190,6 +1235,10 @@ class OrderForm(ModelForm):
 
 class EnteringForm(forms.Form):
     report_date = forms.DateField(required=True, label='Дата заезда')
+
+class DateFilterForm(forms.Form):
+    start_date = forms.DateField(required=True, label='С')
+    end_date = forms.DateField(required=True, label='по')
 
 class EnteringReport():
 

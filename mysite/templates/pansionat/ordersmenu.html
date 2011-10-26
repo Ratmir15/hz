@@ -1,0 +1,46 @@
+{% extends "pansionat/index.html" %}
+
+{% block title %} Меню путевок {%  endblock  %}
+
+{% block head %}
+    <style type="text/css">
+        @import "/static/dataTables/media/css/demo_page.css";
+        @import "/static/dataTables/media/css/demo_table.css";
+        @import "/static/jquery-ui/themes/base/jquery.ui.all.css";
+    </style>
+    <script src="/static/dataTables/media/js/jquery.js"></script>
+    <script src="/static/dataTables/media/js/jquery.dataTables.js"></script>
+    <script src="/static/jquery-ui/ui/jquery.ui.core.js"></script>
+    <script src="/static/jquery-ui/ui/jquery.ui.widget.js"></script>
+    <script src="/static/jquery-ui/ui/jquery.ui.datepicker.js"></script>
+    <script src="/static/jquery-ui/ui/i18n/jquery.ui.datepicker-ru.js"></script>
+    <script src="/static/jquery-ui/ui/jquery.ui.button.js"></script>
+
+<link rel="stylesheet" href="/static/Refresh.css" type="text/css" />
+    <script type="text/javascript">
+        $(document).ready(function() {
+            $.datepicker.setDefaults($.datepicker.regional['ru']);
+            $('#id_start_date').datepicker();
+            $('#id_end_date').datepicker();
+            } );
+    </script>
+ {%  endblock  %}
+
+{% block allcontent %}
+    <h1>Путевки за месяц</h1>
+    <h3>
+    {% for month in months %}
+        <a href="/orders/{{ year }}/{{ month }}">{{ year }}.{{ month }}</a>
+    {% endfor %}
+    </h3>
+    <br/>
+    <form action="/filterorders/" method="POST">
+    <table>
+        {% csrf_token %}
+        {{ form.as_table}}
+        <tr><td colspan="2"><input type="submit" value="Показать"></td></tr>
+    </table>
+    <br/>
+    <a href="/orders">Все путевки</a>
+    </form>
+{%  endblock  %}

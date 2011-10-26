@@ -31,7 +31,7 @@ def getMenuItems(request):
         items.append(i)
     if user.is_authenticated():
         i = MenuItem()
-        i.href = "/orders/"
+        i.href = "/ordersmenu/"
         i.label = "Путевки"
         items.append(i)
         i = MenuItem()
