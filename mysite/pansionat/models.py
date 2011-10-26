@@ -138,10 +138,10 @@ class Busy(models.Model):
 class Customer(models.Model):
     name = models.CharField(max_length = 50, verbose_name = 'Название')
     shortname = models.CharField(max_length = 50, verbose_name = 'Короткое название')
-    inn = models.CharField(null = True, max_length=20, verbose_name='ИНН')
-    bank = models.CharField(max_length=40, verbose_name='Банк')
-    rs = models.CharField(max_length=50, verbose_name='Расчетный счет')
-    address = models.CharField(max_length=255, verbose_name='Адрес')
+    inn = models.CharField(null = True, blank=True, max_length=20, verbose_name='ИНН')
+    bank = models.CharField(max_length=40, blank=True, verbose_name='Банк')
+    rs = models.CharField(max_length=50, blank=True, verbose_name='Расчетный счет')
+    address = models.CharField(max_length=255, blank=True, verbose_name='Адрес')
     is_show = models.BooleanField(verbose_name = 'Показывать в отчетах')
     def __unicode__(self):
         return self.name

@@ -21,8 +21,15 @@
             $('#id_birth_date').datepicker();
             $('input:submit').button()
             $(':button').button()
+            $('#id_name').change(
+                function() {
+                    sd = $('#id_shortname').val();
+                    if (!sd.length) {
+                        $('#id_shortname').val($('#id_name').val());
+                    }
+            });
             } );
-    </script> 
+    </script>
 <link rel="stylesheet" href="/static/Refresh.css" type="text/css" />
  {%  endblock  %}
 
