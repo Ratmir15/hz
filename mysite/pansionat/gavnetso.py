@@ -170,6 +170,7 @@ def inithistory(filename, input_columns, row_set):
                               room = room, directive = dir, start_date = start_date, end_date = end_date,
                               price = price, reab = reab)
                 order.save()
+                fillOrderDays(order)
                 # TODO WTF is_with_child = models.BooleanField(verbose_name = 'Мать и дитя')
                 # TODO WTF payd_by_patient = models.BooleanField(verbose_name = 'Оплачивается пациентом')
 
