@@ -38,6 +38,24 @@ def up_low_case(fios):
     else:
         return upper(fios)
 
+def import_bron(filename):
+    rb = open_workbook(settings.STATIC_ROOT + '/xls/' + filename,formatting_info=True)
+    rsh = rb.sheet_by_index(0)
+
+    for rrowx in xrange(rsh.nrows):
+        v = rsh.cell_value(rrowx, 1)
+        if v != "":
+            s_date = rsh.cell_value(rrowx,1)
+            e_date = rsh.cell_value(rrowx,2)
+            s_date = datetime.date(year = 1899, month = 12, day=30)+datetime.timedelta(days=s_date)
+            e_date = datetime.date(year = 1899, month = 12, day=30)+datetime.timedelta(days=e_date)
+            name = up_low_case(rsh.cell_value(rrowx,7))
+            phone = up_low_case(unicode(rsh.cell_value(rrowx,8)))
+            description = up_low_case(rsh.cell_value(rrowx,4))
+            book = Book(start_date = s_date, end_date = e_date, name = name, phone = phone, description = description)
+            book.save()
+
+
 
 def inithistory(filename):
     rt1 = RoomType(name = 'Двухместный номер блочный повышенной комфортности',

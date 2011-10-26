@@ -23,7 +23,7 @@ from django.template.context import RequestContext
 from mysite.pansionat import gavnetso
 from mysite.pansionat.models import IllHistory, Customer, IllHistoryFieldType, IllHistoryFieldValue, IllHistoryRecord, OrderMedicalProcedure, MedicalProcedureType, OrderMedicalProcedureSchedule, Occupied, IllHistoryFieldTypeGroup, EmployerRoleHistory, Role, Employer, OrderDiet, Diet, OrderDay
 from pytils import numeral
-from mysite.pansionat.gavnetso import monthlabel, nextmonthfirstday, initbase, initroles, initroomtypes, initp, initdiet, fillBookDays, fillOrderDays, inithistory
+from mysite.pansionat.gavnetso import monthlabel, nextmonthfirstday, initbase, initroles, initroomtypes, initp, initdiet, fillBookDays, fillOrderDays, inithistory, import_bron
 import datetime
 import time
 from django import forms
@@ -128,6 +128,16 @@ def orders(request):
     #qs = connection.queries
     #for q in qs:
     #    print q
+    return resp
+
+@login_required
+def books(request):
+    occupied_list = Book.objects.all()
+    t = loader.get_template('pansionat/books.html')
+    c = MenuRequestContext(request, {
+        'occupied_list': occupied_list,
+    })
+    resp = HttpResponse(t.render(c))
     return resp
 
 def my_view(request):
@@ -767,6 +777,8 @@ def clear(request):
 
 @login_required
 def init(request):
+    clear(request)
+    import_bron('soon.xls')
     inithistory("201105.xls")
     list = RoomType.objects.all()
     if not len(list):

@@ -1,0 +1,35 @@
+{% extends "pansionat/orders.html" %}
+
+{% block title %} Бронирования {%  endblock  %}
+
+{% block allcontent %}
+    <h1>Список брони</h1>
+    <table border="0" id = "occupied" class = "display">
+    <thead>
+    <th>Дата заезда</th>
+    <th>Дата выезда</th>
+    <th>Пациент</th>
+    <th>Телефон</th>
+    <th>Комментарий</th>
+    </thead>
+            {% for occupied in occupied_list %}
+                <tr>
+                <td>
+                    {{ occupied.start_date_n }}
+                </td>
+                    <td>
+                        {{ occupied.end_date_n}}
+                    </td>
+                <td>
+                    {{ occupied.name }}
+                </td>
+                <td>
+                    {{ occupied.phone }}
+                </td>
+                    <td>
+                        {{ occupied.description }}
+                    </td>
+                </tr>
+            {% endfor %}
+    </table>
+{%  endblock  %}
