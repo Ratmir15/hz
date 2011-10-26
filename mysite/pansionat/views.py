@@ -22,7 +22,7 @@ from mysite.pansionat import gavnetso
 from mysite.pansionat.models import IllHistory, Customer, IllHistoryFieldType, IllHistoryFieldValue, IllHistoryRecord, OrderMedicalProcedure, MedicalProcedureType, OrderMedicalProcedureSchedule, Occupied, IllHistoryFieldTypeGroup, EmployerRoleHistory, Role, Employer, OrderDiet, Diet, OrderDay
 from mysite.pansionat.proc import MenuRequestContext, MedicalPriceReport
 from pytils import numeral
-from mysite.pansionat.gavnetso import monthlabel, nextmonthfirstday, initbase, initroles, initroomtypes, initp, initdiet, fillBookDays, fillOrderDays, inithistory, import_bron, import_proc
+from mysite.pansionat.gavnetso import monthlabel, nextmonthfirstday, initbase, initroles, initroomtypes, initp, initdiet, fillBookDays, fillOrderDays, inithistory, import_bron, import_proc, import_rooms
 import datetime
 import time
 from django import forms
@@ -784,28 +784,29 @@ def clear(request):
 @login_required
 def init(request):
     clear(request)
+    import_rooms()
     import_proc()
     import_bron('soon.xls')
-    columns1 = {"n1":0,"n2":2,"d1":6,"put":9,"fio":11,"d":12,"cv":13,"price":17,"c":20,"dr":22,"pd":24,"address":26,"room":28}
-    columns2 = {"n1":0,"n2":2,"d1":6,"put":9,"fio":11,"d":12,"cv":13,"price":16,"c":20,"dr":22,"pd":24,"address":26,"room":28}
-    columns = [columns1, columns2]
-    row_set = set([849])
-    inithistory("201105.xls",columns, row_set)
-    columns = [{"n1":0,"n2":1,"d1":3,"put":5,"fio":6,"d":7,"cv":8,"price":9,"c":11,"dr":12,"pd":13,"address":14,"room":15}]
+    #columns1 = {"n1":0,"n2":2,"d1":6,"put":9,"fio":11,"d":12,"cv":13,"price":17,"c":20,"dr":22,"pd":24,"address":26,"room":28}
+    #columns2 = {"n1":0,"n2":2,"d1":6,"put":9,"fio":11,"d":12,"cv":13,"price":16,"c":20,"dr":22,"pd":24,"address":26,"room":28}
+    #columns = [columns1, columns2]
+    #row_set = set([849])
+    #inithistory("201105.xls",columns, row_set)
+    columns = [{"n1":0,"n2":1,"d1":2,"put":5,"fio":6,"d":7,"cv":8,"price":9,"c":11,"dr":12,"pd":13,"address":14,"room":15}]
     inithistory("201110.xls",columns,set())
     list = RoomType.objects.all()
     if not len(list):
         initroomtypes()
-    order_list = Order.objects.all()
-    if not len(order_list):
-        initbase(1)
-        initroles()
+    #order_list = Order.objects.all()
+    #if not len(order_list):
+    #    initbase(1)
+    #    initroles()
     t = loader.get_template('pansionat/index.html')
     c = MenuRequestContext(request, {
     })
-    list = MedicalProcedureType.objects.all()
-    if not len(list):
-        initp()
+    #list = MedicalProcedureType.objects.all()
+    #if not len(list):
+    #    initp()
     list = Diet.objects.all()
     if not len(list):
         initdiet()

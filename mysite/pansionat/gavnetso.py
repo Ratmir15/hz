@@ -82,6 +82,27 @@ def import_proc():
         mpts = MedicalProcedureTypePrice(mpt = mpt, price = price, date_applied = datetime.date(year=2010,month=12,day=31),add_info=add_info)
         mpts.save()
 
+def import_rooms():
+    rb = open_workbook(settings.STATIC_ROOT + '/xls/rooms.xls',formatting_info=True)
+    rsh = rb.sheet_by_index(0)
+
+    for rrowx in xrange(rsh.nrows):
+        v = rsh.cell_value(rrowx, 0)
+        name = upper(unicode(v))
+        t_name = rsh.cell_value(rrowx, 1).capitalize()
+        price_s = rsh.cell_value(rrowx,2)
+        price = decimal.Decimal(str(price_s))
+        places = int(rsh.cell_value(rrowx,3))
+
+        roomtypes = RoomType.objects.filter(name = t_name)
+        if not len(roomtypes):
+            rt = RoomType(name = t_name, places = places, price = price, price_alone = price)
+            rt.save()
+        else:
+            rt = roomtypes[0]
+        room = Room(name = name, room_type = rt)
+        room.save()
+
 def inithistory(filename, input_columns, row_set):
     rt1 = RoomType(name = 'Двухместный номер блочный повышенной комфортности',
                    description = 'телевизор, холодильник, душевая кабина, кондиционер',
@@ -180,10 +201,18 @@ def inithistory(filename, input_columns, row_set):
                 else:
                     dir = Customer(name=dirname, shortname = dirname)
                     dir.save()
-                std = str(rsh.cell_value(rrowx,columns["d1"]))
-                dts = std.split(".")
+
+                dts = unicode(rsh.cell_value(rrowx,columns["d1"]))
+                cr = rrowx
+                while cr<rhi-1:
+                    cr +=1
+                    dts = dts + " "+unicode(rsh.cell_value(cr,columns["d1"]))
+                dtss = dts.split(" ")
+
+                dts = dtss[0].split(".")
+                dtf = dtss[2].split(".")
                 start_date = datetime.date(day=int(dts[0]),month=int(dts[1]),year=2011)
-                end_date = datetime.date(day=int(dts[0]),month=int(dts[1]),year=2011)
+                end_date = datetime.date(day=int(dtf[0]),month=int(dtf[1]),year=2011)
                 pr = str(rsh.cell_value(rrowx,columns["price"]))
                 prs = pr.split(',')
                 if len(prs)>1:

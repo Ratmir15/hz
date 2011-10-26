@@ -179,7 +179,7 @@ class Customer(models.Model):
 
 class RoomType(models.Model):
     name = models.CharField(max_length = 100)
-    description = models.CharField(max_length = 100)
+    description = models.CharField(max_length = 100, blank = True)
     places = models.IntegerField()
     price = models.DecimalField(decimal_places=2,max_digits=8)
     price_alone = models.DecimalField(decimal_places=2,max_digits=8)
@@ -196,7 +196,7 @@ class RoomType(models.Model):
 class Room (models.Model):
     name = models.CharField(max_length = 50) # it can be room number or name of room
     room_type = models.ForeignKey(RoomType)
-    description = models.CharField(max_length = 10000)
+    description = models.CharField(max_length = 10000, blank=True)
     def __unicode__(self):
         return self.name
 
