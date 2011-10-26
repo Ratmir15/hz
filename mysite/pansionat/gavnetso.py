@@ -5,7 +5,7 @@ from string import lower, upper
 from django.db import connection
 from xlrd import open_workbook
 from mysite import settings
-from mysite.pansionat.models import Patient, Customer, Order, Occupied, Room, RoomType, EmployerRoleHistory, Role, Employer, IllHistoryFieldTypeGroup, IllHistoryFieldType, MedicalProcedureType, OrderMedicalProcedure, OrderMedicalProcedureSchedule, RoomBook, Book, Diet, Item, DietItems, OrderDay
+from mysite.pansionat.models import Patient, Customer, Order, Occupied, Room, RoomType, EmployerRoleHistory, Role, Employer, IllHistoryFieldTypeGroup, IllHistoryFieldType, MedicalProcedureType, OrderMedicalProcedure, OrderMedicalProcedureSchedule, RoomBook, Book, Diet, Item, DietItems, OrderDay, MedicalProcedureTypePrice
 
 def nextmonthfirstday(year, month):
     if month==12:
@@ -55,7 +55,32 @@ def import_bron(filename):
             book = Book(start_date = s_date, end_date = e_date, name = name, phone = phone, description = description)
             book.save()
 
+def import_proc():
+    rb = open_workbook(settings.STATIC_ROOT + '/xls/mproc.xls',formatting_info=True)
+    rsh = rb.sheet_by_index(0)
 
+    for rrowx in xrange(rsh.nrows):
+        v = rsh.cell_value(rrowx, 0)
+        name = v
+        price = rsh.cell_value(rrowx,1)
+        pra = price.split('-')
+        if len(pra)>1:
+            price = decimal.Decimal(pra[0]+'.'+pra[1])
+        else:
+            price = decimal.Decimal(pra[0])
+        add_info = rsh.cell_value(rrowx,2)
+        mpts = MedicalProcedureType.objects.filter(name = name)
+        if not len(mpts):
+            mpt = MedicalProcedureType(name = name, order = 0, capacity = 1, duration =30,
+                                   start_time = datetime.time(hour = 8, minute = 30),
+                                   finish_time = datetime.time(hour = 17, minute = 30),
+                                   optional = add_info)
+        else:
+            mpt = mpts[0]
+            mpt.optional += ','+add_info
+        mpt.save()
+        mpts = MedicalProcedureTypePrice(mpt = mpt, price = price, date_applied = datetime.date(year=2010,month=12,day=31),add_info=add_info)
+        mpts.save()
 
 def inithistory(filename, input_columns, row_set):
     rt1 = RoomType(name = 'Двухместный номер блочный повышенной комфортности',

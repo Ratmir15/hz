@@ -1,0 +1,27 @@
+{% extends "pansionat/orders.html" %}
+
+{% block title %} Медицинские процедуры {%  endblock  %}
+
+{% block allcontent %}
+    <h1>Медицинские процедуры</h1>
+    <table border="0" id = "occupied" class = "display">
+    <thead>
+    <th>Код</th>
+    <th>Наименование</th>
+    <th></th>
+    </thead>
+            {% for occupied in occupied_list %}
+                <tr>
+                <td>
+                    {{ occupied.id }}
+                </td>
+                    <td>
+                        {{ occupied.name }}
+                    </td>
+                    <td>
+                    <a href="/mpp/{{ occupied.id }}">редактировать</a>
+                    </td>
+                </tr>
+            {% endfor %}
+    </table>
+{%  endblock  %}

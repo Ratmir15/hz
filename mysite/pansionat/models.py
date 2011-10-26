@@ -1,5 +1,6 @@
 # coding: utf-8
-from django.db import models
+import datetime
+from django.db import models, connection
 
 # Create your models here.
 class Employer(models.Model):
@@ -112,21 +113,47 @@ class MedicalLocationRoles(models.Model):
 	end_date = models.DateTimeField('date finished')
 
 class MedicalProcedureType(models.Model):
-    name = models.CharField(max_length = 50)
-    order = models.IntegerField()
-    capacity = models.IntegerField()
-    duration = models.IntegerField()
-    start_time = models.TimeField()
-    finish_time = models.TimeField()
-    optional = models.CharField(max_length=100)
+    name = models.CharField(max_length = 50, verbose_name='Наименование')
+    order = models.IntegerField(verbose_name='Порядок', blank=True)
+    capacity = models.IntegerField(verbose_name='Вместимость')
+    duration = models.IntegerField(verbose_name='Длительность')
+    start_time = models.TimeField(verbose_name='Начало приема')
+    finish_time = models.TimeField(verbose_name='Конец приема')
+    optional = models.CharField(max_length=100,verbose_name='Варианты', blank=True)
     def optional_values(self):
         return self.optional.split(',')
     def __unicode__(self):
         return self.name
+    def actual_price(self):
+        return self.price(datetime.date.today())
+    def price(self, dt):
+        list = MedicalProcedureTypePrice.objects.values("price").filter(mpt = self, add_info="", date_applied__lte = dt).order_by("-date_applied")
+        if not len(list):
+            return 0
+        print connection.queries
+        return list[0]["price"]
+    def add_info_price(self, dt, add_info):
+        list = MedicalProcedureTypePrice.objects.values("price").filter(date_applied__lqe = dt, add_info = add_info).order_by("-date_applied")
+        if not len(list):
+            return 0
+        return list[0]["price"]
 
     class Meta:
         verbose_name = 'Тип медицинской процедуры'
         verbose_name_plural = 'Типы медицинской процедуры'
+
+class MedicalProcedureTypePrice(models.Model):
+    mpt = models.ForeignKey(MedicalProcedureType, verbose_name='Процедура')
+    price = models.DecimalField(decimal_places=2, max_digits=10, verbose_name='Цена')
+    date_applied = models.DateField(verbose_name='Дата применения')
+    add_info = models.CharField(max_length=50, verbose_name='Доп инфо', blank=True)
+    class Meta:
+        verbose_name = 'Стоимость медицинской процедуры'
+        verbose_name_plural = 'Стоимости медицинской процедуры'
+    def date_applied_n(self):
+        return self.date_applied.strftime('%Y.%m.%d')
+    def __unicode__(self):
+        return self.mpt.name+"/"+self.date_applied_n()
 
 class Busy(models.Model):
 	location = models.ForeignKey(MedicalLocation)

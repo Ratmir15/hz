@@ -4,12 +4,10 @@ import re
 import user
 from django.contrib.auth import logout, login, authenticate
 from django.contrib.auth.decorators import login_required, permission_required
-from django.db import connection
 from django.db.models.aggregates import Count, Sum, Max
-from django.db.models.base import Model
 from django.forms.widgets import Textarea
 
-from django.template import Context, loader
+from django.template import loader
 from pansionat.models import Patient
 from pansionat.models import RoomType
 from pansionat.models import Room
@@ -20,19 +18,17 @@ from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render_to_response
 from django.shortcuts import redirect 
 import logging
-from django.template.context import RequestContext
 from mysite.pansionat import gavnetso
 from mysite.pansionat.models import IllHistory, Customer, IllHistoryFieldType, IllHistoryFieldValue, IllHistoryRecord, OrderMedicalProcedure, MedicalProcedureType, OrderMedicalProcedureSchedule, Occupied, IllHistoryFieldTypeGroup, EmployerRoleHistory, Role, Employer, OrderDiet, Diet, OrderDay
+from mysite.pansionat.proc import MenuRequestContext, MedicalPriceReport
 from pytils import numeral
-from mysite.pansionat.gavnetso import monthlabel, nextmonthfirstday, initbase, initroles, initroomtypes, initp, initdiet, fillBookDays, fillOrderDays, inithistory, import_bron
+from mysite.pansionat.gavnetso import monthlabel, nextmonthfirstday, initbase, initroles, initroomtypes, initp, initdiet, fillBookDays, fillOrderDays, inithistory, import_bron, import_proc
 import datetime
 import time
 from django import forms
 from django.forms import ModelForm
-from django.core.context_processors import csrf, request
+from django.core.context_processors import csrf
 from django.db.models import Q
-from django.db.models import F
-from django.forms.models import inlineformset_factory
 
 from mysite.pansionat.xltemplates import fill_excel_template, fill_excel_template_s_gavnom
 
@@ -56,38 +52,6 @@ def forbidden(request):
 	})
 	return HttpResponse(t.render(c))
 
-class MenuItem:
-    href = "/"
-    label = "default"
-
-def getMenuItems(request):
-    user = request.user
-    items = []
-    if user.has_perm('pansionat.add_patient'):
-        i = MenuItem()
-        i.href = "/patients/"
-        i.label = "Пациенты"
-        items.append(i)
-        i = MenuItem()
-        i.href = "/clients/"
-        i.label = "Клиенты"
-        items.append(i)
-    if user.has_perm('pansionat.add_order'):
-        i = MenuItem()
-        i.href = "/rooms/"
-        i.label = "Номера"
-        items.append(i)
-    if user.is_authenticated():
-        i = MenuItem()
-        i.href = "/orders/"
-        i.label = "Путевки"
-        items.append(i)
-        i = MenuItem()
-        i.href = "/reports/"
-        i.label = "Отчеты"
-        items.append(i)
-    return items
-
 @login_required
 @permission_required('pansionat.add_patient', login_url='/forbidden/')
 def patients(request):
@@ -106,11 +70,6 @@ def clients(request):
 	'clients_list': clients_list,
 	})
 	return HttpResponse(t.render(c))
-
-class MenuRequestContext(RequestContext):
-    def __init__(self, request, dict=None, processors=None, current_app=None, use_l10n=None):
-        dict['menu_list'] = getMenuItems(request)
-        RequestContext.__init__(self, request, dict, processors, current_app=current_app, use_l10n=use_l10n)
 
 def ordertr(item):
     item["start_date"] = item["start_date"].strftime('%Y.%m.%d')
@@ -780,6 +739,7 @@ def clear(request):
 @login_required
 def init(request):
     clear(request)
+    import_proc()
     import_bron('soon.xls')
     columns1 = {"n1":0,"n2":2,"d1":6,"put":9,"fio":11,"d":12,"cv":13,"price":17,"c":20,"dr":22,"pd":24,"address":26,"room":28}
     columns2 = {"n1":0,"n2":2,"d1":6,"put":9,"fio":11,"d":12,"cv":13,"price":16,"c":20,"dr":22,"pd":24,"address":26,"room":28}
@@ -1245,6 +1205,9 @@ class EnteringReport():
 class LeavingForm(forms.Form):
     report_date = forms.DateField(required=True, label='Дата отъезда')
 
+class MedicalPriceForm(forms.Form):
+    report_date = forms.DateField(required=True, label='Дата формирования')
+
 class LeavingReport():
 
     def process(self, form):
@@ -1257,7 +1220,8 @@ class LeavingReport():
         return z,d
 
 report_map = {"1":('Список заезжающих',EnteringForm,'simplereport.xls',EnteringReport()),
-              "2":('Список съезжающих',LeavingForm,'simplereport.xls',LeavingReport())}
+              "2":('Список съезжающих',LeavingForm,'simplereport.xls',LeavingReport()),
+              "3":('Прайс-лист',MedicalPriceForm,'simplereport.xls',MedicalPriceReport())}
 
 @login_required
 def processreport(request, tp):
