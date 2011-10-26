@@ -1,5 +1,6 @@
 # Create your views here.
 # coding: utf-8
+import re
 import user
 from django.contrib.auth import logout, login, authenticate
 from django.contrib.auth.decorators import login_required, permission_required
@@ -206,6 +207,7 @@ def patient_save(request):
 
         if patient_form.is_valid():
             patient = patient_form.save()
+            patient_form = PatientForm(instance = patient)
             values = {'patient_form' : patient_form, 'patient_id' : patient.id}
             return render_to_response('pansionat/patient.html', MenuRequestContext(request, values))
         else:
@@ -1282,6 +1284,24 @@ def report(request, tp):
 class PatientForm(ModelForm):
     class Meta:
         model = Patient
+    def clean_family(self):
+        data = self.cleaned_data['family']
+        data = data.strip().capitalize()
+        return data
+    def clean_name(self):
+        data = self.cleaned_data['name']
+        data = data.strip().capitalize()
+        return data
+    def clean_sname(self):
+        data = self.cleaned_data['sname']
+        data = data.strip().capitalize()
+        return data
+    def clean_passport_number(self):
+        data = self.cleaned_data['passport_number']
+        matchObj = re.match( '\d\d\s\d\d\s\d\d\d\d\d\d$', data, flags = 0)
+        if not matchObj:
+            raise forms.ValidationError("Поле должно быть вида XX XX XXXXXX")
+        return data
 
 class CustomerForm(ModelForm):
     class Meta:
@@ -1289,6 +1309,18 @@ class CustomerForm(ModelForm):
         widgets = {
             'address': Textarea(attrs={'cols': 80, 'rows': 3}),
         }
+    def clean_inn(self):
+        data = self.cleaned_data['inn']
+        matchObj = re.match( '[0-9]*$', data, flags = 0)
+        if not matchObj:
+            raise forms.ValidationError("В ИНН должны быть только цифры")
+        return data
+    def clean_bank(self):
+        data = self.cleaned_data['bank']
+        matchObj = re.match( '[0-9]*$', data, flags = 0)
+        if not matchObj:
+            raise forms.ValidationError("В банковском счете должны быть только цифры")
+        return data
 
 class RecordForm(ModelForm):
     class Meta:

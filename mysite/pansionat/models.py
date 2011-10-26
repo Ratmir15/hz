@@ -23,15 +23,15 @@ MARRIAGE = (
 class Patient(models.Model):
     family = models.CharField(max_length=50, verbose_name = 'Фамилия')
     name = models.CharField(max_length=50, verbose_name = 'Имя')
-    sname = models.CharField(max_length=50, verbose_name = 'Отчество')
-    birth_date = models.DateField(verbose_name = 'Дата рождения', null=True)
-    grade = models.CharField(max_length=50, verbose_name = 'Должность', null=True)
-    profession = models.CharField(max_length=50, verbose_name = 'Профессия', null=True)
-    marriage = models.CharField(max_length = 1, choices = MARRIAGE, verbose_name='Семейное положение', null=True)
+    sname = models.CharField(max_length=50, verbose_name = 'Отчество', blank=True)
+    birth_date = models.DateField(verbose_name = 'Дата рождения', blank=True, null=True)
+    grade = models.CharField(max_length=50, verbose_name = 'Должность', blank=True, null=True)
+    profession = models.CharField(max_length=50, verbose_name = 'Профессия', blank=True, null=True)
+    marriage = models.CharField(max_length = 1, choices = MARRIAGE, verbose_name='Семейное положение', blank=True, null=True)
     passport_number = models.CharField(unique = True, max_length=20,\
                     verbose_name = 'Серия и номер паспорта')
-    passport_whom = models.CharField(max_length=30, verbose_name = 'Кем выдан паспорт')
-    address = models.CharField(max_length=200, verbose_name = 'Адрес', null=True)
+    passport_whom = models.CharField(max_length=100, verbose_name = 'Кем выдан паспорт', blank=True)
+    address = models.CharField(max_length=200, verbose_name = 'Адрес', blank=True, null=True)
     def fio(self):
         return self.family+' '+self.name+' '+self.sname
     def __unicode__(self):
@@ -181,9 +181,9 @@ class Order(models.Model):
     code = models.CharField(max_length = 10, verbose_name = 'Номер заказа')
     putevka = models.CharField(max_length = 6, verbose_name = 'Номер путевки')
     patient = models.ForeignKey(Patient)
-    customer = models.ForeignKey(Customer, verbose_name = 'Предприятие')
+    customer = models.ForeignKey(Customer, verbose_name = 'Предприятие', blank=True)
     room = models.ForeignKey(Room)
-    directive = models.ForeignKey(Customer, related_name='dir', verbose_name = 'Оплачивающий')
+    directive = models.ForeignKey(Customer, related_name='dir', verbose_name = 'Оплачивающий', blank= True)
     start_date = models.DateField('Дата заезда')
     end_date = models.DateField('Даты выезда')
     price = models.DecimalField(decimal_places = 2,max_digits=8, verbose_name = 'Стоимость')
@@ -312,7 +312,7 @@ class Book(models.Model):
     start_date = models.DateTimeField("Start book date")
     end_date = models.DateTimeField("End book date")
     name = models.CharField(max_length = 10000)
-    phone = models.CharField(max_length = 30)
+    phone = models.CharField(max_length = 100)
     description = models.CharField(max_length = 10000)
     def start_date_n(self):
         return self.start_date.strftime('%Y.%m.%d')
