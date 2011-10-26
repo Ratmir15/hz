@@ -312,7 +312,7 @@ class Book(models.Model):
     start_date = models.DateTimeField("Start book date")
     end_date = models.DateTimeField("End book date")
     name = models.CharField(max_length = 10000)
-    phone = models.CharField(max_length = 11)
+    phone = models.CharField(max_length = 30)
     description = models.CharField(max_length = 10000)
     def start_date_n(self):
         return self.start_date.strftime('%Y.%m.%d')
