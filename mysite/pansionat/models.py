@@ -113,13 +113,13 @@ class MedicalLocationRoles(models.Model):
 	end_date = models.DateTimeField('date finished')
 
 class MedicalProcedureType(models.Model):
-    name = models.CharField(max_length = 50, verbose_name='Наименование')
+    name = models.CharField(max_length = 100, verbose_name='Наименование')
     order = models.IntegerField(verbose_name='Порядок', blank=True)
     capacity = models.IntegerField(verbose_name='Вместимость')
     duration = models.IntegerField(verbose_name='Длительность')
     start_time = models.TimeField(verbose_name='Начало приема')
     finish_time = models.TimeField(verbose_name='Конец приема')
-    optional = models.CharField(max_length=100,verbose_name='Варианты', blank=True)
+    optional = models.CharField(max_length=1000,verbose_name='Варианты', blank=True)
     def optional_values(self):
         return self.optional.split(',')
     def __unicode__(self):
