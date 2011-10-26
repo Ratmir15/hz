@@ -1,6 +1,7 @@
 # coding: utf-8
 import datetime
 import decimal
+from string import lower, upper
 from django.db import connection
 from xlrd import open_workbook
 from mysite import settings
@@ -23,6 +24,20 @@ def initfromfile(filename):
         for col in xrange(rsh.ncols):
             v = rsh.cell_value(rrowx,col)
             print str(rrowx)+":"+str(col)+unicode(v)
+
+
+def add_lead_zeros(putevka, req_length):
+    while len(putevka) < req_length:
+        putevka = "0" + putevka
+    return putevka
+
+
+def up_low_case(fios):
+    if len(fios)>1:
+        return upper(fios[0]) + lower(fios[1:])
+    else:
+        return upper(fios)
+
 
 def inithistory(filename):
     rt1 = RoomType(name = 'Двухместный номер блочный повышенной комфортности',
@@ -58,8 +73,7 @@ def inithistory(filename):
             putevkas = putevka.split('.')
             if len(putevkas)>1:
                 putevka = putevkas[0]
-            while len(putevka)<6:
-                putevka = "0"+putevka
+            putevka = add_lead_zeros(putevka, 6)
             rhi = mc_map.get(rrowx,rrowx)
             pdall = unicode(rsh.cell_value(rrowx,columns["pd"]))
             cr = rrowx
@@ -76,7 +90,10 @@ def inithistory(filename):
                 q = False
 
             if q:
-                pn = str(int(round(float(pdd[0]))))+" "+str(int(round(float(pdd[1]))))+" "+str(int(round(float(pdd[2]))))
+                pd0 = add_lead_zeros(pd0, 2)
+                pd1 = add_lead_zeros(pd1, 2)
+                pd2 = add_lead_zeros(pd2, 6)
+                pn = pd0+" "+pd1+" "+pd2
                 cnt = 3
                 pv = pdd[cnt]
                 while cnt<len(pdd)-1:
@@ -91,9 +108,9 @@ def inithistory(filename):
                 if len(fios)==3:
                     family,name, sname = fio.split(" ")
                 else:
-                    family = fios[0]
-                    name = fios[1]
-                    sname = fios[2]
+                    family = up_low_case(fios[0])
+                    name = up_low_case(fios[1])
+                    sname = up_low_case(fios[2])
                 objs = Patient.objects.filter(passport_number = pn)
                 if len(objs)>0:
                     p = objs[0]
@@ -101,8 +118,12 @@ def inithistory(filename):
                     p = Patient(family = family,name = name, sname = sname, passport_number = pn, passport_whom = pv)
                     p.save()
                 c_name = rsh.cell_value(rrowx,columns["c"])
-                cust = Customer(name=c_name)
-                cust.save()
+                objs = Customer.objects.filter(name = c_name)
+                if len(objs)>0:
+                    cust = objs[0]
+                else:
+                    cust = Customer(name=c_name, shortname = c_name)
+                    cust.save()
                 roomname = rsh.cell_value(rrowx,columns["room"])
                 objs = Room.objects.filter(name = roomname)
                 if len(objs)>0:
