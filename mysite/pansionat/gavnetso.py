@@ -57,13 +57,11 @@ def import_bron(filename):
 
 
 
-def inithistory(filename):
+def inithistory(filename, input_columns, row_set):
     rt1 = RoomType(name = 'Двухместный номер блочный повышенной комфортности',
                    description = 'телевизор, холодильник, душевая кабина, кондиционер',
                    places = 2, price = 1310, price_alone = 2120)
     rt1.save()
-    columns = {"n1":0,"n2":2,"d1":6,"put":9,"fio":11,"d":12,"cv":13,"price":17,"c":20,"dr":22,"pd":24,"address":26,"room":28}
-    columns2 = {"n1":0,"n2":2,"d1":6,"put":9,"fio":11,"d":12,"cv":13,"price":16,"c":20,"dr":22,"pd":24,"address":26,"room":28}
     rb = open_workbook(settings.STATIC_ROOT + '/xls/' + filename,formatting_info=True)
     rsh = rb.sheet_by_index(0)
 
@@ -73,10 +71,11 @@ def inithistory(filename):
         if not clo:
             mc_map[rlo] = rhi
 
+    columns = input_columns[0]
 
     for rrowx in xrange(rsh.nrows):
-        if rrowx==849:
-            columns = columns2
+        if rrowx in row_set:
+            columns = input_columns[1]
         v = rsh.cell_value(rrowx,columns["n1"])
         if v != "":
             n = rsh.cell_value(rrowx,columns["n2"])
@@ -164,13 +163,15 @@ def inithistory(filename):
                 prs = pr.split(',')
                 if len(prs)>1:
                     pr = prs[0]+'.'+prs[1]
+                if not len(str(pr)):
+                    pr = 0
                 price = decimal.Decimal(pr)
                 order = Order(code = code, putevka = putevka, patient = p, customer = cust,
                               room = room, directive = dir, start_date = start_date, end_date = end_date,
                               price = price, reab = reab)
                 order.save()
-    # TODO WTF is_with_child = models.BooleanField(verbose_name = 'Мать и дитя')
-    # TODO WTF payd_by_patient = models.BooleanField(verbose_name = 'Оплачивается пациентом')
+                # TODO WTF is_with_child = models.BooleanField(verbose_name = 'Мать и дитя')
+                # TODO WTF payd_by_patient = models.BooleanField(verbose_name = 'Оплачивается пациентом')
 
 
 def initbase(doit):
