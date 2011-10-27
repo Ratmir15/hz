@@ -1,0 +1,62 @@
+{% extends "pansionat/bookit.html" %}
+
+{% block title %} Редактирование заказа {%  endblock  %}
+
+{% block head %}
+        <meta http-equiv="content-type" content="text/html; charset=utf-8">
+        <link href="/static/dataTables/media/css/demo_table.css" rel="stylesheet" type="text/css" />
+        <link href="/static/jquery-ui/themes/base/jquery.ui.all.css" rel="stylesheet" type="text/css" />
+        <link href="/static/main.css" rel="stylesheet" type="text/css" />
+
+        <script src="/static/dataTables/media/js/jquery.js"></script>
+        <script src="/static/dataTables/media/js/jquery.dataTables.js"></script>
+        <script src="/static/jquery-ui/ui/jquery.ui.core.js"></script>
+        <script src="/static/jquery-ui/ui/jquery.ui.widget.js"></script>
+        <script src="/static/jquery-ui/ui/jquery.ui.datepicker.js"></script>
+        <script src="/static/jquery-ui/ui/i18n/jquery.ui.datepicker-ru.js"></script>
+        <script src="/static/jquery-ui/ui/jquery.ui.button.js"></script>
+        <script type="text/javascript">
+            $(document).ready(function() {
+                $.datepicker.setDefaults($.datepicker.regional['ru']);
+                //alert($('#id_patient'));
+//                options = $('#id_patient').children('option');
+//                options.each(function() {
+//                    var $this = $(this);
+//                    o = new Option('z','zz');
+//                    $("#help_patient").add(o);
+//                    alert(o);
+//                    asasa
+//                });
+                $('#id_start_date').datepicker();
+                $('#id_end_date').datepicker();
+                } );
+        </script>
+{%  endblock  %}
+        {% block form %}
+            <form action="/order/save/" method="post">
+                {% csrf_token %}
+                <table border = "0">
+                <tr><td></td><td></td><td rowspan="20" valign="top">
+{#                    <label for="patient_sw">Пациент:</label> <input type="text" id="patient_sw"/>#}
+{#                    <br/>#}
+{#                    <select style="width: 200px;"  size="6" id="help_patient">#}
+{#                        <option value="1">2</option>#}
+{#                    </select>#}
+                </td>
+{#                    <tr><td colspan="2">Свободных мест: {{ pl }}</td></tr>#}
+                    {{ form.as_table }}
+                <input type="hidden" id="pr" name="pr" value="{{ pr }}"/>
+                <input type="hidden" id="md" name="md" value="730"/>
+                    <tr><td colspan="2">
+                        <input type="submit" name="s" value="Сохранить с проверкой" />
+                        <input type="submit" name="s" value="Сохранить без проверки" />
+                    </td></tr>
+                    {% if id %}
+                        <input type="hidden" name="id" value="{{ id }}"/>
+                    {% endif %}
+                    {% for order_day in order_days %}
+                        <tr><td>{{ order_day.0.busydate_n }}</td><td>{{ order_day.0.room.name }}</td><td>{{ order_day.1 }}</td></tr>
+                    {% endfor %}
+                </table>
+            </form>
+        {% endblock %}

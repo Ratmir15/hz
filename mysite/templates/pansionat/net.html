@@ -1,6 +1,6 @@
 {% extends "pansionat/index.html" %}
 
-{% block title %} Бронирования {%  endblock  %}
+{% block title %} Сетка {%  endblock  %}
 
 {% block head %}
     <style type="text/css">
@@ -19,13 +19,12 @@
 <link rel="stylesheet" href="/static/Refresh.css" type="text/css" />
     <script type="text/javascript">
         $(document).ready(function() {
-            $('#occupied').dataTable();
             } );
     </script>
  {%  endblock  %}
 
 {% block allcontent %}
-    <h1>Список брони</h1>
+    <h1>Сетка</h1>
     <table border="0" id = "occupied" class = "display">
     <thead>
     <th>Код</th>

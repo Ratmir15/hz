@@ -192,6 +192,7 @@ def inithistory(filename, input_columns, row_set):
                 if len(objs)>0:
                     room = objs[0]
                 else:
+                    #print unicode(rrowx)+":"+unicode(roomname)
                     room = Room(name=roomname, room_type = rt1)
                     room.save()
                 dirname = rsh.cell_value(rrowx,columns["cv"])

@@ -20,6 +20,7 @@ from django.shortcuts import redirect
 import logging
 from mysite.pansionat import gavnetso
 from mysite.pansionat.models import IllHistory, Customer, IllHistoryFieldType, IllHistoryFieldValue, IllHistoryRecord, OrderMedicalProcedure, MedicalProcedureType, OrderMedicalProcedureSchedule, Occupied, IllHistoryFieldTypeGroup, EmployerRoleHistory, Role, Employer, OrderDiet, Diet, OrderDay
+from mysite.pansionat.orders import room_availability
 from mysite.pansionat.proc import MenuRequestContext, MedicalPriceReport
 from pytils import numeral
 from mysite.pansionat.gavnetso import monthlabel, nextmonthfirstday, initbase, initroles, initroomtypes, initp, initdiet, fillBookDays, fillOrderDays, inithistory, import_bron, import_proc, import_rooms
@@ -767,6 +768,7 @@ def clear(request):
     dellist(IllHistory.objects.all())
     dellist(Occupied.objects.all())
     dellist(OrderDiet.objects.all())
+    dellist(OrderDay.objects.all())
     dellist(Order.objects.all())
     dellist(Room.objects.all())
     dellist(RoomType.objects.all())
@@ -800,7 +802,7 @@ def init(request):
     #order_list = Order.objects.all()
     #if not len(order_list):
     #    initbase(1)
-    #    initroles()
+    initroles()
     t = loader.get_template('pansionat/index.html')
     c = MenuRequestContext(request, {
     })
@@ -1079,35 +1081,6 @@ def rooms(request):
         values['patient'] = patient
     return render_to_response('pansionat/rooms.html', MenuRequestContext(request, values))
 
-def room_availability(room, start_date, end_date):
-    order_rooms = room.orderday_set.filter(busydate__range = (start_date, end_date)).order_by('busydate')
-
-    cnt = 0
-    orders = set()
-    booked = set()
-    cd = ""
-    l_cnt = 0
-    max = 0
-    for ord_days in order_rooms:
-        if ord_days.order is None:
-            booked.add(ord_days.book)
-        else:
-            orders.add(ord_days.order)
-        if cd != ord_days.busydate:
-            l_cnt = 0
-            cd = ord_days.busydate
-
-        if ord_days.is_with_child:
-            cnt += 2
-            l_cnt += 2
-        else:
-            cnt += 1
-            l_cnt += 1
-        if max < l_cnt:
-            max = l_cnt
-            print ord_days.busydate_n()+ ":" + str(l_cnt)
-    return orders, booked, max
-
 def room_with_orders(start_date, end_date, room_type, room_book):
 
     if not room_type is None:
@@ -1118,7 +1091,7 @@ def room_with_orders(start_date, end_date, room_type, room_book):
     ordered_rooms = [] 
 
     for room in room_list:
-        (orders, booked, max) = room_availability(room, start_date, end_date)
+        (orders, booked, max, ignore) = room_availability(room, start_date, end_date)
 
         if room_book == 'Booked':
             append = room.room_type.places <= max
@@ -1380,7 +1353,7 @@ def order(request):
     period = strptime(request.session['end_date'],'%d.%m.%Y') - strptime(request.session['start_date'],'%d.%m.%Y')
     price = rooms[0].room_type.price * (period.days + 1)
     room = rooms[0]
-    (orders, booked, max) = room_availability(room, start_date, end_date)
+    (orders, booked, max, ignore) = room_availability(room, start_date, end_date)
 
     pl = room.room_type.places - max
 
