@@ -1271,6 +1271,9 @@ def report(request, tp):
 class PatientForm(ModelForm):
     class Meta:
         model = Patient
+        widgets = {
+            'address': Textarea(attrs={'cols': 80, 'rows': 3}),
+        }
     def clean_family(self):
         data = self.cleaned_data['family']
         data = data.strip().capitalize()

@@ -33,6 +33,7 @@ class Patient(models.Model):
                     verbose_name = 'Серия и номер паспорта')
     passport_whom = models.CharField(max_length=100, verbose_name = 'Кем выдан паспорт', blank=True)
     address = models.CharField(max_length=200, verbose_name = 'Адрес', blank=True, null=True)
+    phone = models.CharField(max_length=20, verbose_name='Телефон',blank=True,null=True)
     def fio(self):
         return self.family+' '+self.name+' '+self.sname
     def __unicode__(self):
@@ -207,10 +208,10 @@ class Room (models.Model):
 class Order(models.Model):
     code = models.IntegerField(verbose_name = 'Номер заказа')
     putevka = models.CharField(max_length = 6, verbose_name = 'Номер путевки')
-    patient = models.ForeignKey(Patient)
-    customer = models.ForeignKey(Customer, verbose_name = 'Предприятие', blank=True)
-    room = models.ForeignKey(Room)
-    directive = models.ForeignKey(Customer, related_name='dir', verbose_name = 'Оплачивающий', blank= True)
+    patient = models.ForeignKey(Patient, verbose_name='Пациент')
+    customer = models.ForeignKey(Customer, verbose_name = 'Предприятие', blank=True, null=True)
+    room = models.ForeignKey(Room, verbose_name='Место расселения')
+    directive = models.ForeignKey(Customer, related_name='dir', verbose_name = 'Место работы', blank= True)
     start_date = models.DateField('Дата заезда')
     end_date = models.DateField('Даты выезда')
     price = models.DecimalField(decimal_places = 2,max_digits=8, verbose_name = 'Стоимость')
