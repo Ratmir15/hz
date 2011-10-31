@@ -205,6 +205,12 @@ class Room (models.Model):
         verbose_name = 'Комната'
         verbose_name_plural = 'Комнаты'
 
+class OrderType(models.Model):
+    name = models.CharField(max_length = 10, verbose_name = 'Наименование')
+    price = models.DecimalField(decimal_places=2,max_digits=8,verbose_name='Цена')
+    def __unicode__(self):
+        return self.name
+
 class Order(models.Model):
     code = models.IntegerField(verbose_name = 'Номер заказа')
     putevka = models.CharField(max_length = 6, verbose_name = 'Номер путевки')
@@ -218,12 +224,16 @@ class Order(models.Model):
     is_with_child = models.BooleanField(verbose_name = 'Мать и дитя')
     payd_by_patient = models.BooleanField(verbose_name = 'Оплачивается пациентом')
     reab = models.BooleanField(verbose_name = 'Реабилитация')
+    order_type = models.ForeignKey(OrderType, verbose_name='Тип заказа',blank=True, null=True)
     def __unicode__(self):
         return self.code
     def start_date_n(self):
         return self.start_date.strftime('%Y.%m.%d')
     def end_date_n(self):
         return self.end_date.strftime('%Y.%m.%d')
+
+    #create index idx_end_date on pansionat_order (end_date);
+    #create index idx_start_date on pansionat_order (start_date);
 
     class Meta:
         verbose_name = 'Заказ'

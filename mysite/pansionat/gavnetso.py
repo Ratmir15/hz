@@ -5,7 +5,7 @@ from string import lower, upper
 from django.db import connection
 from xlrd import open_workbook
 from mysite import settings
-from mysite.pansionat.models import Patient, Customer, Order, Occupied, Room, RoomType, EmployerRoleHistory, Role, Employer, IllHistoryFieldTypeGroup, IllHistoryFieldType, MedicalProcedureType, OrderMedicalProcedure, OrderMedicalProcedureSchedule, RoomBook, Book, Diet, Item, DietItems, OrderDay, MedicalProcedureTypePrice
+from mysite.pansionat.models import Patient, Customer, Order, Occupied, Room, RoomType, EmployerRoleHistory, Role, Employer, IllHistoryFieldTypeGroup, IllHistoryFieldType, MedicalProcedureType, OrderMedicalProcedure, OrderMedicalProcedureSchedule, RoomBook, Book, Diet, Item, DietItems, OrderDay, MedicalProcedureTypePrice, OrderType
 
 def nextmonthfirstday(year, month):
     if month==12:
@@ -81,6 +81,20 @@ def import_proc():
         mpt.save()
         mpts = MedicalProcedureTypePrice(mpt = mpt, price = price, date_applied = datetime.date(year=2010,month=12,day=31),add_info=add_info)
         mpts.save()
+
+def import_ordertypes():
+    ots = OrderType.objects.all()
+    if not len(ots):
+        ot = OrderType(name = 'Ульяновск проф',price = 0)
+        ot.save()
+        ot = OrderType(name = 'Самара проф',price = 35154)
+        ot.save()
+        ot = OrderType(name = 'Пенза проф',price = 0)
+        ot.save()
+        ot = OrderType(name = 'Пенза фсс',price = 14850)
+        ot.save()
+        ot = OrderType(name = 'Реабилитация проф',price = '21607.92')
+        ot.save()
 
 def import_rooms():
     rb = open_workbook(settings.STATIC_ROOT + '/xls/rooms.xls',formatting_info=True)
