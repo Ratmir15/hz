@@ -15,6 +15,7 @@ from pansionat.models import RoomBook
 from pansionat.models import TypeBook
 from pansionat.models import Order 
 from pansionat.models import Customer 
+from pansionat.models import OrderType
 
 from django.contrib import admin
 from mysite.pansionat.models import Order, Customer, IllHistoryFieldValue, IllHistoryFieldType, MedicalProcedureType
@@ -49,3 +50,4 @@ admin.site.register(Order)
 admin.site.register(Customer)
 admin.site.register(IllHistoryFieldType)
 admin.site.register(MedicalProcedureType)
+admin.site.register(OrderType)

@@ -206,7 +206,7 @@ class Room (models.Model):
         verbose_name_plural = 'Комнаты'
 
 class OrderType(models.Model):
-    name = models.CharField(max_length = 10, verbose_name = 'Наименование')
+    name = models.CharField(max_length = 20, verbose_name = 'Наименование')
     price = models.DecimalField(decimal_places=2,max_digits=8,verbose_name='Цена')
     def __unicode__(self):
         return self.name
@@ -234,6 +234,8 @@ class Order(models.Model):
 
     #create index idx_end_date on pansionat_order (end_date);
     #create index idx_start_date on pansionat_order (start_date);
+    #alter table pansionat_order add order_type_id INT;
+    #create index ordertype_idx on pansionat_order (order_type_id);
 
     class Meta:
         verbose_name = 'Заказ'
