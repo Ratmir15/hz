@@ -1,7 +1,9 @@
 import datetime
 from django.contrib.auth.decorators import permission_required, login_required
+from django.core import serializers
 from django.db import connection
 from django.forms.models import ModelForm
+from django.http import HttpResponse
 from django.shortcuts import render_to_response
 from mysite.pansionat.menu import MenuRequestContext
 from mysite.pansionat.models import OrderDay, Order, Room
@@ -11,6 +13,14 @@ __author__ = 'rpanov'
 class OrderEditForm(ModelForm):
     class Meta:
         model = Order
+
+@login_required
+def order_json(request, order_id):
+    response = HttpResponse()
+    order = Order.objects.filter(id = order_id)
+    json_serializer = serializers.get_serializer("json")()
+    json_serializer.serialize(order, ensure_ascii=False, stream=response)
+    return response
 
 @login_required
 @permission_required('pansionat.add_order', login_url='/forbidden/')
@@ -28,13 +38,26 @@ def net(request):
     d = datetime.date.today()
     td = d + datetime.timedelta(days=60)
     rooms = Room.objects.all().order_by("name")
+    res = []
+    i = 0
     for room in rooms:
+        if not i:
+            q = []
+            res.append(q)
         orders, booked, max , by_dates = room_availability(room,d,td)
+        flag = False
         for key,value in by_dates.items():
-            if value<room.room_type.places:
+            if value<room.room_type.places and not flag:
+                q.append((room,key.strftime('%d.%m')))
+                flag = True
                 print key
                 print value
-    values = {}
+        if not flag:
+            q.append((room,''))
+        i +=1
+        if i==8:
+            i = 0
+    values = {"res" : res}
     return render_to_response('pansionat/net.html', MenuRequestContext(request, values))
 
 @login_required
@@ -114,7 +137,8 @@ def room_availability(room, start_date, end_date):
         else:
             orders.add(ord_days.order)
         if cd != ord_days.busydate:
-            by_dates[cd] = l_cnt
+            if cd!="":
+                by_dates[cd] = l_cnt
             l_cnt = 0
             cd = ord_days.busydate
 

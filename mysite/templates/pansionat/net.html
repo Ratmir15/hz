@@ -26,56 +26,12 @@
 {% block allcontent %}
     <h1>Сетка</h1>
     <table border="0" id = "occupied" class = "display">
-    <thead>
-    <th>Код</th>
-    <th>Путевка</th>
-    <th>Клиент</th>
-    <th>Дата заезда</th>
-    <th>Дата выезда</th>
-    <th>К</th>
-    <th>Пациент</th>
-    <th>Сумма(руб)</th>
-    <th></th>
-    <th></th>
-    </thead>
-            {% for occupied in occupied_list %}
-                <tr>
-                <td>
-                    {{ occupied.code }}
-                </td>
-                    <td>
-                        {{ occupied.putevka }}
-                    </td>
-                <td>
-                    {{ occupied.customer__name }}
-                </td>
-                <td>
-                    {{ occupied.start_date }}
-                </td>
-                    <td>
-                        {{ occupied.end_date }}
-                    </td>
-                    <td>
-                        {{ occupied.room__name }}
-                    </td>
-                    <td>
-                        {{ occupied.patient__family }} {{ occupied.patient__name }} {{ occupied.patient__sname }}
-                    </td>
-                <td>
-                    {{ occupied.price }}
-                </td>
-                    <td>
-                        <a href="/illhistory/{{ occupied.id }}/">История болезни</a><br/><a href="/mp/{{ occupied.id }}/">Процедуры</a>{% if diet_en %}/<a href="/diet/{{ occupied.id }}/">Диета</a>{% endif %}
-                    </td>
-                <td>
-                    <a href="/order/{{ occupied.id }}/">Редактировать</a>/
-                    <a href="/orders/nakl/{{ occupied.id }}/">Накладная</a>/
-                        <a href="/orders/sf/{{ occupied.id }}/">Сч-ф</a>/
-                        <a href="/orders/pko/{{ occupied.id }}/">ПКО</a>/
-                        <a href="/orders/rootik/{{ occupied.id }}/">Квиток</a>/
-                        <a href="/orders/zayava/{{ occupied.id }}/">Заявление</a>
-                    </td>
-                </tr>
+            {% for q in res %}
+                <tr>{% for r in q %}
+                <td>{{ r.0.name }}</td>
+                    <td>{{ r.1 }}</td>
+                    {% endfor %}
+            </tr>
             {% endfor %}
     </table>
 {%  endblock  %}
