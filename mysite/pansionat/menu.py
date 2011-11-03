@@ -17,7 +17,7 @@ def getMenuItems(request):
         items.append(i)
         i = MenuItem()
         i.href = "/clients/"
-        i.label = "Клиенты"
+        i.label = "Организации"
         items.append(i)
     if user.has_perm('pansionat.add_order'):
         i = MenuItem()
