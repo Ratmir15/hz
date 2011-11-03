@@ -7,6 +7,7 @@ from django.forms import forms
 from django.forms.models import ModelForm
 from django.http import HttpResponse
 from django.shortcuts import render_to_response
+from mysite import settings
 from mysite.pansionat.gavnetso import test_file
 from mysite.pansionat.menu import MenuRequestContext
 from mysite.pansionat.models import OrderDay, Order, Room
@@ -53,7 +54,7 @@ def import_orders(request):
 
 
 def handle_upload_file(file_data):
-    destination = open('tmp.xls','wb+')
+    destination = open(settings.MEDIA_ROOT+'tmp.xls','wb+')
     for chunk in file_data.chunks():
         destination.write(chunk)
     destination.close()
@@ -64,7 +65,7 @@ def import_file(request):
     form = FileForm(request.POST, request.FILES)
     if form.is_valid():
         handle_upload_file(request.FILES['data'])
-        res = test_file('tmp.xls', True)
+        res = test_file(settings.MEDIA_ROOT+'tmp.xls', True)
     values = {"res":res}
     return render_to_response('pansionat/importorder.html', MenuRequestContext(request, values))
 
