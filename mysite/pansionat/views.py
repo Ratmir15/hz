@@ -885,7 +885,10 @@ def nakl(request, occupied_id):
     template_filename = 'tov_nakl1.xls'
     fullname = str('ООО санаторий "Хопровские зори"')
     vendor = str('КПП 581701001 ')+ fullname + str(' Пензенская обл., п.Колышлей, ул.Лесная 1а')
-    client  = order.patient.fio()+','+order.patient.address
+    if order.patient.address is None:
+        client  = order.patient.fio()
+    else:
+        client  = order.patient.fio()+','+order.patient.address
     delt = order.end_date - order.start_date
     days = delt.days + 1
     dir = gavnetso.getEmployerByRoleNameAndDate('Директор',order.start_date).__unicode__()
@@ -895,7 +898,7 @@ def nakl(request, occupied_id):
     price = order.price
     rub = numeral.rubles(float(price), True)
     tel = {'PIZDEZ': fullname, 'NUMBER': order.code,
-           'FILENAME': 'nakladnaya-'+order.code,
+           'FILENAME': 'nakladnaya-'+str(order.code),
            'CLIENT': client, 'VENDOR': vendor,
            'DIRECTOR': dir,
            'GBUH': gb,

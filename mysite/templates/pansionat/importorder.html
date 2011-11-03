@@ -1,0 +1,18 @@
+{% extends "pansionat/index.html" %}
+
+{% block title %} Импорт путевок {%  endblock  %}
+
+{% block allcontent %}
+    <h1>Импорт путевок</h1>
+    <form action = "/importfile/" method="POST">
+    <table>
+        {% for row in res %}
+<tr>
+    {% for columns in row %}
+        <td>{{  columns.0 }}{% if columns.1 %}<div class="alert">{{ columns.1  }}</div>{% endif %}</td>
+    {% endfor %}
+</tr>
+        {% endfor %}
+    </table>
+    </form>
+{%  endblock  %}

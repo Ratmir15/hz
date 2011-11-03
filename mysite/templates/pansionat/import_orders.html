@@ -1,0 +1,18 @@
+{% extends "pansionat/index.html" %}
+
+{% block title %} Импорт путевок {%  endblock  %}
+
+{% block allcontent %}
+    <h1>Импорт путевок</h1>
+    <form action = "/{{ action }}/" enctype="multipart/form-data" method="POST">
+    <table>
+        {{ form.as_table }}
+        {% csrf_token %}
+            <tr>
+                <td colspan="2">
+                    <input type="submit" value="Сохранить">
+                </td>
+            </tr>
+        </table>
+    </form>
+{%  endblock  %}

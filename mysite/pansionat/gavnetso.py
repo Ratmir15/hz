@@ -1,8 +1,10 @@
 # coding: utf-8
 import datetime
 import decimal
+import re
 from string import lower, upper
 from django.db import connection
+from django.db.models.query_utils import Q
 from xlrd import open_workbook
 from mysite import settings
 from mysite.pansionat.models import Patient, Customer, Order, Occupied, Room, RoomType, EmployerRoleHistory, Role, Employer, IllHistoryFieldTypeGroup, IllHistoryFieldType, MedicalProcedureType, OrderMedicalProcedure, OrderMedicalProcedureSchedule, RoomBook, Book, Diet, Item, DietItems, OrderDay, MedicalProcedureTypePrice, OrderType
@@ -93,8 +95,259 @@ def import_ordertypes():
         ot.save()
         ot = OrderType(name = 'Пенза фсс',price = 14850)
         ot.save()
-        ot = OrderType(name = 'Реабилитация проф',price = '21607.92')
+        ot = OrderType(name = 'Реабилитация',price = '21607.92')
         ot.save()
+
+def test_file(filename, flag):
+    rb = open_workbook(filename,formatting_info=True)
+    rsh = rb.sheet_by_index(0)
+
+    res = []
+
+    order_type = None
+    order_type_r = OrderType.objects.filter(name = 'Реабилитация')[0]
+
+    for rrowx in xrange(rsh.nrows):
+        if rrowx>4:
+            data = rsh.cell_value(rrowx,1)
+            row_info = []
+            strdata = unicode(data)
+            if strdata!="":
+                #matchObj = re.match( '([0-9]*)[\.0]?$', strdata, flags = 0)
+                do_import = True
+                r = False
+                if not strdata[0] in ('0','1','2'):
+                    r = True
+                    order_type = order_type_r
+                    strdata = strdata[1:]
+                arr = strdata.split(".")
+                if len(arr)>1:
+                    strdata = arr[0]
+                os = Order.objects.filter(code = int(strdata))
+                if not len(os):
+                    row_info.append((int(strdata),""))
+                else:
+                    do_import = False
+                    row_info.append((int(strdata),"duplicated"))
+                v = rsh.cell_value(rrowx,2)
+                start_date = datetime.date(year = 1899, month = 12, day=30)+datetime.timedelta(days=v)
+                row_info.append((start_date,""))
+                v = rsh.cell_value(rrowx,3)
+                end_date = datetime.date(year = 1899, month = 12, day=30)+datetime.timedelta(days=v)
+                row_info.append((end_date,""))
+                v = rsh.cell_value(rrowx,4)
+                putevkas = str(v).split('.')
+                if len(putevkas)>1:
+                    v = putevkas[0]
+                v = add_lead_zeros(v, 6)
+                putevka = v
+                row_info.append((v,""))
+                v = rsh.cell_value(rrowx,5)
+                fios = v.split(" ")
+                family = up_low_case(fios[0])
+                name = up_low_case(fios[1])
+                sname = up_low_case(fios[2])
+                row_info.append((family,""))
+                row_info.append((name,""))
+                row_info.append((sname,""))
+                grade = rsh.cell_value(rrowx,6)
+                row_info.append((grade,""))
+                v = rsh.cell_value(rrowx,7)
+                cs = Customer.objects.filter(Q(name = v,shortname = v))
+                if len(cs)>0:
+                    row_info.append((cs[0].name,""))
+                    directive = cs[0]
+                else:
+#                    do_import = False
+                    if flag:
+                        customer = Customer(name = v,shortname =v)
+                        customer.save()
+                    row_info.append((v,"Клиент не найден"))
+                v = rsh.cell_value(rrowx,8)
+                pr = str(v)
+                prs = pr.split(',')
+                if len(prs)>1:
+                    pr = prs[0]+'.'+prs[1]
+                if not len(str(pr)):
+                    pr = 0
+                price = decimal.Decimal(pr)
+                row_info.append((price,""))
+                v = rsh.cell_value(rrowx,9)
+                s_date = datetime.date(year = 1899, month = 12, day=30)+datetime.timedelta(days=v)
+                row_info.append((s_date,""))
+                v = rsh.cell_value(rrowx,10)
+                cs = Customer.objects.filter(Q(name = v,shortname = v))
+                if len(cs)>0:
+                    row_info.append((cs[0].name,""))
+                    customer = cs[0]
+                else:
+                    #do_import = False
+                    if flag:
+                        customer = Customer(name = v,shortname =v)
+                        customer.save()
+                    row_info.append((v,"Клиент не найден"))
+                v = rsh.cell_value(rrowx,11)
+                birth_date = datetime.date(year = 1899, month = 12, day=30)+datetime.timedelta(days=v)
+                row_info.append((birth_date,""))
+                address = rsh.cell_value(rrowx,13)
+                row_info.append((address,""))
+                v = rsh.cell_value(rrowx,12)
+                s1 = v[:11]
+                s2 = v[12:]
+                ps = Patient.objects.filter(passport_number = s1)
+                if len(ps)>0:
+                    row_info.append((s1,"Пациент найден"))
+                    patient = ps[0]
+                else:
+                    row_info.append((s1,"Пациент не найден"))
+                    if flag:
+                        patient = Patient(family = family,
+                                          name = name,
+                                          sname = sname,
+                                          birth_date = birth_date,
+                                          grade = grade,
+                                          profession = grade,
+                                          passport_number = s1,
+                                          passport_whom = s2,
+                                          address = address
+                        )
+                        patient.save()
+                row_info.append((s2,""))
+                v = rsh.cell_value(rrowx,14)
+                v = upper(v)
+                rooms = Room.objects.filter(name = v)
+                if len(rooms)>0:
+                    row_info.append((rooms[0].name,""))
+                    room = rooms[0]
+                else:
+                    do_import = False
+                    row_info.append((v,"Комната не найден"))
+                res.append(row_info)
+                if flag and do_import:
+                    order = Order(
+                        code = int(strdata),
+                        putevka = putevka,
+                        patient = patient,
+                        customer = customer,
+                        room = room,
+                        directive = directive,
+                        start_date = start_date,
+                        end_date = end_date,
+                        price = price,
+                        is_with_child = False,
+                        payd_by_patient = False,
+                        reab = r,
+                        order_type = order_type
+                    )
+                    order.save()
+
+    return res
+
+#        if v != "":
+#            n = rsh.cell_value(rrowx,columns["n2"])
+#            ns = unicode(n).split(" ")
+#            reab = False
+#            if len(ns)>1:
+#                n = ns[0]
+#                if ns[1]=="Р":
+#                    reab = True
+#            code = int(n)
+#            putevka = str(rsh.cell_value(rrowx,columns["put"]))
+#            putevkas = putevka.split('.')
+#            if len(putevkas)>1:
+#                putevka = putevkas[0]
+#            putevka = add_lead_zeros(putevka, 6)
+#            rhi = mc_map.get(rrowx,rrowx)
+#            pdall = unicode(rsh.cell_value(rrowx,columns["pd"]))
+#            cr = rrowx
+#            while cr<rhi-1:
+#                cr +=1
+#                pdall = pdall + " "+unicode(rsh.cell_value(cr,columns["pd"]))
+#            pdd = pdall.split(" ")
+#            try:
+#                pd0 = str(int(round(float(pdd[0]))))
+#                pd1 = str(int(round(float(pdd[1]))))
+#                pd2 = str(int(round(float(pdd[2]))))
+#                q = True
+#            except UnicodeEncodeError:
+#                q = False
+#
+#            if q:
+#                pd0 = add_lead_zeros(pd0, 2)
+#                pd1 = add_lead_zeros(pd1, 2)
+#                pd2 = add_lead_zeros(pd2, 6)
+#                pn = pd0+" "+pd1+" "+pd2
+#                cnt = 3
+#                pv = pdd[cnt]
+#                while cnt<len(pdd)-1:
+#                    cnt += 1
+#                    pv = pv + " "+ pdd[cnt]
+#                fio = rsh.cell_value(rrowx,columns["fio"])
+#                cr = rrowx
+#                while cr<rhi-1:
+#                    cr +=1
+#                    fio = fio + " "+unicode(rsh.cell_value(cr,columns["fio"]))
+#                fios = fio.split(" ")
+#                if len(fios)==3:
+#                    family,name, sname = fio.split(" ")
+#                else:
+#                    family = up_low_case(fios[0])
+#                    name = up_low_case(fios[1])
+#                    sname = up_low_case(fios[2])
+#                objs = Patient.objects.filter(passport_number = pn)
+#                if len(objs)>0:
+#                    p = objs[0]
+#                else:
+#                    p = Patient(family = family,name = name, sname = sname, passport_number = pn, passport_whom = pv)
+#                    p.save()
+#                c_name = rsh.cell_value(rrowx,columns["c"])
+#                objs = Customer.objects.filter(name = c_name)
+#                if len(objs)>0:
+#                    cust = objs[0]
+#                else:
+#                    cust = Customer(name=c_name, shortname = c_name)
+#                    cust.save()
+#                roomname = rsh.cell_value(rrowx,columns["room"])
+#                objs = Room.objects.filter(name = roomname)
+#                if len(objs)>0:
+#                    room = objs[0]
+#                else:
+#                    #print unicode(rrowx)+":"+unicode(roomname)
+#                    room = Room(name=roomname, room_type = rt1)
+#                    room.save()
+#                dirname = rsh.cell_value(rrowx,columns["cv"])
+#                objs = Customer.objects.filter(shortname = dirname)
+#                if len(objs)>0:
+#                    dir = objs[0]
+#                else:
+#                    dir = Customer(name=dirname, shortname = dirname)
+#                    dir.save()
+#
+#                dts = unicode(rsh.cell_value(rrowx,columns["d1"]))
+#                cr = rrowx
+#                while cr<rhi-1:
+#                    cr +=1
+#                    dts = dts + " "+unicode(rsh.cell_value(cr,columns["d1"]))
+#                dtss = dts.split(" ")
+#
+#                dts = dtss[0].split(".")
+#                dtf = dtss[2].split(".")
+#                start_date = datetime.date(day=int(dts[0]),month=int(dts[1]),year=2011)
+#                end_date = datetime.date(day=int(dtf[0]),month=int(dtf[1]),year=2011)
+#                pr = str(rsh.cell_value(rrowx,columns["price"]))
+#                prs = pr.split(',')
+#                if len(prs)>1:
+#                    pr = prs[0]+'.'+prs[1]
+#                if not len(str(pr)):
+#                    pr = 0
+#                price = decimal.Decimal(pr)
+#                order = Order(code = code, putevka = putevka, patient = p, customer = cust,
+#                              room = room, directive = dir, start_date = start_date, end_date = end_date,
+#                              price = price, reab = reab)
+#                order.save()
+#                fillOrderDays(order)
+                # TODO WTF is_with_child = models.BooleanField(verbose_name = 'Мать и дитя')
+                # TODO WTF payd_by_patient = models.BooleanField(verbose_name = 'Оплачивается пациентом')
 
 def import_rooms():
     rb = open_workbook(settings.STATIC_ROOT + '/xls/rooms.xls',formatting_info=True)

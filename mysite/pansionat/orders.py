@@ -1,10 +1,13 @@
+# coding: utf-8
 import datetime
 from django.contrib.auth.decorators import permission_required, login_required
 from django.core import serializers
 from django.db import connection
+from django.forms import forms
 from django.forms.models import ModelForm
 from django.http import HttpResponse
 from django.shortcuts import render_to_response
+from mysite.pansionat.gavnetso import test_file
 from mysite.pansionat.menu import MenuRequestContext
 from mysite.pansionat.models import OrderDay, Order, Room
 
@@ -32,6 +35,49 @@ def order_edit(request, order_id):
     places = get_order_places(order)
     values["order_days"] = get_order_days_with_availability(order_days, places)
     return render_to_response('pansionat/order_edit.html', MenuRequestContext(request, values))
+
+class FileForm(forms.Form):
+    data = forms.FileField(required=True, label='Данные')
+
+@login_required
+@permission_required('pansionat.add_order', login_url='/forbidden/')
+def test_orders(request):
+    values = {"form":FileForm(),"action":"testfile"}
+    return render_to_response('pansionat/import_orders.html', MenuRequestContext(request, values))
+
+@login_required
+@permission_required('pansionat.add_order', login_url='/forbidden/')
+def import_orders(request):
+    values = {"form":FileForm(),"action":"importfile"}
+    return render_to_response('pansionat/import_orders.html', MenuRequestContext(request, values))
+
+
+def handle_upload_file(file_data):
+    destination = open('tmp.xls','wb+')
+    for chunk in file_data.chunks():
+        destination.write(chunk)
+    destination.close()
+
+@login_required
+@permission_required('pansionat.add_order', login_url='/forbidden/')
+def import_file(request):
+    form = FileForm(request.POST, request.FILES)
+    if form.is_valid():
+        handle_upload_file(request.FILES['data'])
+        res = test_file('tmp.xls', True)
+    values = {"res":res}
+    return render_to_response('pansionat/importorder.html', MenuRequestContext(request, values))
+
+
+@login_required
+@permission_required('pansionat.add_order', login_url='/forbidden/')
+def testfile(request):
+    form = FileForm(request.POST, request.FILES)
+    if form.is_valid():
+        handle_upload_file(request.FILES['data'])
+        res = test_file('tmp.xls', False)
+    values = {"res":res}
+    return render_to_response('pansionat/importorder.html', MenuRequestContext(request, values))
 
 @login_required
 def net(request):
