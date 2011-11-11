@@ -8,7 +8,7 @@ from django.forms.models import ModelForm
 from django.http import HttpResponse
 from django.shortcuts import render_to_response
 from mysite import settings
-from mysite.pansionat.gavnetso import test_file
+from mysite.pansionat.gavnetso import test_file, import_diets
 from mysite.pansionat.menu import MenuRequestContext
 from mysite.pansionat.models import OrderDay, Order, Room
 
@@ -77,6 +77,13 @@ def testfile(request):
     if form.is_valid():
         handle_upload_file(request.FILES['data'])
         res = test_file(settings.STATIC_ROOT+'/tmp.xls', False)
+    values = {"res":res}
+    return render_to_response('pansionat/importorder.html', MenuRequestContext(request, values))
+
+@login_required
+@permission_required('pansionat.add_order', login_url='/forbidden/')
+def importdiet(request):
+    res = import_diets('dietitems.xls')
     values = {"res":res}
     return render_to_response('pansionat/importorder.html', MenuRequestContext(request, values))
 

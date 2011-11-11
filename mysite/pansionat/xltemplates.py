@@ -137,6 +137,119 @@ def fill_excel_template_s_gavnom(template_filename, tel, fields, records):
     w.save(response)
     return response
 
+def fill_excel_template_porcii(template_filename, tel, res):
+    w = prepare_excel_template(template_filename, tel)
+    response = HttpResponse(mimetype='application/vnd.ms-excel')
+    filename = tel.get('FILENAME','report')
+    response['Content-Disposition'] = 'attachment; filename=' + filename + '.xls'
+    maxr = tel['max_row']
+    top_row = maxr
+    maxr += 1
+    wtsheet = w.get_sheet(0)
+    pieces = set()
+    pieces_indexes = dict()
+    di_pi = dict()
+    wtsheet.write_merge(top_row,top_row+1, 0,0,"Продукты\nБлюда", easyxf('align: wrap on, horiz center, vert center; border: top thick, left thick, bottom thin, right thin'))
+    wtsheet.write_merge(top_row,top_row, 1,1,"", easyxf('align: wrap on, horiz center, vert center; border: top thick, left thin, bottom thin, right thin'))
+    wtsheet.write_merge(top_row,top_row, 2,2,"", easyxf('align: wrap on, horiz center, vert center; border: top thick, left thin, bottom thin, right thin'))
+    wtsheet.write_merge(top_row,top_row, 3,3,"", easyxf('align: wrap on, horiz center, vert center; border: top thick, left thin, bottom thin, right thin'))
+    wtsheet.write_merge(top_row+1,top_row+1, 1,1,"", easyxf('align: wrap on, horiz center, vert center; border: top thin, left thin, bottom thin, right thin'))
+    wtsheet.write_merge(top_row+1,top_row+1, 2,2,"", easyxf('align: wrap on, horiz center, vert center; border: top thin, left thin, bottom thin, right thin'))
+    wtsheet.write_merge(top_row+1,top_row+1, 3,3,"", easyxf('align: wrap on, horiz center, vert center; border: top thin, left thin, bottom thin, right thin'))
+
+    for id,qty,di in res:
+        for itempiece in di.item.itempiece_set.all():
+            if not itempiece.piece in pieces:
+                pieces.add(itempiece.piece)
+                pieces_indexes[itempiece.piece]=(len(pieces),0)
+                wtsheet.write_merge(top_row,top_row, 2+2*len(pieces)-1,2+2*len(pieces),itempiece.piece.name, easyxf('align: wrap on, horiz center, vert center; border: top thick, left thick, bottom thin, right thick'))
+                wtsheet.write_merge(top_row+1,top_row+1,2+2*len(pieces)-1,2+2*len(pieces)-1, 'норма', easyxf('align: wrap on; alignment:rota 90; border: top thin, left thick, bottom thin, right thin'))
+                wtsheet.write_merge(top_row+1,top_row+1,2+2*len(pieces),2+2*len(pieces), 'кол-во', easyxf('align: wrap on; alignment:rota 90; border: top thin, left thin, bottom thin, right thick'))
+                col = wtsheet.col(1+2*len(pieces))
+                col.width = 850
+                col = wtsheet.col(2+2*len(pieces))
+                col.width = 850
+            (idx,total) = pieces_indexes[itempiece.piece]
+            l = di_pi.get(di,dict())
+            l[idx] = itempiece.weight
+            di_pi[di] = l
+            pieces_indexes[itempiece.piece] = (idx,total+qty*itempiece.weight)
+
+    simple = easyxf('align: wrap on; font:name Arial, height 160; border: top thin, left thin, bottom thin, right thin')
+    left = easyxf('align: wrap on; font:name Arial, height 160; border: top thin, left thick, bottom thin, right thin')
+    right = easyxf('align: wrap on; font:name Arial, height 160; border: top thin, left thin, bottom thin, right thick')
+    bottom = easyxf('align: wrap on; font:name Arial, height 160; border: top thin, left thin, bottom thick, right thin')
+
+    for id,qty,di in res:
+        maxr += 1
+        wtsheet.write_merge(maxr, maxr, 0, 0, di.item.name, easyxf('align: wrap on; border: top thin, left thick, bottom thin, right thin'))
+        wtsheet.write_merge(maxr, maxr, 1, 1, qty, easyxf('align: wrap on; border: top thin, left thin, bottom thin, right thin'))
+        wtsheet.write_merge(maxr, maxr, 2, 2, di.item.weight, easyxf('align: wrap on; border: top thin, left thin, bottom thin, right thin'))
+        wtsheet.write_merge(maxr, maxr, 3, 3, 0, easyxf('align: wrap on; border: top thin, left thin, bottom thin, right thin'))
+        row = wtsheet.row(maxr)
+        row.height=500
+        row.height_mismatch = True
+
+        d = di_pi.get(di,dict())
+
+        cnt = len(pieces)+1
+
+        for i in xrange(1,cnt):
+            weight = d.get(i,0)
+            if weight>0:
+                wtsheet.write_merge(maxr, maxr, 1+2*i, 1+2*i, weight, left)
+                wtsheet.write_merge(maxr, maxr, 2+2*i, 2+2*i, qty, right)
+            else:
+                wtsheet.write_merge(maxr, maxr, 1+2*i, 1+2*i, "", left)
+                wtsheet.write_merge(maxr, maxr, 2+2*i, 2+2*i, "", right)
+                
+
+#    for id,qty,di in res:
+#        maxr += 1
+#        wtsheet.write_merge(maxr, maxr, 0, 0, di.item.name, easyxf('align: wrap on'))
+#        wtsheet.write_merge(maxr, maxr, 1, 1, qty, easyxf('align: wrap on'))
+#        wtsheet.write_merge(maxr, maxr, 2, 2, di.item.weight, easyxf('align: wrap on'))
+#        for itempiece in di.item.itempiece_set.all():
+#            if not itempiece.piece in pieces:
+#                pieces.add(itempiece.piece)
+#                pieces_indexes[itempiece.piece]=(len(pieces),0)
+#                wtsheet.write_merge(top_row,top_row, 3+2*len(pieces)-1,3+2*len(pieces),itempiece.piece.name, easyxf('align: wrap on, horiz center, vert center'))
+#                wtsheet.write_merge(top_row+1,top_row+1,3+2*len(pieces)-1,3+2*len(pieces)-1, 'норма', easyxf('align: wrap on; alignment:rota 90'))
+#                wtsheet.write_merge(top_row+1,top_row+1,3+2*len(pieces),3+2*len(pieces), 'кол-во', easyxf('align: wrap on; alignment:rota 90'))
+#                col = wtsheet.col(2+2*len(pieces))
+#                col.width = 900
+#                col = wtsheet.col(3+2*len(pieces))
+#                col.width = 900
+#            (idx,total) = pieces_indexes[itempiece.piece]
+#            pieces_indexes[itempiece.piece] = (idx,total+qty*itempiece.weight)
+#            wtsheet.write_merge(maxr, maxr, 2+2*idx, 2+2*idx, itempiece.weight, easyxf('align: wrap on; font:name Arial, height 160'))
+#            wtsheet.write_merge(maxr, maxr, 3+2*idx, 3+2*idx, qty, easyxf('align: wrap on; font:name Arial, height 160'))
+#            row = wtsheet.row(maxr)
+#            row.height=500
+#            row.height_mismatch = True
+
+    maxr += 1
+    wtsheet.write_merge(maxr, maxr, 0,0, 'Итого продуктов', easyxf('align: wrap on; font:name Arial, height 240; border: top thin, left thick, bottom thick, right thin'))
+    wtsheet.write_merge(maxr, maxr, 1,1, '', bottom)
+    wtsheet.write_merge(maxr, maxr, 2,2, '', bottom)
+    wtsheet.write_merge(maxr, maxr, 3,3, '', bottom)
+
+    for key,value in pieces_indexes.items():
+        wtsheet.write_merge(maxr, maxr, 1+2*value[0], 2+2*value[0], value[1], easyxf('align: wrap on; font:name Arial, height 220; border: top thin, left thick, bottom thick, right thick'))
+
+    row = wtsheet.row(top_row)
+    row.height=1500
+    row.height_mismatch = True
+    row = wtsheet.row(top_row+1)
+    row.height=1000
+    row.height_mismatch = True
+    row = wtsheet.row(maxr)
+    row.height=400
+    row.height_mismatch = True
+
+    w.save(response)
+    return response
+
 def prepare_excel_template(template_filename, tel):
     rb = open_workbook(settings.STATIC_ROOT + '/xls/' + template_filename,formatting_info=True)
     rsh = rb.sheet_by_index(0)

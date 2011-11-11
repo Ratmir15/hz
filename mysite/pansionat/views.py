@@ -19,7 +19,7 @@ from django.shortcuts import render_to_response
 from django.shortcuts import redirect 
 import logging
 from mysite.pansionat import gavnetso
-from mysite.pansionat.models import IllHistory, Customer, IllHistoryFieldType, IllHistoryFieldValue, IllHistoryRecord, OrderMedicalProcedure, MedicalProcedureType, OrderMedicalProcedureSchedule, Occupied, IllHistoryFieldTypeGroup, EmployerRoleHistory, Role, Employer, OrderDiet, Diet, OrderDay, OrderType
+from mysite.pansionat.models import IllHistory, Customer, IllHistoryFieldType, IllHistoryFieldValue, IllHistoryRecord, OrderMedicalProcedure, MedicalProcedureType, OrderMedicalProcedureSchedule, Occupied, IllHistoryFieldTypeGroup, EmployerRoleHistory, Role, Employer, OrderDiet, Diet, OrderDay, OrderType, DietItems, Item, ItemPiece, Piece
 from mysite.pansionat.orders import room_availability
 from mysite.pansionat.proc import MenuRequestContext, MedicalPriceReport
 from pytils import numeral
@@ -31,7 +31,7 @@ from django.forms import ModelForm
 from django.core.context_processors import csrf
 from django.db.models import Q
 
-from mysite.pansionat.xltemplates import fill_excel_template, fill_excel_template_s_gavnom
+from mysite.pansionat.xltemplates import fill_excel_template, fill_excel_template_s_gavnom, fill_excel_template_porcii
 
 
 logger = logging.getLogger(__name__)
@@ -782,6 +782,10 @@ def clear(request):
     dellist(Employer.objects.all())
     dellist(Role.objects.all())
     dellist(Diet.objects.all())
+    dellist(Item.objects.all())
+    dellist(ItemPiece.objects.all())
+    dellist(Piece.objects.all())
+    dellist(DietItems.objects.all())
     dellist(OrderType.objects.all())
 
 @login_required
@@ -1203,6 +1207,50 @@ def mpreport(request):
     return render_to_response('pansionat/mpreport.html', MenuRequestContext(request, values))
 
 @login_required
+def dietday(request):
+    form = DietForm()
+    values = {"form":form}
+    return render_to_response('pansionat/dietday.html', MenuRequestContext(request, values))
+
+@login_required
+def dietdaychoose(request):
+    form = DietForm(request.POST)
+    if form.is_valid():
+        start_date = form.cleaned_data['report_date']
+        day_of_week = start_date.weekday()+1
+        dis = DietItems.objects.filter(day_of_week = day_of_week)
+#        res = []
+#        for di in dis:
+        values = {"dietitems":dis}
+        return render_to_response('pansionat/dietdaychoose.html', MenuRequestContext(request, values))
+    else:
+        values = {"form":form}
+        return render_to_response('pansionat/dietday.html', MenuRequestContext(request, values))
+
+@login_required
+def dietdayreport(request):
+    post = request.POST
+    res = []
+    for key,value in post.items():
+        ak = key.split("_")
+        if len(ak)>1:
+            id = int(ak[len(ak)-1])
+            qty = int(value)
+            di = DietItems.objects.get(id = id)
+            res.append((id,qty,di))
+#        for itempiece in di.item.itempiece_set:
+#        print key
+#        print value
+#        res = []
+    tel = {}
+    tel["filename"] = "porcionnik"
+    return fill_excel_template_porcii("porcii.xls",tel,res)
+#        for di in dis:
+#        values = {"dietitems":dis}
+#        return render_to_response('pansionat/dietdaychoose.html', MenuRequestContext(request, values))
+
+
+@login_required
 def diets(request):
     values = { 'start_date': datetime.date.today().strftime('%d.%m.%Y') }
     return render_to_response('pansionat/diets.html', MenuRequestContext(request, values))
@@ -1214,6 +1262,9 @@ class OrderForm(ModelForm):
 
 class EnteringForm(forms.Form):
     report_date = forms.DateField(required=True, label='Дата заезда')
+
+class DietForm(forms.Form):
+    report_date = forms.DateField(required=True, label='Дата формирования меню')
 
 class DateFilterForm(forms.Form):
     start_date = forms.DateField(required=True, label='С')

@@ -2,12 +2,12 @@
 import datetime
 import decimal
 import re
-from string import lower, upper
+from string import lower, upper, strip
 from django.db import connection
 from django.db.models.query_utils import Q
 from xlrd import open_workbook
 from mysite import settings
-from mysite.pansionat.models import Patient, Customer, Order, Occupied, Room, RoomType, EmployerRoleHistory, Role, Employer, IllHistoryFieldTypeGroup, IllHistoryFieldType, MedicalProcedureType, OrderMedicalProcedure, OrderMedicalProcedureSchedule, RoomBook, Book, Diet, Item, DietItems, OrderDay, MedicalProcedureTypePrice, OrderType
+from mysite.pansionat.models import Patient, Customer, Order, Occupied, Room, RoomType, EmployerRoleHistory, Role, Employer, IllHistoryFieldTypeGroup, IllHistoryFieldType, MedicalProcedureType, OrderMedicalProcedure, OrderMedicalProcedureSchedule, RoomBook, Book, Diet, Item, DietItems, OrderDay, MedicalProcedureTypePrice, OrderType, Piece, ItemPiece
 
 def nextmonthfirstday(year, month):
     if month==12:
@@ -57,6 +57,57 @@ def import_bron(filename):
             book = Book(start_date = s_date, end_date = e_date, name = name, phone = phone, description = description)
             book.save()
 
+def import_diets(filename):
+    rb = open_workbook(settings.STATIC_ROOT + '/xls/' + filename,formatting_info=True)
+    rsh = rb.sheet_by_index(0)
+
+    res = []
+
+    d2  = Diet.objects.filter(name = 'Диета №2 (легкая)')
+    diet = d2[0]
+    
+    last = None
+    for rrowx in xrange(rsh.nrows):
+        v = rsh.cell_value(rrowx, 0)
+        if v != "":
+            line = [("Блюдо","")]
+            bl_name = rsh.cell_value(rrowx,0)
+            bls = Item.objects.filter(name = bl_name)
+            line.append((bl_name,""))
+            w = rsh.cell_value(rrowx,1)
+            line.append((w,""))
+            dw = rsh.cell_value(rrowx,2)
+            line.append((dw,""))
+            pp = rsh.cell_value(rrowx,3)
+            line.append((pp,""))
+            if not len(bls):
+                bl = Item(name = bl_name, weight = float2int(w))
+                bl.save()
+                last = bl
+                di = DietItems(diet = diet, item = bl,day_of_week = float2int(dw), eating = float2int(pp),
+                          start_date = datetime.date(2001,1,1), end_date = datetime.date(2020,1,1))
+                di.save()
+            else:
+                last = bls[0]
+
+            res.append(line)
+        else:
+            line = [("Ингридиент","")]
+            it = strip(rsh.cell_value(rrowx,1))
+            line.append((it,""))
+            w = rsh.cell_value(rrowx,2)
+            line.append((w,""))
+            ps = Piece.objects.filter(name = it)
+            if not len(ps):
+                p = Piece(name = it)
+                p.save()
+            else:
+                p = ps[0]
+            ip = ItemPiece(item = last, piece = p,weight = float2int(w))
+            ip.save()
+            res.append(line)
+    return res
+
 def import_proc():
     rb = open_workbook(settings.STATIC_ROOT + '/xls/mproc.xls',formatting_info=True)
     rsh = rb.sheet_by_index(0)
@@ -97,6 +148,12 @@ def import_ordertypes():
         ot.save()
         ot = OrderType(name = 'Реабилитация',price = '21607.92')
         ot.save()
+
+def float2int(strdata):
+    arr = str(strdata).split(".")
+    if len(arr)>1:
+        strdata = arr[0]
+    return int(strdata)
 
 def test_file(filename, flag):
     rb = open_workbook(filename,formatting_info=True)
@@ -757,29 +814,29 @@ def initdiet():
     d2.save()
     d3  = Diet(name = 'Диета №3 (питательная)')
     d3.save()
-    i1 = Item(name = 'Рис с овощами')
+    i1 = Item(name = 'Рис с овощами',weight = 100)
     i1.save()
-    i2 = Item(name = 'Макароны по флотски')
+    i2 = Item(name = 'Макароны по флотски',weight = 100)
     i2.save()
-    i3 = Item(name = 'Спагетти с сосиской')
+    i3 = Item(name = 'Спагетти с сосиской',weight = 100)
     i3.save()
-    i4 = Item(name = 'Суп грибной')
+    i4 = Item(name = 'Суп грибной',weight = 100)
     i4.save()
-    i5 = Item(name = 'Лапша куриная')
+    i5 = Item(name = 'Лапша куриная',weight = 100)
     i5.save()
-    i6 = Item(name = 'Щи')
+    i6 = Item(name = 'Щи',weight = 100)
     i6.save()
-    di = DietItems(diet = d1, item = i1, start_date = datetime.date(2007,7,1), end_date = datetime.date(2015,7,1))
+    di = DietItems(diet = d1, item = i1,day_of_week=2,eating = 1, start_date = datetime.date(2007,7,1), end_date = datetime.date(2015,7,1))
     di.save()
-    di = DietItems(diet = d2, item = i2, start_date = datetime.date(2007,7,1), end_date = datetime.date(2015,7,1))
+    di = DietItems(diet = d2, item = i2,day_of_week=2,eating = 1, start_date = datetime.date(2007,7,1), end_date = datetime.date(2015,7,1))
     di.save()
-    di = DietItems(diet = d3, item = i3, start_date = datetime.date(2007,7,1), end_date = datetime.date(2015,7,1))
+    di = DietItems(diet = d3, item = i3,day_of_week=2,eating = 1, start_date = datetime.date(2007,7,1), end_date = datetime.date(2015,7,1))
     di.save()
-    di = DietItems(diet = d1, item = i4, start_date = datetime.date(2007,7,1), end_date = datetime.date(2015,7,1))
+    di = DietItems(diet = d1, item = i4,day_of_week=2,eating = 1, start_date = datetime.date(2007,7,1), end_date = datetime.date(2015,7,1))
     di.save()
-    di = DietItems(diet = d2, item = i5, start_date = datetime.date(2007,7,1), end_date = datetime.date(2015,7,1))
+    di = DietItems(diet = d2, item = i5,day_of_week=2,eating = 1, start_date = datetime.date(2007,7,1), end_date = datetime.date(2015,7,1))
     di.save()
-    di = DietItems(diet = d3, item = i6, start_date = datetime.date(2007,7,1), end_date = datetime.date(2015,7,1))
+    di = DietItems(diet = d3, item = i6,day_of_week=2,eating = 1, start_date = datetime.date(2007,7,1), end_date = datetime.date(2015,7,1))
     di.save()
 
 def initp():

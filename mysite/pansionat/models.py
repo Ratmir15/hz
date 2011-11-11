@@ -76,10 +76,23 @@ class Diet(models.Model):
 
 class Item(models.Model):
     name = models.CharField(max_length=50)
+    weight = models.DecimalField(decimal_places=3,max_digits=7)
 
     class Meta:
         verbose_name = 'Продукт'
         verbose_name_plural = 'Продукты'
+
+class Piece(models.Model):
+    name = models.CharField(max_length = 50)
+
+    class Meta:
+        verbose_name = 'Часть блюда'
+        verbose_name_plural = 'Части блюд'
+        
+class ItemPiece(models.Model):
+    item = models.ForeignKey(Item)
+    piece = models.ForeignKey(Piece)
+    weight = models.DecimalField(decimal_places=3,max_digits=7)
 
 class ItemPrices(models.Model):
 	item = models.ForeignKey(Item)
@@ -88,10 +101,12 @@ class ItemPrices(models.Model):
 	end_date = models.DateTimeField('date finished')
 	
 class DietItems(models.Model):
-	diet = models.ForeignKey(Diet)
-	item = models.ForeignKey(Item)
-	start_date = models.DateTimeField('date started')
-	end_date = models.DateTimeField('date finished')
+    diet = models.ForeignKey(Diet,verbose_name='Диета')
+    item = models.ForeignKey(Item, verbose_name='Блюдо')
+    day_of_week = models.IntegerField(verbose_name='День недели')
+    eating = models.IntegerField(verbose_name='Прием пищи')
+    start_date = models.DateTimeField(verbose_name='Дата начала действия')
+    end_date = models.DateTimeField(verbose_name='Дата окончания действия')
 
 class MedicalLocation(models.Model):
     name = models.CharField(max_length=50)

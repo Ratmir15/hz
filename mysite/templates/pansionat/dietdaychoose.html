@@ -1,0 +1,52 @@
+{% extends "pansionat/index.html" %}
+
+{% block title %} Выберите дату {%  endblock  %}
+
+{% block head %}
+    <style type="text/css">
+        @import "/static/dataTables/media/css/demo_page.css";
+        @import "/static/dataTables/media/css/demo_table.css";
+        @import "/static/jquery-ui/themes/base/jquery.ui.all.css";
+    </style>
+    <script src="/static/dataTables/media/js/jquery.js"></script>
+    <script src="/static/dataTables/media/js/jquery.dataTables.js"></script>
+    <script src="/static/jquery-ui/ui/jquery.ui.core.js"></script>
+    <script src="/static/jquery-ui/ui/jquery.ui.widget.js"></script>
+    <script src="/static/jquery-ui/ui/jquery.ui.datepicker.js"></script>
+    <script src="/static/jquery-ui/ui/i18n/jquery.ui.datepicker-ru.js"></script>
+    <script src="/static/jquery-ui/ui/jquery.ui.button.js"></script>
+    <script type="text/javascript">
+        $(document).ready(function() {
+            $.datepicker.setDefaults($.datepicker.regional['ru']);
+            $("#start_date").datepicker();
+            $('input:submit').button()
+            $(':button').button()
+            } );
+    </script>
+<link rel="stylesheet" href="/static/Refresh.css" type="text/css" />
+ {%  endblock  %}
+
+{% block allcontent %}
+    <h1>Выбор блюд</h1>
+    <form action = "/dietday/report/" method="POST">
+        {% csrf_token %}
+        <table border="0" id = "occupied" class = "display">
+        <tr><th>Название</th><th>Доп. инфо</th><th>Кол-во</th><th>Назначено</th><th></th></tr>
+            {% for dietitem in dietitems %}
+                <tr>
+                    <th>
+                        <label for="id_add_field_{{ dietitem.id }}">{{ dietitem.item.name }}</label>
+                    </th>
+                    <td>
+                        <input type="text" value="" id="id_addinfo_field_{{ dietitem.id }}" name="id_addinfo_field_{{ dietitem.id }}">
+                    </td>
+                </tr>
+            {% endfor %}
+            <tr>
+                <td colspan="2">
+                    <input type="submit" value="Сохранить">
+                </td>
+            </tr>
+        </table>
+    </form>
+{%  endblock  %}
