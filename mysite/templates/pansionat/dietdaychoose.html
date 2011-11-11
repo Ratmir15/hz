@@ -31,7 +31,7 @@
     <form action = "/dietday/report/" method="POST">
         {% csrf_token %}
         <table border="0" id = "occupied" class = "display">
-        <tr><th>Название</th><th>Доп. инфо</th><th>Кол-во</th><th>Назначено</th><th></th></tr>
+        <tr><th>Название</th><th>Кол-во</th></tr>
             {% for dietitem in dietitems %}
                 <tr>
                     <th>
@@ -44,7 +44,7 @@
             {% endfor %}
             <tr>
                 <td colspan="2">
-                    <input type="submit" value="Сохранить">
+                    <input type="submit" value="Сформировать">
                 </td>
             </tr>
         </table>
