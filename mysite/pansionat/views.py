@@ -931,7 +931,7 @@ def ill_history(request, order_id):
     #secondary_diagnose = u'б) сопутствующего заболевания: ' + ill_history.secondary_diagnose
     #conditions =  u'Условия труда и быта больного: ' + ill_history.conditions
     tel = { 'NUMBER': order.code,
-           'FILENAME': 'ill_history-'+order.code,
+           'FILENAME': 'ill_history-'+str(order.code),
            'SURNAME': order.patient.family, 'NAME': order.patient.name,
            'SNAME': order.patient.sname,
            'WHOIS': order.patient.profession,

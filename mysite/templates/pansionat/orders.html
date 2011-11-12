@@ -12,6 +12,11 @@
     <script src="/static/dataTables/media/js/jquery.dataTables.js"></script>
     <script src="/static/jquery-ui/ui/jquery.ui.core.js"></script>
     <script src="/static/jquery-ui/ui/jquery.ui.widget.js"></script>
+    <script src="/static/jquery-ui/ui/jquery.ui.mouse.js"></script>
+    <script src="/static/jquery-ui/ui/jquery.ui.draggable.js"></script>
+    <script src="/static/jquery-ui/ui/jquery.ui.position.js"></script>
+    <script src="/static/jquery-ui/ui/jquery.ui.resizable.js"></script>
+    <script src="/static/jquery-ui/ui/jquery.ui.dialog.js"></script>
     <script src="/static/jquery-ui/ui/jquery.ui.datepicker.js"></script>
     <script src="/static/jquery-ui/ui/i18n/jquery.ui.datepicker-ru.js"></script>
     <script src="/static/jquery-ui/ui/jquery.ui.button.js"></script>
@@ -20,11 +25,39 @@
     <script type="text/javascript">
         $(document).ready(function() {
             $('#occupied').dataTable();
+            $('#dl').dialog({ autoOpen: false });
+//            $('div.mhref').click(function() {
+//                links(this.id);
+//            })
             } );
+        function update_links(id) {
+            ids = id.split("_")
+            id = ids[1]
+            $('#dl_code').html(ids[2]);
+            $('#dl_1').attr('href','/order/'+id);
+            $('#dl_2').attr('href','/orders/nakl/'+id);
+            $('#dl_3').attr('href','/orders/sf/'+id);
+            $('#dl_4').attr('href','/orders/pko/'+id);
+            $('#dl_5').attr('href','/orders/rootik/'+id);
+            $('#dl_6').attr('href','/orders/zayava/'+id);
+            $('#dl_7').attr('href','/illhistory/'+id);
+            $('#dl_8').attr('href','/mp/'+id);
+            $('#dl_9').attr('href','/diet/'+id);
+            $('#dl').dialog('open');
+        }
     </script>
  {%  endblock  %}
 
 {% block allcontent %}
+    <div id="dl" title="Подменю путевки">
+        <table width="100%"><tr><td colspan="2"><div id="dl_code"></div></td></tr>
+            <tr><td><a id="dl_1" href="/order/id/">Редактировать</a></td><td><a id="dl_2" href="/orders/nakl/id/">Накладная</a></td></tr>
+            <tr><td><a id="dl_3" href="/orders/sf/id/">Сч-ф</a></td><td><a id="dl_4" href="/orders/pko/id/">ПКО</a></td></tr>
+            <tr><td><a id="dl_5" href="/orders/rootik/id/">Квиток</a></td><td><a id="dl_6" href="/orders/zayava/id/">Заявление</a></td></tr>
+            <tr><td><a id="dl_7" href="/illhistory/id/">История болезни</a></td><td><a id="dl_8" href="/mp/id/">Процедуры</a></td></tr>
+            <tr><td colspan="2">{% if diet_en %}<a id="dl_9" href="/diet/id/">Диета</a>{% endif %}</td></tr>
+        </table>
+    </div>
     <h1>Список брони</h1>
     <table border="0" id = "occupied" class = "display">
     <thead>
@@ -36,7 +69,6 @@
     <th>К</th>
     <th>Пациент</th>
     <th>Сумма(руб)</th>
-    <th></th>
     <th></th>
     </thead>
             {% for occupied in occupied_list %}
@@ -65,16 +97,8 @@
                 <td>
                     {{ occupied.price }}
                 </td>
-                    <td>
-                        <a href="/illhistory/{{ occupied.id }}/">История болезни</a><br/><a href="/mp/{{ occupied.id }}/">Процедуры</a>{% if diet_en %}/<a href="/diet/{{ occupied.id }}/">Диета</a>{% endif %}
-                    </td>
                 <td>
-                    <a href="/order/{{ occupied.id }}/">Редактировать</a>/
-                    <a href="/orders/nakl/{{ occupied.id }}/">Накладная</a>/
-                        <a href="/orders/sf/{{ occupied.id }}/">Сч-ф</a>/
-                        <a href="/orders/pko/{{ occupied.id }}/">ПКО</a>/
-                        <a href="/orders/rootik/{{ occupied.id }}/">Квиток</a>/
-                        <a href="/orders/zayava/{{ occupied.id }}/">Заявление</a>
+                    <div class="mhref" onclick="update_links(this.id);" id="m_{{ occupied.id }}_{{ occupied.code }}">&raquo;&raquo;&raquo;&raquo;</div>
                     </td>
                 </tr>
             {% endfor %}
