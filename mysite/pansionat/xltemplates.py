@@ -150,11 +150,9 @@ def fill_excel_template_porcii(template_filename, tel, res):
     pieces_indexes = dict()
     di_pi = dict()
     wtsheet.write_merge(top_row,top_row+1, 0,0,"Продукты\nБлюда", easyxf('align: wrap on, horiz center, vert center; border: top thick, left thick, bottom thin, right thin'))
-    wtsheet.write_merge(top_row,top_row, 1,1,"", easyxf('align: wrap on, horiz center, vert center; border: top thick, left thin, bottom thin, right thin'))
-    wtsheet.write_merge(top_row,top_row, 2,2,"", easyxf('align: wrap on, horiz center, vert center; border: top thick, left thin, bottom thin, right thin'))
+    wtsheet.write_merge(top_row,top_row+1, 1,1,"Кол-во", easyxf('align: wrap on, horiz center, vert center, rota 90; border: top thick, left thin, bottom thin, right thin'))
+    wtsheet.write_merge(top_row,top_row+1, 2,2,"Выход", easyxf('align: wrap on, horiz center, vert center, rota 90; border: top thick, left thin, bottom thin, right thin'))
     wtsheet.write_merge(top_row,top_row, 3,3,"", easyxf('align: wrap on, horiz center, vert center; border: top thick, left thin, bottom thin, right thin'))
-    wtsheet.write_merge(top_row+1,top_row+1, 1,1,"", easyxf('align: wrap on, horiz center, vert center; border: top thin, left thin, bottom thin, right thin'))
-    wtsheet.write_merge(top_row+1,top_row+1, 2,2,"", easyxf('align: wrap on, horiz center, vert center; border: top thin, left thin, bottom thin, right thin'))
     wtsheet.write_merge(top_row+1,top_row+1, 3,3,"", easyxf('align: wrap on, horiz center, vert center; border: top thin, left thin, bottom thin, right thin'))
 
     for id,qty,di in res:
