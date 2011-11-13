@@ -1258,7 +1258,10 @@ def diets(request):
 class OrderForm(ModelForm):
     class Meta:
         model = Order
-        exclude = ('patient', 'room')
+#        widgets = {
+#            'customer': TextInput(),
+#        }
+        exclude = ('directive','customer','patient', 'room')
 
 class EnteringForm(forms.Form):
     report_date = forms.DateField(required=True, label='Дата заезда')
@@ -1422,6 +1425,10 @@ def order(request):
                                     'end_date' : request.session['end_date'],\
                                     'price': price,
                                     'code': code['code__max']+1})
+    cus_error = None
+    dir_error = None
+    cus = ''
+    dir = ''
     if request.method == 'POST':
         order_form = OrderForm(request.POST)
         patient_form = None
@@ -1432,19 +1439,38 @@ def order(request):
         else:
             patient_form = PatientForm(request.POST)
 
-        if order_form.is_valid():
-            if (not patient_form is None and patient_form.is_valid()):
+        cus = request.POST.get("customer","")
+        customer = None
+        if cus!="":
+            cs = Customer.objects.filter(name = cus)
+            if not len(cs):
+                cus_error = "Выберите корректный вариант. Вашего варианта нет среди допустимых значений."
+            else:
+                customer = cs[0]
+        dir = order_form.data.get("directive","")
+        directive = None
+        if dir!="":
+            cs = Customer.objects.filter(name = dir)
+            if not len(cs):
+                dir_error = "Выберите корректный вариант. Вашего варианта нет среди допустимых значений."
+            else:
+                directive = cs[0]
+
+        if order_form.is_valid() and cus_error is None and dir_error is None:
+            if not patient_form is None and patient_form.is_valid():
                 patient = patient_form.save()
 
             if not patient is None:
                 order = order_form.save(commit = False)
+                order.customer = customer
+                order.directive = directive
                 order.patient = patient
                 order.room = rooms[0] # Get first element because len of array should be 1
                 order.save()
                 fillOrderDays(order)
                 return redirect('/rooms')
 
-    values = {'order_form': order_form, 'rooms': rooms, user: request.user, 'pr': int(rooms[0].room_type.price), 'pl': int(pl)}
+    values = {'order_form': order_form, 'cus':cus, 'dir':dir, 'rooms': rooms, user: request.user, 'pr': int(rooms[0].room_type.price), 'pl': int(pl)}
     values.update(csrf(request))
     if 'patient_id' in request.session:
         patient_id = request.session['patient_id']
@@ -1453,5 +1479,9 @@ def order(request):
     else:    
         patient_form = PatientForm()
         values['patient_form'] = patient_form
-        
+
+    values["customers"] = Customer.objects.all()
+    values["cus_error"] = cus_error
+    values["dir_error"] = dir_error
+
     return render_to_response('pansionat/order.html', MenuRequestContext(request, values))
