@@ -41,6 +41,7 @@
             $('#dl_5').attr('href','/orders/rootik/'+id);
             $('#dl_6').attr('href','/orders/zayava/'+id);
             $('#dl_7').attr('href','/illhistory/'+id);
+            $('#dl_10').attr('href','/ih/'+id);
             $('#dl_8').attr('href','/mp/'+id);
             $('#dl_9').attr('href','/diet/'+id);
             $('#dl').dialog('open');
@@ -54,6 +55,7 @@
             <tr><td><a id="dl_1" href="/order/id/">Редактировать</a></td><td><a id="dl_2" href="/orders/nakl/id/">Накладная</a></td></tr>
             <tr><td><a id="dl_3" href="/orders/sf/id/">Сч-ф</a></td><td><a id="dl_4" href="/orders/pko/id/">ПКО</a></td></tr>
             <tr><td><a id="dl_5" href="/orders/rootik/id/">Квиток</a></td><td><a id="dl_6" href="/orders/zayava/id/">Заявление</a></td></tr>
+            <tr><td colspan="2"><a id="dl_10" href="/ih/id/">Шапка истории болезни</a></td></tr>
             <tr><td><a id="dl_7" href="/illhistory/id/">История болезни</a></td><td><a id="dl_8" href="/mp/id/">Процедуры</a></td></tr>
             <tr><td colspan="2">{% if diet_en %}<a id="dl_9" href="/diet/id/">Диета</a>{% endif %}</td></tr>
         </table>

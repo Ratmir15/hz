@@ -945,6 +945,30 @@ def ill_history(request, order_id):
     return fill_excel_template_s_gavnom(template_filename, tel, ill_history_fields, ill_history_records)
 
 @login_required
+def ill_history_head(request, order_id):
+    order = Order.objects.get(id=order_id)
+    template_filename = 'historytitul.xls'
+    if not order.patient.birth_date is None:
+        delt = datetime.date.today() - order.patient.birth_date
+        years = int (delt.days / 365.25)
+    else:
+        years = ""
+    srok = 'c '+str(order.start_date)+' по '+str(order.end_date)
+    tel = { 'NUMBER': order.code,
+           'FILENAME': 'ill_history-'+str(order.code),
+           'SURNAME': order.patient.family, 'NAME': order.patient.name,
+           'SNAME': order.patient.sname,
+           'WHOIS': order.patient.profession,
+           'WHOARE': order.patient.grade,
+           'CLIENT': order.customer.name,
+           'ONANIST': order.patient.marriage,
+           'ADDRESS': order.patient.address,
+           'AGE': years,
+           'SROK':srok,
+    }
+    return fill_excel_template(template_filename, tel)
+
+@login_required
 def rootik(request, order_id):
     order = Order.objects.get(id=order_id)
     template_filename = 'rootik.xls'
