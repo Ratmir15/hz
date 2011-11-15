@@ -19,7 +19,7 @@ from django.shortcuts import render_to_response
 from django.shortcuts import redirect 
 import logging
 from mysite.pansionat import gavnetso
-from mysite.pansionat.models import IllHistory, Customer, IllHistoryFieldType, IllHistoryFieldValue, IllHistoryRecord, OrderMedicalProcedure, MedicalProcedureType, OrderMedicalProcedureSchedule, Occupied, IllHistoryFieldTypeGroup, EmployerRoleHistory, Role, Employer, OrderDiet, Diet, OrderDay, OrderType, DietItems, Item, ItemPiece, Piece
+from mysite.pansionat.models import IllHistory, Customer, IllHistoryFieldType, IllHistoryFieldValue, IllHistoryRecord, OrderMedicalProcedure, MedicalProcedureType, OrderMedicalProcedureSchedule, Occupied, IllHistoryFieldTypeGroup, EmployerRoleHistory, Role, Employer, OrderDiet, Diet, OrderDay, OrderType, DietItems, Item, ItemPiece, Piece, MARRIAGE
 from mysite.pansionat.orders import room_availability
 from mysite.pansionat.proc import MenuRequestContext, MedicalPriceReport
 from pytils import numeral
@@ -954,17 +954,18 @@ def ill_history_head(request, order_id):
     else:
         years = ""
     srok = 'c '+str(order.start_date)+' по '+str(order.end_date)
-    tel = { 'NUMBER': order.code,
+    tel = { 'NUMBER': order.putevka,
            'FILENAME': 'ill_history-'+str(order.code),
            'SURNAME': order.patient.family, 'NAME': order.patient.name,
            'SNAME': order.patient.sname,
            'WHOIS': order.patient.profession,
            'WHOARE': order.patient.grade,
            'CLIENT': order.customer.name,
-           'ONANIST': order.patient.marriage,
+           'ONANIST': order.patient.get_marriage_display(),
            'ADDRESS': order.patient.address,
            'AGE': years,
            'SROK':srok,
+           'DATEIN':str(order.start_date),
     }
     return fill_excel_template(template_filename, tel)
 
@@ -1021,7 +1022,7 @@ def zayava(request, occupied_id):
     delt = order.end_date - order.start_date
     days = delt.days + 1
     tel = {'FULLNAME': fullname, 'CODE': order.code,
-           'FILENAME': 'zayavlenie-'+order.code,
+           'FILENAME': 'zayavlenie-'+str(order.code),
            'ROOM': order.room.name,
            'CLIENTFAMILY': order.patient.family,
            'CLIENTIO': clientio,
