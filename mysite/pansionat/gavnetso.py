@@ -173,13 +173,14 @@ def test_file(filename, flag):
                 #matchObj = re.match( '([0-9]*)[\.0]?$', strdata, flags = 0)
                 do_import = True
                 r = False
+                strdata = strip(strdata)
                 if not strdata[0] in ('0','1','2'):
                     r = True
                     order_type = order_type_r
                     strdata = strdata[1:]
                 arr = strdata.split(".")
                 if len(arr)>1:
-                    strdata = arr[0]
+                    strdata = strip(arr[0])
                 os = Order.objects.filter(code = int(strdata))
                 if not len(os):
                     row_info.append((int(strdata),""))
@@ -229,9 +230,9 @@ def test_file(filename, flag):
                     pr = 0
                 price = decimal.Decimal(pr)
                 row_info.append((price,""))
-                v = rsh.cell_value(rrowx,9)
-                s_date = datetime.date(year = 1899, month = 12, day=30)+datetime.timedelta(days=v)
-                row_info.append((s_date,""))
+#                v = rsh.cell_value(rrowx,9)
+#                s_date = datetime.date(year = 1899, month = 12, day=30)+datetime.timedelta(days=v)
+#                row_info.append((s_date,""))
                 v = rsh.cell_value(rrowx,10)
                 cs = Customer.objects.filter(Q(name = v,shortname = v))
                 if len(cs)>0:
@@ -244,7 +245,10 @@ def test_file(filename, flag):
                         customer.save()
                     row_info.append((v,"Клиент не найден"))
                 v = rsh.cell_value(rrowx,11)
-                birth_date = datetime.date(year = 1899, month = 12, day=30)+datetime.timedelta(days=v)
+                if v!='':
+                    birth_date = datetime.date(year = 1899, month = 12, day=30)+datetime.timedelta(days=v)
+                else:
+                    birth_date = None
                 row_info.append((birth_date,""))
                 address = rsh.cell_value(rrowx,13)
                 row_info.append((address,""))
