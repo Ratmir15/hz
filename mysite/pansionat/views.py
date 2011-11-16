@@ -1021,7 +1021,7 @@ def zayava(request, occupied_id):
     dir = gavnetso.getEmployerByRoleNameAndDate('Директор',order.start_date).__unicode__()
     delt = order.end_date - order.start_date
     days = delt.days + 1
-    tel = {'FULLNAME': fullname, 'CODE': order.code,
+    tel = {'FULLNAME': fullname, 'CODE': order.putevka,
            'FILENAME': 'zayavlenie-'+str(order.code),
            'ROOM': order.room.name,
            'CLIENTFAMILY': order.patient.family,
