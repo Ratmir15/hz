@@ -246,10 +246,15 @@ def test_file(filename, flag):
                     row_info.append((v,"Клиент не найден"))
                 v = rsh.cell_value(rrowx,11)
                 if v!='':
-                    birth_date = datetime.date(year = 1899, month = 12, day=30)+datetime.timedelta(days=v)
+                    try:
+                        birth_date = datetime.date(year = 1899, month = 12, day=30)+datetime.timedelta(days=v)
+                        row_info.append((birth_date,""))
+                    except TypeError:
+                        birth_date = None
+                        row_info.append((birth_date,"Incorrect date format!"))
                 else:
                     birth_date = None
-                row_info.append((birth_date,""))
+                    row_info.append((birth_date,""))
                 address = rsh.cell_value(rrowx,13)
                 row_info.append((address,""))
                 v = rsh.cell_value(rrowx,12)

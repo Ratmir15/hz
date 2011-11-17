@@ -107,4 +107,3 @@ class MedicalPriceReport():
         z = {'REPORTDATE': str(cleaned_report_date)}
         return z,d
 
-

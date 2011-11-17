@@ -5,7 +5,7 @@ from django.shortcuts import render_to_response
 from django import forms
 from django.template import loader
 from mysite.pansionat.menu import MenuRequestContext
-from mysite.pansionat.models import Order
+from mysite.pansionat.models import Order, OrderType, OrderDay
 from mysite.pansionat.proc import MedicalPriceReport
 from mysite.pansionat.xltemplates import fill_excel_template
 
@@ -36,8 +36,16 @@ class EnteringReport():
 class LeavingForm(forms.Form):
     report_date = forms.DateField(required=True, label='Дата отъезда')
 
+class LeavingForm2(forms.Form):
+    report_date = forms.DateField(required=True, label='Дата отъезда')
+    order_type = forms.ModelChoiceField(OrderType.objects.all(), label = 'Тип путевки')
+
 class MedicalPriceForm(forms.Form):
     report_date = forms.DateField(required=True, label='Дата формирования')
+
+class LivingForm(forms.Form):
+    report_date = forms.DateField(required=True, label='Дата формирования')
+    order_type = forms.ModelChoiceField(OrderType.objects.all(), label = 'Тип путевки')
 
 class LeavingReport():
 
@@ -50,10 +58,59 @@ class LeavingReport():
         z = {'REPORTDATE': str(cleaned_report_date)}
         return z,d
 
+class LeavingReport2():
+
+    def process(self, form):
+        cleaned_report_date = form.cleaned_data['report_date']
+        order_type = form.cleaned_data['order_type']
+        orders = Order.objects.filter(end_date = cleaned_report_date, order_type = order_type)
+        d = []
+        for order in orders:
+            d.append({'FIO':order.patient.fio(), 'ROOM':order.room.name})
+        z = {'REPORTDATE': str(cleaned_report_date)}
+        return z,d
+
+
+class LivingReport():
+
+    def process(self, form):
+        cleaned_report_date = form.cleaned_data['report_date']
+        order_type = form.cleaned_data['order_type']
+        list = OrderDay.objects.filter(busydate = cleaned_report_date,
+            order__order_type = order_type).order_by("order__code")
+        d = []
+        i = 0
+        for obj in list:
+            order = obj.order
+            i += 1
+            innermap = dict()
+            innermap['NUMBER'] = i
+            innermap['NUMBERYEAR'] = order.code
+            innermap['FIO'] = order.patient.__unicode__()
+            innermap['AMOUNT'] = order.price
+            innermap['DATEIN'] = str(order.start_date)
+            innermap['DATEOUT'] = str(order.end_date)
+            innermap['SROK'] = str(order.start_date)+' - '+str(order.end_date)
+            innermap['ORDERNUMBER'] = order.putevka
+            innermap['WHOIS'] = order.patient.grade
+            innermap['WHOM'] = order.directive.name
+            innermap['TIME'] = str(order.start_date)
+            innermap['WORK'] = order.customer.name
+            innermap['BIRTHDATE'] = str(order.patient.birth_date)
+            innermap['PASSPORT'] = order.patient.passport_number+' '+order.patient.passport_whom
+            innermap['ADDRESS'] = order.patient.address
+            innermap['ROOM'] = order.room.name
+            d.append(innermap)
+        title = "Список заселенных"
+        month  = ""#order_type.__unicode__()
+        z = {'TITLE': title+". "+str(cleaned_report_date),'MONTH':month, 'REPORTDATE': str(cleaned_report_date)}
+        return z,d
 
 report_map = {"1":('Список заезжающих',EnteringForm,'simplereport.xls',EnteringReport()),
               "2":('Список съезжающих',LeavingForm,'simplereport.xls',LeavingReport()),
               "3":('Прайс-лист',MedicalPriceForm,'simplereport.xls',MedicalPriceReport()),
+              "4":('Отчет по заселенным',LivingForm,'registrydiary.xls',LivingReport()),
+              "5":('Список съезжающих с учетом типа путевки)',LeavingForm2,'simplereport.xls',LeavingReport2()),
 }
 
 @login_required
@@ -64,7 +121,7 @@ def processreport(request, tp):
     if form.is_valid():
         md = report_metadata[3].process(form)
         tel = {'TITLE': report_metadata[0],
-               'P': md[1]}
+               'T': md[1]}
         for (key,value) in md[0].items():
             tel[key] = str(value)
 

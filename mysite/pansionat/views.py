@@ -22,6 +22,7 @@ from mysite.pansionat import gavnetso
 from mysite.pansionat.models import IllHistory, Customer, IllHistoryFieldType, IllHistoryFieldValue, IllHistoryRecord, OrderMedicalProcedure, MedicalProcedureType, OrderMedicalProcedureSchedule, Occupied, IllHistoryFieldTypeGroup, EmployerRoleHistory, Role, Employer, OrderDiet, Diet, OrderDay, OrderType, DietItems, Item, ItemPiece, Piece, MARRIAGE
 from mysite.pansionat.orders import room_availability
 from mysite.pansionat.proc import MenuRequestContext, MedicalPriceReport
+from mysite.pansionat.reports import DietForm, DateFilterForm
 from pytils import numeral
 from mysite.pansionat.gavnetso import monthlabel, nextmonthfirstday, initbase, initroles, initroomtypes, initp, initdiet, fillBookDays, fillOrderDays, inithistory, import_bron, import_proc, import_rooms, import_ordertypes
 import datetime
@@ -818,6 +819,7 @@ def reestr(request, year, month):
     orders = Order.objects.filter(start_date__year=intyear, start_date__month=intmonth)
     template_filename = 'registrydiary.xls'
     map = {'MONTH': monthlabel(intmonth)+' '+str(intyear)+' год',
+           'TITLE': 'Журнал регистрации отдыхающих',
            'FILENAME': 'reestr-'+year+'-'+month}
     l = []
     i = 0
