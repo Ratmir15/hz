@@ -261,6 +261,9 @@ def test_file(filename, flag):
                 s1 = v[:11]
                 s2 = v[12:]
                 ps = Patient.objects.filter(passport_number = s1)
+                if len(os)>0:
+                    if os[0].patient.passport_number!=s1:
+                        row_info.append((os[0].patient.passport_number,"Несоответствие заказов!!!"))
                 if len(ps)>0:
                     row_info.append((s1,"Пациент найден"))
                     patient = ps[0]
