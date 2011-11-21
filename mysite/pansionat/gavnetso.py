@@ -174,7 +174,7 @@ def test_file(filename, flag):
                 do_import = True
                 r = False
                 strdata = strip(strdata)
-                if not strdata[0] in ('0','1','2'):
+                if not strdata[0] in ('0','1','2','3'):
                     r = True
                     order_type = order_type_r
                     strdata = strdata[1:]
