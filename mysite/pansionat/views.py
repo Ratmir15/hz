@@ -947,7 +947,7 @@ def ill_history_head(request, order_id):
     else:
         years = ""
     srok = 'c '+str(order.start_date)+' по '+str(order.end_date)
-    if order.patient is None:
+    if order.customer is None:
         client = "-"
     else:
         client = order.customer.name
