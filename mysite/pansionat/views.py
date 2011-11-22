@@ -947,13 +947,17 @@ def ill_history_head(request, order_id):
     else:
         years = ""
     srok = 'c '+str(order.start_date)+' по '+str(order.end_date)
+    if order.patient is None:
+        client = "-"
+    else:
+        client = order.customer.name
     tel = { 'NUMBER': order.putevka,
            'FILENAME': 'ill_history-'+str(order.code),
            'SURNAME': order.patient.family, 'NAME': order.patient.name,
            'SNAME': order.patient.sname,
            'WHOIS': order.patient.profession,
            'WHOARE': order.patient.grade,
-           'CLIENT': order.customer.name,
+           'CLIENT': client,
            'ONANIST': order.patient.get_marriage_display(),
            'ADDRESS': order.patient.address,
            'AGE': years,
