@@ -258,8 +258,8 @@ def test_file(filename, flag):
                 address = rsh.cell_value(rrowx,13)
                 row_info.append((address,""))
                 v = rsh.cell_value(rrowx,12)
-                s1 = v[:11]
-                s2 = v[12:]
+                s1 = v[:12]
+                s2 = v[13:]
                 ps = Patient.objects.filter(passport_number = s1)
                 if len(os)>0:
                     if os[0].patient.passport_number!=s1:
