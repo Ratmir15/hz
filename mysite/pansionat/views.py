@@ -1,6 +1,7 @@
 # Create your views here.
 # coding: utf-8
 import re
+from string import upper
 import user
 from django.contrib.auth import logout, login, authenticate
 from django.contrib.auth.decorators import login_required, permission_required
@@ -875,6 +876,215 @@ def moves(request, year, month):
     map['T'] = l
     return fill_excel_template(template_filename, map)
 
+@login_required
+def mov(request, year, month):
+    intyear = int(year)
+    intmonth = int(month)
+    fd = nextmonthfirstday(intyear, intmonth)
+    orders = Order.objects.filter(start_date__year=intyear, start_date__month=intmonth).order_by("code")
+    template_filename = 'reestrz.xls'
+    map = {'MONTH': monthlabel(intmonth)+' '+str(intyear),
+           'MONTHC':monthlabel(intmonth),
+           'MONTHN':monthlabel(fd.month),
+           'FILENAME': 'moves-'+year+'-'+month,
+           'MARKETING': gavnetso.getEmployerByRoleNameAndDate('Маркетинг',datetime.date(intyear, intmonth,1)).__unicode__()}
+    l = []
+    i = 0
+    for order in orders:
+        i += 1
+        innermap = dict()
+        innermap['IDX'] = i
+        innermap['PUTEVKA'] = order.putevka
+        innermap['FIO'] = order.patient.fio()
+        innermap['D'] = order.patient.grade
+        innermap['KEM'] = order.directive.__unicode__()
+        innermap['SUMM'] = order.price
+        td = datetime.timedelta(days=1)
+        duration = order.end_date - order.start_date
+        if order.end_date<fd:
+            innermap['DAYS'] = duration.days+1
+            innermap['DAYSN'] = ""
+            innermap['SUMMC'] = order.price
+            innermap['SUMMN'] = ""
+        else:
+            dd = order.end_date-fd
+            days = duration.days-dd.days
+            innermap['DAYS'] = days
+            innermap['DAYSN'] = dd.days+1
+            innermap['SUMMC'] = days*order.price/(duration.days+1)
+            innermap['SUMMN'] = (dd.days+1)*order.price/(duration.days+1)
+
+        l.append(innermap)
+
+    map['T'] = l
+    return fill_excel_template(template_filename, map)
+
+class HzCondition():
+
+    def process(self, order):
+        n_list = [u'ХЗ',u'СЗ']
+        return upper(order.directive.name) in n_list
+
+class PPCondition():
+
+    def process(self, order):
+        n_list = [u'ПЕНЗА ПРОФ']
+        return upper(order.directive.name) in n_list
+
+class SPCondition():
+
+    def process(self, order):
+        n_list = [u'САМАРА ПРОФ']
+        return upper(order.directive.name) in n_list
+
+class PFCondition():
+
+    def process(self, order):
+        n_list = [u'ПЕНЗА ФСС']
+        return upper(order.directive.name) in n_list
+
+class RCondition():
+
+    def process(self, order):
+        p_list = [26400,21607.92]
+        return order.price==26400 or (order.price>21607 and order.price<21608)
+
+class ElseCondition():
+
+    def process(self, order):
+        b = order.price==26400 or (order.price>21607 and order.price<21608)
+        n_list = [u'ХЗ',u'СЗ',u'ПЕНЗА ФСС',u'САМАРА ПРОФ',u'ПЕНЗА ПРОФ']
+        return not b and (not upper(order.directive.name) in n_list)
+
+tp_map = {
+    "1":('ХЗ,СЗ',HzCondition()),
+    "2":('Прочие',ElseCondition()),
+    "3":('Реабилитация',RCondition()),
+    "4":('Пенза проф',PPCondition()),
+    "5":('Самара проф',SPCondition()),
+    "6":('Пенза фсс',PFCondition()),
+}
+
+
+@login_required
+def movtp(request, year, month,tp):
+    (title,condition) = tp_map[tp]
+    intyear = int(year)
+    intmonth = int(month)
+    fd = nextmonthfirstday(intyear, intmonth)
+    orders = Order.objects.filter(start_date__year=intyear, start_date__month=intmonth).order_by("code")
+    template_filename = 'reestrzd.xls'
+    map = {'MONTH': monthlabel(intmonth)+' '+str(intyear),
+           'MONTHC':monthlabel(intmonth),
+           'MONTHN':monthlabel(fd.month),
+           'TITLE':monthlabel(fd.month),
+           'FILENAME': 'moves-'+tp+'-'+year+'-'+month,
+           'MARKETING': gavnetso.getEmployerByRoleNameAndDate('Маркетинг',datetime.date(intyear, intmonth,1)).__unicode__()}
+    l = []
+    i = 0
+    c_set = set()
+    s1 = 0
+    s2 = 0
+    s3 = 0
+    s4 = 0
+    for order in orders:
+        if condition.process(order):
+            i += 1
+            innermap = dict()
+            innermap['IDX'] = i
+            innermap['PUTEVKA'] = order.putevka
+            innermap['FIO'] = order.patient.fio()
+            innermap['D'] = order.patient.grade
+            innermap['KEM'] = order.directive.__unicode__()
+            innermap['SUMM'] = order.price
+            srok = str(order.start_date)+'-'+str(order.end_date)
+            innermap['SROK'] = srok
+            td = datetime.timedelta(days=1)
+            duration = order.end_date - order.start_date
+            if order.end_date<fd:
+                innermap['DAYS'] = duration.days+1
+                s1 += duration.days+1
+                innermap['DAYSN'] = ""
+                innermap['SUMMC'] = order.price
+                s2 += order.price
+                innermap['SUMMN'] = ""
+            else:
+                dd = order.end_date-fd
+                days = duration.days-dd.days
+                innermap['DAYS'] = days
+                s1 += duration.days+1
+                innermap['DAYSN'] = dd.days+1
+                s3 += dd.days+1
+                innermap['SUMMC'] = days*order.price/(duration.days+1)
+                s2 += days*order.price/(duration.days+1)
+                innermap['SUMMN'] = (dd.days+1)*order.price/(duration.days+1)
+                s4 += (dd.days+1)*order.price/(duration.days+1)
+
+            l.append(innermap)
+            c_set.add(upper(order.directive.name))
+
+    innermap = dict()
+    innermap['FIO'] = 'Итого'
+    innermap['DAYS'] = s1
+    innermap['DAYSN'] = s3
+    innermap['SUMMC'] = s2
+    innermap['SUMMN'] = s4
+    l.append(innermap)
+
+    for c_name in c_set:
+        i = 0
+        s1 = 0
+        s2 = 0
+        s3 = 0
+        s4 = 0
+        innermap = dict()
+        innermap['FIO'] = c_name
+        l.append(innermap)
+
+        for order in orders:
+            if upper(order.directive.name)==c_name and condition.process(order):
+                i += 1
+                innermap = dict()
+                innermap['IDX'] = i
+                innermap['PUTEVKA'] = order.putevka
+                innermap['FIO'] = order.patient.fio()
+                innermap['D'] = order.patient.grade
+                innermap['KEM'] = order.directive.__unicode__()
+                innermap['SUMM'] = order.price
+                srok = str(order.start_date)+'-'+str(order.end_date)
+                innermap['SROK'] = srok
+                td = datetime.timedelta(days=1)
+                duration = order.end_date - order.start_date
+                if order.end_date<fd:
+                    innermap['DAYS'] = duration.days+1
+                    s1 += duration.days+1
+                    innermap['DAYSN'] = ""
+                    innermap['SUMMC'] = order.price
+                    s2 += order.price
+                    innermap['SUMMN'] = ""
+                else:
+                    dd = order.end_date-fd
+                    days = duration.days-dd.days
+                    innermap['DAYS'] = days
+                    s1 += duration.days+1
+                    innermap['DAYSN'] = dd.days+1
+                    s3 += dd.days+1
+                    innermap['SUMMC'] = days*order.price/(duration.days+1)
+                    s2 += days*order.price/(duration.days+1)
+                    innermap['SUMMN'] = (dd.days+1)*order.price/(duration.days+1)
+                    s4 += (dd.days+1)*order.price/(duration.days+1)
+                l.append(innermap)
+
+        innermap = dict()
+        innermap['FIO'] = u'Итого по '+c_name
+        innermap['DAYS'] = s1
+        innermap['DAYSN'] = s3
+        innermap['SUMMC'] = s2
+        innermap['SUMMN'] = s4
+        l.append(innermap)
+
+    map['T'] = l
+    return fill_excel_template(template_filename, map)
 
 @login_required
 def nakl(request, occupied_id):

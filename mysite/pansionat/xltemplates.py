@@ -137,6 +137,26 @@ def fill_excel_template_s_gavnom(template_filename, tel, fields, records):
     w.save(response)
     return response
 
+def fill_excel_template_with_many_tp(template_filename, tel, tps):
+    w = prepare_excel_template(template_filename, tel)
+    response = HttpResponse(mimetype='application/vnd.ms-excel')
+    filename = tel.get('FILENAME','report')
+    response['Content-Disposition'] = 'attachment; filename=' + filename + '.xls'
+    maxr = tel['max_row']
+    wtsheet = w.get_sheet(0)
+    cols = ['IDX','PUTEVKA','FIO','D','KEM','SUMM','SROK','DAYS','SUMMC','DAYSN','SUMMN']
+    for tp in tps:
+        maxr += 2
+        wtsheet.write_merge(maxr-1, maxr, 0, 10, tp[0], easyxf('align: wrap on'))
+        for record in tp[1]:
+            maxr += 1
+            i = 0
+            for col in cols:
+                wtsheet.write(maxr-1, i, record[col],easyxf('align: wrap on; border: top thick, left thick, bottom thick, right thick'))
+                i += 1
+    w.save(response)
+    return response
+
 def fill_excel_template_porcii(template_filename, tel, res):
     w = prepare_excel_template(template_filename, tel)
     response = HttpResponse(mimetype='application/vnd.ms-excel')
@@ -360,10 +380,10 @@ def prepare_excel_template(template_filename, tel):
                             i += 1
                             if not rrowx in cloned_rows:
                                 ymargin += 1
-                                print ymargin
+                                #print ymargin
                         if not rrowx in cloned_rows:
                             ymargin -= 1
-                            print ymargin
+                            # print ymargin
                             for k in xrange(col-1):
                                 #print 'Копирование ячейки '+str(k)
                                 write_and_clone_cell(wtsheet, mc_map, rsh.cell_value(rrox,k), style_list[rsh.cell_xf_index(rrowx,k)], rrowx, k, rrowx , k, i)

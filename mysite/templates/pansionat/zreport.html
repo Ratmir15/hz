@@ -1,0 +1,42 @@
+{% extends "pansionat/index.html" %}
+
+{% block title %} Отчет по заселенным {%  endblock  %}
+
+{% block head %}
+    <style type="text/css">
+        @import "/static/dataTables/media/css/demo_page.css";
+        @import "/static/dataTables/media/css/demo_table.css";
+        @import "/static/jquery-ui/themes/base/jquery.ui.all.css";
+    </style>
+    <script src="/static/dataTables/media/js/jquery.js"></script>
+    <script src="/static/dataTables/media/js/jquery.dataTables.js"></script>
+    <script src="/static/jquery-ui/ui/jquery.ui.core.js"></script>
+    <script src="/static/jquery-ui/ui/jquery.ui.widget.js"></script>
+    <script src="/static/jquery-ui/ui/jquery.ui.datepicker.js"></script>
+    <script src="/static/jquery-ui/ui/i18n/jquery.ui.datepicker-ru.js"></script>
+    <script src="/static/jquery-ui/ui/jquery.ui.button.js"></script>
+    <script type="text/javascript">
+        $(document).ready(function() {
+            $.datepicker.setDefaults($.datepicker.regional['ru']);
+            $("#start_date").datepicker();
+            $('input:submit').button()
+            $(':button').button()
+            } );
+    </script>
+<link rel="stylesheet" href="/static/Refresh.css" type="text/css" />
+ {%  endblock  %}
+
+{% block allcontent %}
+    <h1>Отчет по заселенным</h1>
+    <form id="f" action = "/zprint/" method="POST">
+        {% csrf_token %}
+        <table border="0" id = "occupied" class = "display">
+        <tr><td>Дата</td><td><input type="text" id="start_date" name="start_date" class = "datepicker" value = "{{ start_date }}"></td></tr>
+            <tr>
+                <td colspan="2">
+                    <input type="submit" value="Печать">
+                </td>
+            </tr>
+        </table>
+    </form>
+{%  endblock  %}

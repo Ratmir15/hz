@@ -148,6 +148,10 @@ def import_ordertypes():
         ot.save()
         ot = OrderType(name = 'Реабилитация',price = '21607.92')
         ot.save()
+        ot = OrderType(name = 'Наличка',price = 0)
+        ot.save()
+        ot = OrderType(name = 'Командировочные',price = 0)
+        ot.save()
 
 def float2int(strdata):
     arr = str(strdata).split(".")
@@ -260,16 +264,21 @@ def test_file(filename, flag):
                 v = rsh.cell_value(rrowx,12)
                 s1 = v[:12]
                 s2 = v[13:]
-                ps = Patient.objects.filter(passport_number = s1)
-                if len(os)>0:
-                    if os[0].patient.passport_number!=s1:
-                        row_info.append((os[0].patient.passport_number,"Несоответствие заказов!!!"))
+                if s1!="":
+                    ps = Patient.objects.filter(passport_number = s1)
+                    if len(os)>0:
+                        if os[0].patient.passport_number!=s1:
+                            row_info.append((os[0].patient.passport_number,"Несоответствие заказов!!!"))
+                else:
+                    ps = Patient.objects.filter(family = family, name = name, sname = sname)
                 if len(ps)>0:
                     row_info.append((s1,"Пациент найден"))
                     patient = ps[0]
                 else:
                     row_info.append((s1,"Пациент не найден"))
                     if flag:
+                        if s1=="":
+                            s1 = family+name;
                         patient = Patient(family = family,
                                           name = name,
                                           sname = sname,

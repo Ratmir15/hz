@@ -1,4 +1,5 @@
 # coding: utf-8
+import datetime
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse
 from django.shortcuts import render_to_response
@@ -144,4 +145,37 @@ def reports(request):
     't_list': t_list,
     })
     return HttpResponse(t.render(c))
+
+@login_required
+def zreport(request):
+    values = {}
+    return render_to_response('pansionat/zreport.html', MenuRequestContext(request, values))
+
+@login_required
+def zprint(request):
+    dt = request.POST.get("start_date","")
+    dtv = dt.split(".")
+    p = []
+    for slot in order_scheduled:
+        tdelta = datetime.timedelta(minutes=slot.mp_type.duration)
+        entry = dict()
+        entry['PATIENT'] = slot.order.patient.fio()
+        mp = OrderMedicalProcedure.objects.filter(order = slot.order, mp_type=slot.mp_type)
+        if len(mp)>0:
+            t = datetime.datetime.combine(slot.p_date,slot.mp_type.start_time)
+            time = t + (slot.slot-1)*tdelta
+            entry['TIME'] = time.strftime('%H:%M')
+            add_info = mp[0].add_info
+        else:
+            add_info = ""
+        entry['NAME'] = slot.mp_type.name +" " +add_info
+        p.append(entry)
+
+    tel = { 'P': p,
+            'DATE': p_date.strftime('%d.%m.%Y'),
+           'FILENAME': 'procedures-'+str(mp_type_id)+"-"+p_date.strftime('%d-%m-%Y'),
+    }
+    template_filename = 'mps.xls'
+    return fill_excel_template(template_filename, tel)
+
 
