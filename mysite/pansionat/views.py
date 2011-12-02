@@ -973,14 +973,14 @@ class RCondition():
 
     def process(self, order):
         p_list = [26400,21607.92]
-        n_list = [u'ХЗ',u'СЗ',u'ПЕНЗА ФСС',u'САМАРА ПРОФ',u'ПЕНЗА ПРОФ']
+        n_list = [u'САНАТОРИЙ ХОПРОВСКИЕ ЗОРИ',u'СЕЛЬСКАЯ ЗДРАВНИЦА',u'ПЕНЗА ФСС',u'САМАРА ПРОФ',u'ПЕНЗА ПРОФ']
         return (not upper(order.directive.name) in n_list) and (order.price==26400 or (order.price>21607 and order.price<21608))
 
 class ElseCondition():
 
     def process(self, order):
         b = order.price==26400 or (order.price>21607 and order.price<21608)
-        n_list = [u'ХЗ',u'СЗ',u'ПЕНЗА ФСС',u'САМАРА ПРОФ',u'ПЕНЗА ПРОФ']
+        n_list = [u'САНАТОРИЙ ХОПРОВСКИЕ ЗОРИ',u'СЕЛЬСКАЯ ЗДРАВНИЦА',u'ПЕНЗА ФСС',u'САМАРА ПРОФ',u'ПЕНЗА ПРОФ']
         return not b and (not upper(order.directive.name) in n_list)
 
 tp_map = {
