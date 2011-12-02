@@ -75,8 +75,8 @@
                 {% csrf_token %}
                 <table border = "0">
                     <tr><td colspan="2">Свободных мест: {{ pl }}</td></tr>
-                    <tr><th><label for="customer">Предприятие</label></th><td><input type="text" id="customer" name="customer" value="{{ cus }}">{% if cus_error %}<ul class="errorlist"><li>{{ cus_error }}</li></ul>{% endif %}</td></tr>
-                    <tr><th><label for="directive">Место работы</label></th><td><input type="text" id="directive" name="directive" value="{{ dir }}">{% if dir_error %}<ul class="errorlist"><li>{{ dir_error }}</li></ul>{% endif %}</td></tr>
+                    <tr><th><label for="customer">Место работы</label></th><td><input type="text" id="customer" name="customer" value="{{ cus }}">{% if cus_error %}<ul class="errorlist"><li>{{ cus_error }}</li></ul>{% endif %}</td></tr>
+                    <tr><th><label for="directive">Направляющая организация</label></th><td><input type="text" id="directive" name="directive" value="{{ dir }}">сз,хз,фсс,...{% if dir_error %}<ul class="errorlist"><li>{{ dir_error }}</li></ul>{% endif %}</td></tr>
                 <tr><td colspan="2"><a href="/clients/new" target="_blank" style="font-size: 8px;">добавить организацию</a></td></tr>
                     {{ order_form.as_table }}
                 </table>

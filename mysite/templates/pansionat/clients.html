@@ -30,6 +30,7 @@
     <table border="0" id = "occupied" class = "display">
     <thead>
     <th>Наименование</th>
+    <th>Кор.</th>
     <th>ИНН</th>
     <th></th>
     </thead>
@@ -38,6 +39,9 @@
                 <td>
                     {{ client.name }}
                 </td>
+                    <td>
+                        {{ client.shortname }}
+                    </td>
                     <td>
                         {{ client.inn }}
                     </td>

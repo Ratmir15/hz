@@ -936,19 +936,19 @@ def mov(request, year, month):
 class HzCondition():
 
     def process(self, order):
-        n_list = [u'ХЗ']
+        n_list = [u'ООО Санаторий Хопровские Зори']
         return upper(order.directive.name) in n_list
 
 class SzCondition():
 
     def process(self, order):
-        n_list = [u'СЗ']
+        n_list = [u'ОАО Сельская здравница']
         return upper(order.directive.name) in n_list
 
 class HzSzCondition():
 
     def process(self, order):
-        n_list = [u'ХЗ',u'СЗ']
+        n_list = [u'ОАО Сельская здравница',u'ООО Санаторий Хопровские Зори']
         return upper(order.directive.name) in n_list
 
 class PPCondition():
