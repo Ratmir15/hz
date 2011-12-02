@@ -33,7 +33,7 @@ from django.forms import ModelForm
 from django.core.context_processors import csrf
 from django.db.models import Q
 
-from mysite.pansionat.xltemplates import fill_excel_template, fill_excel_template_s_gavnom, fill_excel_template_porcii
+from mysite.pansionat.xltemplates import fill_excel_template, fill_excel_template_s_gavnom, fill_excel_template_porcii, fill_excel_template_with_many_tp
 
 
 logger = logging.getLogger(__name__)
@@ -876,6 +876,23 @@ def moves(request, year, month):
     map['T'] = l
     return fill_excel_template(template_filename, map)
 
+
+def calc_bm(fd, order):
+    duration = order.end_date - order.start_date
+    if order.end_date < fd:
+        days_value = duration.days + 1
+        daysn_value = 0
+        summc_value = order.price
+        summn_value = 0
+    else:
+        dd = order.end_date - fd
+        days = duration.days - dd.days
+        days_value = days
+        daysn_value = dd.days + 1
+        summc_value = days * order.price / (duration.days + 1)
+        summn_value = (dd.days + 1) * order.price / (duration.days + 1)
+    return days_value, daysn_value, summc_value, summn_value
+
 @login_required
 def mov(request, year, month):
     intyear = int(year)
@@ -890,6 +907,7 @@ def mov(request, year, month):
            'MARKETING': gavnetso.getEmployerByRoleNameAndDate('Маркетинг',datetime.date(intyear, intmonth,1)).__unicode__()}
     l = []
     i = 0
+    s1 = s2 = s3 = s4 =0
     for order in orders:
         i += 1
         innermap = dict()
@@ -899,20 +917,16 @@ def mov(request, year, month):
         innermap['D'] = order.patient.grade
         innermap['KEM'] = order.directive.__unicode__()
         innermap['SUMM'] = order.price
-        td = datetime.timedelta(days=1)
-        duration = order.end_date - order.start_date
-        if order.end_date<fd:
-            innermap['DAYS'] = duration.days+1
-            innermap['DAYSN'] = ""
-            innermap['SUMMC'] = order.price
-            innermap['SUMMN'] = ""
-        else:
-            dd = order.end_date-fd
-            days = duration.days-dd.days
-            innermap['DAYS'] = days
-            innermap['DAYSN'] = dd.days+1
-            innermap['SUMMC'] = days*order.price/(duration.days+1)
-            innermap['SUMMN'] = (dd.days+1)*order.price/(duration.days+1)
+        days_value, daysn_value, summc_value, summn_value = calc_bm(fd, order)
+
+        innermap['DAYS'] = days_value
+        innermap['DAYSN'] = daysn_value
+        innermap['SUMMC'] = summc_value
+        innermap['SUMMN'] = summn_value
+        s1 += days_value
+        s2 += summc_value
+        s3 += daysn_value
+        s4 += summn_value
 
         l.append(innermap)
 
@@ -920,6 +934,18 @@ def mov(request, year, month):
     return fill_excel_template(template_filename, map)
 
 class HzCondition():
+
+    def process(self, order):
+        n_list = [u'ХЗ']
+        return upper(order.directive.name) in n_list
+
+class SzCondition():
+
+    def process(self, order):
+        n_list = [u'СЗ']
+        return upper(order.directive.name) in n_list
+
+class HzSzCondition():
 
     def process(self, order):
         n_list = [u'ХЗ',u'СЗ']
@@ -947,7 +973,8 @@ class RCondition():
 
     def process(self, order):
         p_list = [26400,21607.92]
-        return order.price==26400 or (order.price>21607 and order.price<21608)
+        n_list = [u'ХЗ',u'СЗ',u'ПЕНЗА ФСС',u'САМАРА ПРОФ',u'ПЕНЗА ПРОФ']
+        return (not upper(order.directive.name) in n_list) and (order.price==26400 or (order.price>21607 and order.price<21608))
 
 class ElseCondition():
 
@@ -957,7 +984,7 @@ class ElseCondition():
         return not b and (not upper(order.directive.name) in n_list)
 
 tp_map = {
-    "1":('ХЗ,СЗ',HzCondition()),
+    "1":('ХЗ,СЗ',HzSzCondition()),
     "2":('Прочие',ElseCondition()),
     "3":('Реабилитация',RCondition()),
     "4":('Пенза проф',PPCondition()),
@@ -965,6 +992,129 @@ tp_map = {
     "6":('Пенза фсс',PFCondition()),
 }
 
+tp2_map = {
+    1:('ООО Санаторий Хопровские Зори',HzCondition()),
+    2:('ОАО Сельская здравница',SzCondition()),
+    3:('Прочие организации',ElseCondition()),
+    4:('Приобретено(Больницы) Реабилитация',RCondition()),
+    5:('Пенза проф',PPCondition()),
+    6:('Самара проф',SPCondition()),
+    7:('Пенза фсс',PFCondition()),
+}
+
+@login_required
+def movinfo(request, year, month):
+    intyear = int(year)
+    intmonth = int(month)
+    fd = nextmonthfirstday(intyear, intmonth)
+    orders = Order.objects.filter(start_date__year=intyear, start_date__month=intmonth).order_by("code")
+    template_filename = 'info.xls'
+    map = {'MONTH': monthlabel(intmonth)+' '+str(intyear),
+           'MONTHC':monthlabel(intmonth),
+           'MONTHN':monthlabel(fd.month),
+           'FILENAME': 'moves-'+year+'-'+month,
+           'MARKETING': gavnetso.getEmployerByRoleNameAndDate('Маркетинг',datetime.date(intyear, intmonth,1)).__unicode__()}
+    l = []
+    res = list()
+    for i in xrange(1,8):
+        res.append((0,0,0))
+    for order in orders:
+        days_value, daysn_value, summc_value, summn_value = calc_bm(fd, order)
+        flag = False
+        for idx in xrange(1,8):
+            if tp2_map[idx][1].process(order):
+                if flag:
+                    print "Duplicated type of order:"+str(order.code)
+                flag = True
+                if order.price>0:
+                    qty, summc, summn = res[idx-1]
+                    res[idx-1] = (qty+1, summc+summc_value,summn+summn_value)
+
+
+    i = 0
+    s1 = s2 = s3 = 0
+    for line in res:
+        i += 1
+        innermap = dict()
+        innermap['IDX'] = i
+        innermap['NAME'] = tp2_map[i][0]
+        innermap['QTY'] = line[0]
+        innermap['SUMMC'] = line[1]
+        innermap['SUMMN'] = line[2]
+        s1 += line[0]
+        s2 += line[1]
+        s3 += line[2]
+
+        l.append(innermap)
+
+    innermap = dict()
+    innermap['IDX'] = ""
+    innermap['NAME'] = "Итого"
+    innermap['QTY'] = s1
+    innermap['SUMMC'] = s2
+    innermap['SUMMN'] = s3
+
+    l.append(innermap)
+
+    map['T'] = l
+    return fill_excel_template(template_filename, map)
+
+@login_required
+def movanal(request, year, month):
+    intyear = int(year)
+    intmonth = int(month)
+    fd = nextmonthfirstday(intyear, intmonth)
+    orders = Order.objects.filter(start_date__year=intyear, start_date__month=intmonth).order_by("code")
+    template_filename = 'info.xls'
+    map = {'MONTH': monthlabel(intmonth)+' '+str(intyear),
+           'MONTHC':monthlabel(intmonth),
+           'MONTHN':monthlabel(fd.month),
+           'FILENAME': 'moves-'+year+'-'+month,
+           'MARKETING': gavnetso.getEmployerByRoleNameAndDate('Маркетинг',datetime.date(intyear, intmonth,1)).__unicode__()}
+    l = []
+    res = list()
+    idx_dict = dict()
+    for order in orders:
+        days_value, daysn_value, summc_value, summn_value = calc_bm(fd, order)
+        key = upper(order.directive.name)
+        idx = idx_dict.get(key,-1)
+        if idx==-1:
+            idx = len(res)
+            idx_dict[key] = idx
+            res.append((key,0,0,0,0))
+        name, qty, summ, summc, summn = res[idx]
+        res[idx] = (name, qty+1, summ+order.price, summc+summc_value, summn+summn_value)
+
+    i = 0
+    s1 = s2 = s3 = s4 = 0
+    for line in res:
+        i += 1
+        innermap = dict()
+        innermap['IDX'] = i
+        innermap['NAME'] = line[0]
+        innermap['QTY'] = line[1]
+        innermap['SUMM'] = line[2]
+        innermap['SUMMC'] = line[3]
+        innermap['SUMMN'] = line[4]
+        s1 += line[1]
+        s2 += line[2]
+        s3 += line[3]
+        s3 += line[4]
+
+        l.append(innermap)
+
+    innermap = dict()
+    innermap['IDX'] = ""
+    innermap['NAME'] = "Итого"
+    innermap['QTY'] = s1
+    innermap['SUMM'] = s2
+    innermap['SUMMC'] = s3
+    innermap['SUMMN'] = s4
+
+    l.append(innermap)
+
+    map['T'] = l
+    return fill_excel_template(template_filename, map)
 
 @login_required
 def movtp(request, year, month,tp):
@@ -999,27 +1149,17 @@ def movtp(request, year, month,tp):
             innermap['SUMM'] = order.price
             srok = str(order.start_date)+'-'+str(order.end_date)
             innermap['SROK'] = srok
-            td = datetime.timedelta(days=1)
-            duration = order.end_date - order.start_date
-            if order.end_date<fd:
-                innermap['DAYS'] = duration.days+1
-                s1 += duration.days+1
-                innermap['DAYSN'] = ""
-                innermap['SUMMC'] = order.price
-                s2 += order.price
-                innermap['SUMMN'] = ""
-            else:
-                dd = order.end_date-fd
-                days = duration.days-dd.days
-                innermap['DAYS'] = days
-                s1 += duration.days+1
-                innermap['DAYSN'] = dd.days+1
-                s3 += dd.days+1
-                innermap['SUMMC'] = days*order.price/(duration.days+1)
-                s2 += days*order.price/(duration.days+1)
-                innermap['SUMMN'] = (dd.days+1)*order.price/(duration.days+1)
-                s4 += (dd.days+1)*order.price/(duration.days+1)
+            days_value, daysn_value, summc_value, summn_value = calc_bm(fd, order)
 
+            innermap['DAYS'] = days_value
+            innermap['DAYSN'] = daysn_value
+            innermap['SUMMC'] = summc_value
+            innermap['SUMMN'] = summn_value
+            s1 += days_value
+            s2 += summc_value
+            s3 += daysn_value
+            s4 += summn_value
+            
             l.append(innermap)
             c_set.add(upper(order.directive.name))
 
@@ -1031,15 +1171,18 @@ def movtp(request, year, month,tp):
     innermap['SUMMN'] = s4
     l.append(innermap)
 
+    tps = list()
+
     for c_name in c_set:
         i = 0
         s1 = 0
         s2 = 0
         s3 = 0
         s4 = 0
+        cl = list()
         innermap = dict()
         innermap['FIO'] = c_name
-        l.append(innermap)
+        cl.append(innermap)
 
         for order in orders:
             if upper(order.directive.name)==c_name and condition.process(order):
@@ -1053,27 +1196,17 @@ def movtp(request, year, month,tp):
                 innermap['SUMM'] = order.price
                 srok = str(order.start_date)+'-'+str(order.end_date)
                 innermap['SROK'] = srok
-                td = datetime.timedelta(days=1)
-                duration = order.end_date - order.start_date
-                if order.end_date<fd:
-                    innermap['DAYS'] = duration.days+1
-                    s1 += duration.days+1
-                    innermap['DAYSN'] = ""
-                    innermap['SUMMC'] = order.price
-                    s2 += order.price
-                    innermap['SUMMN'] = ""
-                else:
-                    dd = order.end_date-fd
-                    days = duration.days-dd.days
-                    innermap['DAYS'] = days
-                    s1 += duration.days+1
-                    innermap['DAYSN'] = dd.days+1
-                    s3 += dd.days+1
-                    innermap['SUMMC'] = days*order.price/(duration.days+1)
-                    s2 += days*order.price/(duration.days+1)
-                    innermap['SUMMN'] = (dd.days+1)*order.price/(duration.days+1)
-                    s4 += (dd.days+1)*order.price/(duration.days+1)
-                l.append(innermap)
+                days_value, daysn_value, summc_value, summn_value = calc_bm(fd, order)
+
+                innermap['DAYS'] = days_value
+                innermap['DAYSN'] = daysn_value
+                innermap['SUMMC'] = summc_value
+                innermap['SUMMN'] = summn_value
+                s1 += days_value
+                s2 += summc_value
+                s3 += daysn_value
+                s4 += summn_value
+                cl.append(innermap)
 
         innermap = dict()
         innermap['FIO'] = u'Итого по '+c_name
@@ -1081,10 +1214,11 @@ def movtp(request, year, month,tp):
         innermap['DAYSN'] = s3
         innermap['SUMMC'] = s2
         innermap['SUMMN'] = s4
-        l.append(innermap)
+        cl.append(innermap)
+        tps.append((c_name,cl))
 
     map['T'] = l
-    return fill_excel_template(template_filename, map)
+    return fill_excel_template_with_many_tp(template_filename, map, tps)
 
 @login_required
 def nakl(request, occupied_id):

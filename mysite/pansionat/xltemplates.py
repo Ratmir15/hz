@@ -146,13 +146,13 @@ def fill_excel_template_with_many_tp(template_filename, tel, tps):
     wtsheet = w.get_sheet(0)
     cols = ['IDX','PUTEVKA','FIO','D','KEM','SUMM','SROK','DAYS','SUMMC','DAYSN','SUMMN']
     for tp in tps:
-        maxr += 2
-        wtsheet.write_merge(maxr-1, maxr, 0, 10, tp[0], easyxf('align: wrap on'))
+        maxr += 3
+        wtsheet.write_merge(maxr-2, maxr, 0, 10, tp[0], easyxf('align: wrap on;border: left no_line, right no_line'))
         for record in tp[1]:
             maxr += 1
             i = 0
             for col in cols:
-                wtsheet.write(maxr-1, i, record[col],easyxf('align: wrap on; border: top thick, left thick, bottom thick, right thick'))
+                wtsheet.write(maxr-1, i, record.get(col,""),easyxf('align: wrap on; border: top thin, left thin, bottom thin, right thin'))
                 i += 1
     w.save(response)
     return response

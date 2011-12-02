@@ -197,18 +197,20 @@ def test_file(filename, flag):
                 v = rsh.cell_value(rrowx,3)
                 end_date = datetime.date(year = 1899, month = 12, day=30)+datetime.timedelta(days=v)
                 row_info.append((end_date,""))
-                v = rsh.cell_value(rrowx,4)
-                putevkas = str(v).split('.')
+                putevka = rsh.cell_value(rrowx,4)
+                putevkas = str(putevka).split('.')
                 if len(putevkas)>1:
-                    v = putevkas[0]
-                v = add_lead_zeros(v, 6)
-                putevka = v
-                row_info.append((v,""))
+                    putevka = putevkas[0]
+                putevka = add_lead_zeros(putevka, 6)
+                row_info.append((putevka,""))
                 v = rsh.cell_value(rrowx,5)
                 fios = v.split(" ")
                 family = up_low_case(fios[0])
                 name = up_low_case(fios[1])
-                sname = up_low_case(fios[2])
+                if len(fios)>2:
+                    sname = up_low_case(fios[2])
+                else:
+                    sname = ""
                 row_info.append((family,""))
                 row_info.append((name,""))
                 row_info.append((sname,""))
@@ -226,13 +228,16 @@ def test_file(filename, flag):
                         customer.save()
                     row_info.append((v,"Клиент не найден"))
                 v = rsh.cell_value(rrowx,8)
-                pr = str(v)
-                prs = pr.split(',')
-                if len(prs)>1:
-                    pr = prs[0]+'.'+prs[1]
-                if not len(str(pr)):
-                    pr = 0
-                price = decimal.Decimal(pr)
+                if v=="-" or v==u"нет":
+                    price=0
+                else:
+                    pr = str(v)
+                    prs = pr.split(',')
+                    if len(prs)>1:
+                        pr = prs[0]+'.'+prs[1]
+                    if not len(str(pr)):
+                        pr = 0
+                    price = decimal.Decimal(pr)
                 row_info.append((price,""))
 #                v = rsh.cell_value(rrowx,9)
 #                s_date = datetime.date(year = 1899, month = 12, day=30)+datetime.timedelta(days=v)
@@ -278,7 +283,7 @@ def test_file(filename, flag):
                     row_info.append((s1,"Пациент не найден"))
                     if flag:
                         if s1=="":
-                            s1 = family+name;
+                            s1 = family+name
                         patient = Patient(family = family,
                                           name = name,
                                           sname = sname,
