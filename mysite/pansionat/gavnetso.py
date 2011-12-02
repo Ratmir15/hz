@@ -323,6 +323,7 @@ def test_file(filename, flag):
                         order_type = order_type
                     )
                     order.save()
+                    fillOrderDays(order)
 
     return res
 

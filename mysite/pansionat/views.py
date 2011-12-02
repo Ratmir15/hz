@@ -1075,6 +1075,7 @@ def movanal(request, year, month):
     res = list()
     idx_dict = dict()
     for order in orders:
+        order.delete()
         days_value, daysn_value, summc_value, summn_value = calc_bm(fd, order)
         key = upper(order.directive.name)
         idx = idx_dict.get(key,-1)
