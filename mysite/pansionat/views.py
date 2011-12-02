@@ -948,7 +948,7 @@ class SzCondition():
 class HzSzCondition():
 
     def process(self, order):
-        n_list = [u'Сельская здравница',u'Санаторий Хопровские Зори']
+        n_list = [u'СЕЛЬСКАЯ ЗДРАВНИЦА',u'САНАТОРИЙ ХОПРОВСКИЕ ЗОРИ']
         return upper(order.directive.name) in n_list
 
 class PPCondition():
