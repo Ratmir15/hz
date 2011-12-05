@@ -984,22 +984,22 @@ class ElseCondition():
         return not b and (not upper(order.directive.name) in n_list)
 
 tp_map = {
-    "1":('ХЗ,СЗ',HzSzCondition()),
-    "2":('Прочие',ElseCondition()),
-    "3":('Реабилитация',RCondition()),
-    "4":('Пенза проф',PPCondition()),
-    "5":('Самара проф',SPCondition()),
-    "6":('Пенза фсс',PFCondition()),
+    "1":('ХЗ,СЗ',"hzsz",HzSzCondition()),
+    "2":('Прочие',"else",ElseCondition()),
+    "3":('Реабилитация',"reab",RCondition()),
+    "4":('Пенза проф',"penzaprof",PPCondition()),
+    "5":('Самара проф',"samaraprof",SPCondition()),
+    "6":('Пенза фсс',"penzafss",PFCondition()),
 }
 
 tp2_map = {
-    1:('ООО Санаторий Хопровские Зори',HzCondition()),
-    2:('ОАО Сельская здравница',SzCondition()),
-    3:('Прочие организации',ElseCondition()),
-    4:('Приобретено(Больницы) Реабилитация',RCondition()),
-    5:('Пенза проф',PPCondition()),
-    6:('Самара проф',SPCondition()),
-    7:('Пенза фсс',PFCondition()),
+    1:('ООО Санаторий Хопровские Зори',"hz",HzCondition()),
+    2:('ОАО Сельская здравница',"sz",SzCondition()),
+    3:('Прочие организации',"else",ElseCondition()),
+    4:('Приобретено(Больницы) Реабилитация',"reab",RCondition()),
+    5:('Пенза проф',"penzaprof",PPCondition()),
+    6:('Самара проф',"samaraprof",SPCondition()),
+    7:('Пенза фсс',"penzafss",PFCondition()),
 }
 
 @login_required
@@ -1012,7 +1012,7 @@ def movinfo(request, year, month):
     map = {'MONTH': monthlabel(intmonth)+' '+str(intyear),
            'MONTHC':monthlabel(intmonth),
            'MONTHN':monthlabel(fd.month),
-           'FILENAME': 'moves-'+year+'-'+month,
+           'FILENAME': 'moves-info-'+year+'-'+month,
            'MARKETING': gavnetso.getEmployerByRoleNameAndDate('Маркетинг',datetime.date(intyear, intmonth,1)).__unicode__()}
     l = []
     res = list()
@@ -1022,7 +1022,7 @@ def movinfo(request, year, month):
         days_value, daysn_value, summc_value, summn_value = calc_bm(fd, order)
         flag = False
         for idx in xrange(1,8):
-            if tp2_map[idx][1].process(order):
+            if tp2_map[idx][2].process(order):
                 if flag:
                     print "Duplicated type of order:"+str(order.code)
                 flag = True
@@ -1065,11 +1065,11 @@ def movanal(request, year, month):
     intmonth = int(month)
     fd = nextmonthfirstday(intyear, intmonth)
     orders = Order.objects.filter(start_date__year=intyear, start_date__month=intmonth).order_by("code")
-    template_filename = 'info.xls'
+    template_filename = 'analiz.xls'
     map = {'MONTH': monthlabel(intmonth)+' '+str(intyear),
            'MONTHC':monthlabel(intmonth),
            'MONTHN':monthlabel(fd.month),
-           'FILENAME': 'moves-'+year+'-'+month,
+           'FILENAME': 'moves-analiz-'+year+'-'+month,
            'MARKETING': gavnetso.getEmployerByRoleNameAndDate('Маркетинг',datetime.date(intyear, intmonth,1)).__unicode__()}
     l = []
     res = list()
@@ -1101,7 +1101,7 @@ def movanal(request, year, month):
         s1 += line[1]
         s2 += line[2]
         s3 += line[3]
-        s3 += line[4]
+        s4 += line[4]
 
         l.append(innermap)
 
@@ -1120,7 +1120,7 @@ def movanal(request, year, month):
 
 @login_required
 def movtp(request, year, month,tp):
-    (title,condition) = tp_map[tp]
+    (title,filetitle,condition) = tp_map[tp]
     intyear = int(year)
     intmonth = int(month)
     fd = nextmonthfirstday(intyear, intmonth)
@@ -1129,8 +1129,8 @@ def movtp(request, year, month,tp):
     map = {'MONTH': monthlabel(intmonth)+' '+str(intyear),
            'MONTHC':monthlabel(intmonth),
            'MONTHN':monthlabel(fd.month),
-           'TITLE':monthlabel(fd.month),
-           'FILENAME': 'moves-'+tp+'-'+year+'-'+month,
+           'TITLE':title,
+           'FILENAME': 'moves-'+tp+'-'+year+'-'+month+"-"+filetitle,
            'MARKETING': gavnetso.getEmployerByRoleNameAndDate('Маркетинг',datetime.date(intyear, intmonth,1)).__unicode__()}
     l = []
     i = 0
