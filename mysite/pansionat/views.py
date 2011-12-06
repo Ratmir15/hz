@@ -1083,25 +1083,35 @@ def movanal(request, year, month):
         if idx==-1:
             idx = len(res)
             idx_dict[key] = idx
-            res.append((key,0,0,0,0))
-        name, qty, summ, summc, summn = res[idx]
-        res[idx] = (name, qty+1, summ+order.price, summc+summc_value, summn+summn_value)
+            res.append((key,0,0,0,0,0,0,0))
+        name, qty, qtyp, summ, qtyc, summc, qtyn, summn = res[idx]
+        if summc_value>0:
+            qtyp_c = 1
+        else:
+            qtyp_c = 0
+        res[idx] = (name, qty+1, qtyp + qtyp_c, summ+order.price, qtyc+days_value, summc+summc_value, qtyn+daysn_value, summn+summn_value)
 
     i = 0
-    s1 = s2 = s3 = s4 = 0
+    s1 = s2 = s3 = s4 = s5 = s6 = s7 = 0
     for line in res:
         i += 1
         innermap = dict()
         innermap['IDX'] = i
         innermap['NAME'] = line[0]
         innermap['QTY'] = line[1]
-        innermap['SUMM'] = line[2]
-        innermap['SUMMC'] = line[3]
-        innermap['SUMMN'] = line[4]
+        innermap['QTYP'] = line[2]
+        innermap['SUMM'] = line[3]
+        innermap['QTYC'] = line[4]
+        innermap['SUMMC'] = line[5]
+        innermap['QTYN'] = line[6]
+        innermap['SUMMN'] = line[7]
         s1 += line[1]
         s2 += line[2]
         s3 += line[3]
         s4 += line[4]
+        s5 += line[5]
+        s6 += line[6]
+        s7 += line[7]
 
         l.append(innermap)
 
@@ -1109,9 +1119,12 @@ def movanal(request, year, month):
     innermap['IDX'] = ""
     innermap['NAME'] = "Итого"
     innermap['QTY'] = s1
-    innermap['SUMM'] = s2
-    innermap['SUMMC'] = s3
-    innermap['SUMMN'] = s4
+    innermap['QTYP'] = s2
+    innermap['SUMM'] = s3
+    innermap['QTYC'] = s4
+    innermap['SUMMC'] = s5
+    innermap['QTYN'] = s6
+    innermap['SUMMN'] = s7
 
     l.append(innermap)
 
