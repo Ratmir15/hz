@@ -813,15 +813,15 @@ def init(request):
         initdiet()
     return HttpResponse(t.render(c))
 
-@login_required
-def reestr(request, year, month):
+
+def prepare_reestr_data(month, year):
     intyear = int(year)
     intmonth = int(month)
     orders = Order.objects.filter(start_date__year=intyear, start_date__month=intmonth)
     template_filename = 'registrydiary.xls'
-    map = {'MONTH': monthlabel(intmonth)+' '+str(intyear)+' год',
+    map = {'MONTH': monthlabel(intmonth) + ' ' + str(intyear) + ' год',
            'TITLE': 'Журнал регистрации отдыхающих',
-           'FILENAME': 'reestr-'+year+'-'+month}
+           'FILENAME': 'reestr-' + year + '-' + month}
     l = []
     i = 0
     for order in orders:
@@ -833,21 +833,30 @@ def reestr(request, year, month):
         innermap['AMOUNT'] = order.price
         innermap['DATEIN'] = str(order.start_date)
         innermap['DATEOUT'] = str(order.end_date)
-        innermap['SROK'] = str(order.start_date)+' - '+str(order.end_date)
+        innermap['SROK'] = str(order.start_date) + ' - ' + str(order.end_date)
         innermap['ORDERNUMBER'] = order.code
         innermap['WHOIS'] = order.patient.grade
         innermap['WHOM'] = order.directive.name
         innermap['TIME'] = str(order.start_date)
         innermap['WORK'] = order.customer.name
         innermap['BIRTHDATE'] = str(order.patient.birth_date)
-        innermap['PASSPORT'] = order.patient.passport_number+' '+order.patient.passport_whom
+        innermap['PASSPORT'] = order.patient.passport_number + ' ' + order.patient.passport_whom
         innermap['ADDRESS'] = order.patient.address
         innermap['ROOM'] = order.room.name
         l.append(innermap)
-
     map['T'] = l
-    return fill_excel_template(template_filename, map)
+    return map, template_filename
 
+
+@login_required
+def reestr(request, year, month):
+    map, template_filename = prepare_reestr_data(month, year)
+    return render_to_response('pansionat/reports/reestr.html', MenuRequestContext(request, map))
+
+@login_required
+def reestrxls(request, year, month):
+    map, template_filename = prepare_reestr_data(month, year)
+    return fill_excel_template(template_filename, map)
 
 @login_required
 def moves(request, year, month):

@@ -1,0 +1,66 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+        "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+    <title>Журнал регистрации путевок</title>
+    <style type="text/css">
+        table.tch td {
+            border: 1px solid;
+        }
+        table.tch th {
+            border: 1px solid;
+            text-align: center;
+        }
+        table.tch {
+            border:0;
+            padding: 0;
+            border-spacing: 0;
+        }
+    </style>
+</head>
+<body>
+<h1>Журнал регистрации путевок</h1>
+<h2>за {{ MONTH }} года</h2>
+<table class="tch"><tr>
+    <th rowspan="1">№ п./п.</th>
+    <th rowspan="1">№ п./п. с начала года</th>
+    <th rowspan="1">Срок заезда</th>
+    <th rowspan="1">Дата заезда</th>
+    <th rowspan="1">ДАТА ФАКТИЧЕСКОГО ВЫЕЗДА</th>
+    <th rowspan="1">Номер путевки</th>
+    <th rowspan="1">Ф.И.О.</th>
+    <th rowspan="1">Должность</th>
+    <th rowspan="1">Кем выдана</th>
+    <th rowspan="1">Сумма</th>
+    <th rowspan="1">Время пребывания</th>
+    <th rowspan="1">Место работы</th>
+    <th rowspan="1">Дата рождения</th>
+    <th rowspan="1">Паспортные данные</th>
+    <th rowspan="1">Адрес</th>
+    </tr><tr>
+</tr>
+    {% for rows in T %}
+        <tr>
+        <td>{{  rows.NUMBER }}</td>
+        <td>{{  rows.NUMBERYEAR }}</td>
+        <td>{{  rows.SROK }}</td>
+        <td>{{  rows.DATEIN }}</td>
+        <td>{{  rows.DATEOUT }}</td>
+        <td>{{  rows.ORDERNUMBER }}</td>
+        <td>{{  rows.FIO }}</td>
+        <td>{{  rows.WHOIS }}</td>
+            <td>{{  rows.WHOM }}</td>
+            <td>{{  rows.AMOUNT }}</td>
+            <td>{{  rows.TIME }}</td>
+            <td>{{  rows.WORK }}</td>
+            <td>{{  rows.BIRTHDATE }}</td>
+            <td>{{  rows.PASSPORT }}</td>
+            <td>{{  rows.ADDRESS }}</td>
+            <td>{{  rows.ROOM }}</td>
+        </tr>
+    {% endfor %}
+
+</table>
+
+</body>
+</html>
