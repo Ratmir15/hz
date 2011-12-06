@@ -1,0 +1,55 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+        "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+    <title>Анализ движения путевок</title>
+    <style type="text/css">
+        table.tch td {
+            border: 1px solid;
+        }
+        table.tch th {
+            border: 1px solid;
+            text-align: center;
+        }
+        table.tch {
+            border:0;
+            padding: 0;
+            border-spacing: 0;
+        }
+    </style>
+</head>
+<body>
+<h1>Анализ движения путевок</h1>
+<h2>за {{ MONTH }} года</h2>
+<table class="tch"><tr>
+    <th rowspan="2">№ п./п.</th>
+    <th rowspan="2"></th>
+    <th rowspan="2">Человек</th>
+    <th rowspan="2">Путевок</th>
+    <th rowspan="2">Сумма</th>
+    <th colspan="2">{{ MONTHC }}</th>
+    <th colspan="2">{{ MONTHN }}</th>
+    </tr><tr>
+    <th>Чел.-дни</th>
+    <th>Сумма</th>
+    <th>Чел.-дни</th>
+    <th>Сумма</th>
+</tr>
+    {% for rows in T %}
+        <tr>
+        <td>{{  rows.IDX }}</td>
+        <td>{{  rows.NAME }}</td>
+        <td>{{  rows.QTY }}</td>
+        <td>{{  rows.QTYP }}</td>
+        <td>{{  rows.SUMM }}</td>
+        <td>{{  rows.QTYC }}</td>
+        <td>{{  rows.SUMMC }}</td>
+        <td>{{  rows.QTYN }}</td>
+        <td>{{  rows.SUMMN }}</td>
+        </tr>
+    {% endfor %}
+
+</table>
+
+</body>
+</html>

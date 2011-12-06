@@ -1059,18 +1059,18 @@ def movinfo(request, year, month):
     map['T'] = l
     return fill_excel_template(template_filename, map)
 
-@login_required
-def movanal(request, year, month):
+def prepare_anal_data(month, year):
     intyear = int(year)
     intmonth = int(month)
     fd = nextmonthfirstday(intyear, intmonth)
     orders = Order.objects.filter(start_date__year=intyear, start_date__month=intmonth).order_by("code")
     template_filename = 'analiz.xls'
-    map = {'MONTH': monthlabel(intmonth)+' '+str(intyear),
-           'MONTHC':monthlabel(intmonth),
-           'MONTHN':monthlabel(fd.month),
-           'FILENAME': 'moves-analiz-'+year+'-'+month,
-           'MARKETING': gavnetso.getEmployerByRoleNameAndDate('Маркетинг',datetime.date(intyear, intmonth,1)).__unicode__()}
+    map = {'MONTH': monthlabel(intmonth) + ' ' + str(intyear),
+           'MONTHC': monthlabel(intmonth),
+           'MONTHN': monthlabel(fd.month),
+           'FILENAME': 'moves-analiz-' + year + '-' + month,
+           'MARKETING': gavnetso.getEmployerByRoleNameAndDate('Маркетинг',
+                                                              datetime.date(intyear, intmonth, 1)).__unicode__()}
     l = []
     res = list()
     idx_dict = dict()
@@ -1079,18 +1079,20 @@ def movanal(request, year, month):
         #order.delete()
         days_value, daysn_value, summc_value, summn_value = calc_bm(fd, order)
         key = upper(order.directive.name)
-        idx = idx_dict.get(key,-1)
-        if idx==-1:
+        idx = idx_dict.get(key, -1)
+        if idx == -1:
             idx = len(res)
             idx_dict[key] = idx
-            res.append((key,0,0,0,0,0,0,0))
+            res.append((key, 0, 0, 0, 0, 0, 0, 0))
         name, qty, qtyp, summ, qtyc, summc, qtyn, summn = res[idx]
-        if summc_value>0:
+        if summc_value > 0:
             qtyp_c = 1
         else:
             qtyp_c = 0
-        res[idx] = (name, qty+1, qtyp + qtyp_c, summ+order.price, qtyc+days_value, summc+summc_value, qtyn+daysn_value, summn+summn_value)
-
+        res[idx] = (
+            name, qty + 1, qtyp + qtyp_c, summ + order.price, qtyc + days_value, summc + summc_value, qtyn + daysn_value
+            ,
+            summn + summn_value)
     i = 0
     s1 = s2 = s3 = s4 = s5 = s6 = s7 = 0
     for line in res:
@@ -1114,7 +1116,6 @@ def movanal(request, year, month):
         s7 += line[7]
 
         l.append(innermap)
-
     innermap = dict()
     innermap['IDX'] = ""
     innermap['NAME'] = "Итого"
@@ -1125,10 +1126,19 @@ def movanal(request, year, month):
     innermap['SUMMC'] = s5
     innermap['QTYN'] = s6
     innermap['SUMMN'] = s7
-
     l.append(innermap)
-
     map['T'] = l
+    return map, template_filename
+
+
+@login_required
+def movanal(request, year, month):
+    map, template_filename = prepare_anal_data(month, year)
+    return render_to_response('pansionat/reports/anal.html', MenuRequestContext(request, map))
+
+@login_required
+def movanalxls(request, year, month):
+    map, template_filename = prepare_anal_data(month, year)
     return fill_excel_template(template_filename, map)
 
 @login_required
