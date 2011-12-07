@@ -814,14 +814,7 @@ def init(request):
     return HttpResponse(t.render(c))
 
 
-def prepare_reestr_data(month, year):
-    intyear = int(year)
-    intmonth = int(month)
-    orders = Order.objects.filter(start_date__year=intyear, start_date__month=intmonth)
-    template_filename = 'registrydiary.xls'
-    map = {'MONTH': monthlabel(intmonth) + ' ' + str(intyear) + ' год',
-           'TITLE': 'Журнал регистрации отдыхающих',
-           'FILENAME': 'reestr-' + year + '-' + month}
+def prepare_rmreg_data(orders):
     l = []
     i = 0
     for order in orders:
@@ -829,6 +822,7 @@ def prepare_reestr_data(month, year):
         innermap = dict()
         innermap['NUMBER'] = i
         innermap['NUMBERYEAR'] = i
+        innermap['ID'] = order.id
         innermap['FIO'] = order.patient.__unicode__()
         innermap['AMOUNT'] = order.price
         innermap['DATEIN'] = str(order.start_date)
@@ -844,6 +838,18 @@ def prepare_reestr_data(month, year):
         innermap['ADDRESS'] = order.patient.address
         innermap['ROOM'] = order.room.name
         l.append(innermap)
+    return l
+
+
+def prepare_reestr_data(month, year):
+    intyear = int(year)
+    intmonth = int(month)
+    orders = Order.objects.filter(start_date__year=intyear, start_date__month=intmonth)
+    template_filename = 'registrydiary.xls'
+    map = {'MONTH': monthlabel(intmonth) + ' ' + str(intyear) + ' год',
+           'TITLE': 'Журнал регистрации отдыхающих',
+           'FILENAME': 'reestr-' + year + '-' + month}
+    l = prepare_rmreg_data(orders)
     map['T'] = l
     return map, template_filename
 
@@ -857,6 +863,28 @@ def reestr(request, year, month):
 def reestrxls(request, year, month):
     map, template_filename = prepare_reestr_data(month, year)
     return fill_excel_template(template_filename, map)
+
+@login_required
+def rmreg(request, year, month, day):
+    dt = datetime.date(int(year),int(month),int(day))
+    orders = Order.objects.filter(start_date=dt)
+    l = prepare_rmreg_data(orders)
+    map = dict()
+    map['T'] = l
+    td = datetime.timedelta(days=1)
+    pday = dt - td
+    nday = dt + td
+    map["pday"] = str(pday)
+    map["nday"] = str(nday)
+    return render_to_response('pansionat/reports/rmreg.html', MenuRequestContext(request, map))
+
+@login_required
+def rmregtoday(request):
+    td = datetime.date.today()
+    return rmreg(request, td.year, td.month, td.day )
+#    orders = Order.objects.filter(start_date__year=intyear, start_date__month=intmonth)
+#    map, template_filename = prepare_rmreg_data(td.day, td.month, td.year)
+#    return render_to_response('pansionat/rmreg.html', MenuRequestContext(request, map))
 
 @login_required
 def moves(request, year, month):
