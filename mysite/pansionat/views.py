@@ -23,7 +23,7 @@ from mysite.pansionat import gavnetso
 from mysite.pansionat.models import IllHistory, Customer, IllHistoryFieldType, IllHistoryFieldValue, IllHistoryRecord, OrderMedicalProcedure, MedicalProcedureType, OrderMedicalProcedureSchedule, Occupied, IllHistoryFieldTypeGroup, EmployerRoleHistory, Role, Employer, OrderDiet, Diet, OrderDay, OrderType, DietItems, Item, ItemPiece, Piece, MARRIAGE
 from mysite.pansionat.orders import room_availability
 from mysite.pansionat.proc import MenuRequestContext, MedicalPriceReport
-from mysite.pansionat.reports import DietForm, DateFilterForm
+from mysite.pansionat.reports import DietForm, DateFilterForm, PFCondition, ElseCondition, SPCondition, PPCondition, RCondition, SzCondition, HzCondition, HzSzCondition
 from pytils import numeral
 from mysite.pansionat.gavnetso import monthlabel, nextmonthfirstday, initbase, initroles, initroomtypes, initp, initdiet, fillBookDays, fillOrderDays, inithistory, import_bron, import_proc, import_rooms, import_ordertypes
 import datetime
@@ -969,56 +969,6 @@ def mov(request, year, month):
 
     map['T'] = l
     return fill_excel_template(template_filename, map)
-
-class HzCondition():
-
-    def process(self, order):
-        n_list = [u'САНАТОРИЙ ХОПРОВСКИЕ ЗОРИ']
-        return upper(order.directive.name) in n_list
-
-class SzCondition():
-
-    def process(self, order):
-        n_list = [u'СЕЛЬСКАЯ ЗДРАВНИЦА']
-        return upper(order.directive.name) in n_list
-
-class HzSzCondition():
-
-    def process(self, order):
-        n_list = [u'СЕЛЬСКАЯ ЗДРАВНИЦА',u'САНАТОРИЙ ХОПРОВСКИЕ ЗОРИ']
-        return upper(order.directive.name) in n_list
-
-class PPCondition():
-
-    def process(self, order):
-        n_list = [u'ПЕНЗА ПРОФ']
-        return upper(order.directive.name) in n_list
-
-class SPCondition():
-
-    def process(self, order):
-        n_list = [u'САМАРА ПРОФ']
-        return upper(order.directive.name) in n_list
-
-class PFCondition():
-
-    def process(self, order):
-        n_list = [u'ПЕНЗА ФСС']
-        return upper(order.directive.name) in n_list
-
-class RCondition():
-
-    def process(self, order):
-        p_list = [26400,21607.92]
-        n_list = [u'САНАТОРИЙ ХОПРОВСКИЕ ЗОРИ',u'СЕЛЬСКАЯ ЗДРАВНИЦА',u'ПЕНЗА ФСС',u'САМАРА ПРОФ',u'ПЕНЗА ПРОФ']
-        return (not upper(order.directive.name) in n_list) and (order.price==26400 or (order.price>21607 and order.price<21608))
-
-class ElseCondition():
-
-    def process(self, order):
-        b = order.price==26400 or (order.price>21607 and order.price<21608)
-        n_list = [u'САНАТОРИЙ ХОПРОВСКИЕ ЗОРИ',u'СЕЛЬСКАЯ ЗДРАВНИЦА',u'ПЕНЗА ФСС',u'САМАРА ПРОФ',u'ПЕНЗА ПРОФ']
-        return not b and (not upper(order.directive.name) in n_list)
 
 tp_map = {
     "1":('ХЗ,СЗ',"hzsz",HzSzCondition()),

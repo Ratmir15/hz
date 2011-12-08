@@ -13,7 +13,12 @@
     <script src="/static/jquery-ui/ui/jquery.ui.datepicker.js"></script>
     <script src="/static/jquery-ui/ui/i18n/jquery.ui.datepicker-ru.js"></script>
     <script src="/static/jquery-ui/ui/jquery.ui.button.js"></script>
-
+    <script type="text/javascript">
+    $(document).ready(function() {
+        $.datepicker.setDefaults($.datepicker.regional['ru']);
+        $('#id_report_date').datepicker();
+    });
+</script>
 <link rel="stylesheet" href="/static/Refresh.css" type="text/css" />
  {%  endblock  %}
 

@@ -1,12 +1,13 @@
 # coding: utf-8
 import datetime
+from string import upper
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse
 from django.shortcuts import render_to_response
 from django import forms
 from django.template import loader
 from mysite.pansionat.menu import MenuRequestContext
-from mysite.pansionat.models import Order, OrderType, OrderDay
+from mysite.pansionat.models import Order, OrderType, OrderDay, OrderMedicalProcedure
 from mysite.pansionat.proc import MedicalPriceReport
 from mysite.pansionat.xltemplates import fill_excel_template
 
@@ -46,7 +47,7 @@ class MedicalPriceForm(forms.Form):
 
 class LivingForm(forms.Form):
     report_date = forms.DateField(required=True, label='Дата формирования')
-    order_type = forms.ModelChoiceField(OrderType.objects.all(), label = 'Тип путевки')
+    order_type = forms.ChoiceField([("1","СЗ/ХЗ"),("2","Прочие"),("3","Реабилитация"),("4","Пенза проф"),("5","Самара проф"),("6","Пенза фсс")], label = 'Тип путевки')
 
 class LeavingReport():
 
@@ -72,37 +73,96 @@ class LeavingReport2():
         return z,d
 
 
+class HzCondition():
+
+    def process(self, order):
+        n_list = [u'САНАТОРИЙ ХОПРОВСКИЕ ЗОРИ']
+        return upper(order.directive.name) in n_list
+
+class SzCondition():
+
+    def process(self, order):
+        n_list = [u'СЕЛЬСКАЯ ЗДРАВНИЦА']
+        return upper(order.directive.name) in n_list
+
+class HzSzCondition():
+
+    def process(self, order):
+        n_list = [u'СЕЛЬСКАЯ ЗДРАВНИЦА',u'САНАТОРИЙ ХОПРОВСКИЕ ЗОРИ']
+        return upper(order.directive.name) in n_list
+
+class PPCondition():
+
+    def process(self, order):
+        n_list = [u'ПЕНЗА ПРОФ']
+        return upper(order.directive.name) in n_list
+
+class SPCondition():
+
+    def process(self, order):
+        n_list = [u'САМАРА ПРОФ']
+        return upper(order.directive.name) in n_list
+
+class PFCondition():
+
+    def process(self, order):
+        n_list = [u'ПЕНЗА ФСС']
+        return upper(order.directive.name) in n_list
+
+class RCondition():
+
+    def process(self, order):
+        p_list = [26400,21607.92]
+        n_list = [u'САНАТОРИЙ ХОПРОВСКИЕ ЗОРИ',u'СЕЛЬСКАЯ ЗДРАВНИЦА',u'ПЕНЗА ФСС',u'САМАРА ПРОФ',u'ПЕНЗА ПРОФ']
+        return (not upper(order.directive.name) in n_list) and (order.price==26400 or (order.price>21607 and order.price<21608))
+
+class ElseCondition():
+
+    def process(self, order):
+        b = order.price==26400 or (order.price>21607 and order.price<21608)
+        n_list = [u'САНАТОРИЙ ХОПРОВСКИЕ ЗОРИ',u'СЕЛЬСКАЯ ЗДРАВНИЦА',u'ПЕНЗА ФСС',u'САМАРА ПРОФ',u'ПЕНЗА ПРОФ']
+        return not b and (not upper(order.directive.name) in n_list)
+
+tp_map = {
+    "1":('ХЗ,СЗ',"hzsz",HzSzCondition()),
+    "2":('Прочие',"else",ElseCondition()),
+    "3":('Реабилитация',"reab",RCondition()),
+    "4":('Пенза проф',"penzaprof",PPCondition()),
+    "5":('Самара проф',"samaraprof",SPCondition()),
+    "6":('Пенза фсс',"penzafss",PFCondition()),
+}
+
 class LivingReport():
 
     def process(self, form):
         cleaned_report_date = form.cleaned_data['report_date']
-        order_type = form.cleaned_data['order_type']
-        list = OrderDay.objects.filter(busydate = cleaned_report_date,
-            order__order_type = order_type).order_by("order__code")
+        title, title_eng, condition = tp_map[form.cleaned_data['order_type']]
+        list = OrderDay.objects.filter(busydate = cleaned_report_date).order_by("order__code")
         d = []
         i = 0
         for obj in list:
             order = obj.order
-            i += 1
-            innermap = dict()
-            innermap['NUMBER'] = i
-            innermap['NUMBERYEAR'] = order.code
-            innermap['FIO'] = order.patient.__unicode__()
-            innermap['AMOUNT'] = order.price
-            innermap['DATEIN'] = str(order.start_date)
-            innermap['DATEOUT'] = str(order.end_date)
-            innermap['SROK'] = str(order.start_date)+' - '+str(order.end_date)
-            innermap['ORDERNUMBER'] = order.putevka
-            innermap['WHOIS'] = order.patient.grade
-            innermap['WHOM'] = order.directive.name
-            innermap['TIME'] = str(order.start_date)
-            innermap['WORK'] = order.customer.name
-            innermap['BIRTHDATE'] = str(order.patient.birth_date)
-            innermap['PASSPORT'] = order.patient.passport_number+' '+order.patient.passport_whom
-            innermap['ADDRESS'] = order.patient.address
-            innermap['ROOM'] = order.room.name
-            d.append(innermap)
-        title = "Список заселенных"
+            if condition.process(order):
+                i += 1
+                innermap = dict()
+                innermap['NUMBER'] = i
+                innermap['NUMBERYEAR'] = order.code
+                innermap['FIO'] = order.patient.__unicode__()
+                innermap['AMOUNT'] = order.price
+                innermap['DATEIN'] = str(order.start_date)
+                innermap['DATEOUT'] = str(order.end_date)
+                innermap['SROK'] = str(order.start_date)+' - '+str(order.end_date)
+                innermap['ORDERNUMBER'] = order.putevka
+                innermap['WHOIS'] = order.patient.grade
+                innermap['WHOM'] = order.directive.name
+                innermap['TIME'] = str(order.start_date)
+                innermap['WORK'] = order.customer.name
+                innermap['BIRTHDATE'] = str(order.patient.birth_date)
+                innermap['PASSPORT'] = order.patient.passport_number+' '+order.patient.passport_whom
+                innermap['ADDRESS'] = order.patient.address
+                innermap['ROOM'] = order.room.name
+                d.append(innermap)
+        title = "Список заселенных "+title
         month  = ""#order_type.__unicode__()
         z = {'TITLE': title+". "+str(cleaned_report_date),'MONTH':month, 'REPORTDATE': str(cleaned_report_date)}
         return z,d
