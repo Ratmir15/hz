@@ -146,6 +146,7 @@ class LivingReport():
                 i += 1
                 innermap = dict()
                 innermap['NUMBER'] = i
+                innermap['ID'] = order.id
                 innermap['NUMBERYEAR'] = order.code
                 innermap['FIO'] = order.patient.__unicode__()
                 innermap['AMOUNT'] = order.price
@@ -167,11 +168,11 @@ class LivingReport():
         z = {'TITLE': title+". "+str(cleaned_report_date),'MONTH':month, 'REPORTDATE': str(cleaned_report_date)}
         return z,d
 
-report_map = {"1":('Список заезжающих',EnteringForm,'simplereport.xls',EnteringReport()),
-              "2":('Список съезжающих',LeavingForm,'simplereport.xls',LeavingReport()),
-              "3":('Прайс-лист',MedicalPriceForm,'simplereport.xls',MedicalPriceReport()),
-              "4":('Отчет по заселенным',LivingForm,'registrydiary.xls',LivingReport()),
-              "5":('Список съезжающих с учетом типа путевки)',LeavingForm2,'simplereport.xls',LeavingReport2()),
+report_map = {"1":('Список заезжающих',EnteringForm,'simplereport.xls',EnteringReport(),""),
+              "2":('Список съезжающих',LeavingForm,'simplereport.xls',LeavingReport(),""),
+              "3":('Прайс-лист',MedicalPriceForm,'simplereport.xls',MedicalPriceReport(),""),
+              "4":('Отчет по заселенным',LivingForm,'registrydiary.xls',LivingReport(),'pansionat/reports/rmreg.html'),
+              "5":('Список съезжающих с учетом типа путевки)',LeavingForm2,'simplereport.xls',LeavingReport2(),'pansionat/reports/rmreg.html'),
 }
 
 @login_required
@@ -186,7 +187,10 @@ def processreport(request, tp):
         for (key,value) in md[0].items():
             tel[key] = str(value)
 
-        return fill_excel_template(report_metadata[2], tel)
+        if request.POST.has_key("s2") and report_metadata[4]!="":
+            return render_to_response(report_metadata[4], MenuRequestContext(request, tel))
+        else:
+            return fill_excel_template(report_metadata[2], tel)
     else:
         values = {"tp": tp, "metadata": report_metadata}
         return render_to_response('pansionat/report.html', MenuRequestContext(request, values))

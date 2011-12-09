@@ -66,12 +66,12 @@
         <td>{{  rows.DATEOUT }}</td>
         <td>{{  rows.ORDERNUMBER }}</td>
         <td>{{  rows.FIO }}</td>
-        <td>{{  rows.WHOIS }}</td>
-            <td>{{  rows.WHOM }}</td>
+        <td>{% if rows.WHOIS %}{{  rows.WHOIS }}{% endif %}</td>
+            <td>{% if rows.WHOM %}{{  rows.WHOM }}{% endif %}</td>
             <td>{{  rows.AMOUNT }}</td>
-            <td>{{  rows.WORK }}</td>
-            <td>{{  rows.BIRTHDATE }}</td>
-            <td class="addr">{{  rows.PASSPORT }}<br/>{{  rows.ADDRESS }}</td>
+            <td>{% if rows.WORK %}{{  rows.WORK }}{% endif %}</td>
+            <td>{% if rows.BIRTHDATE %}{{  rows.BIRTHDATE }}{% endif %}</td>
+            <td class="addr">{{  rows.PASSPORT }}<br/>{% if rows.ADDRESS %}{{  rows.ADDRESS }}{% endif %}</td>
             <td>{{  rows.ROOM }}</td>
         </tr>
     {% endfor %}

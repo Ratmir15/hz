@@ -1639,7 +1639,7 @@ class OrderForm(ModelForm):
 #        widgets = {
 #            'customer': TextInput(),
 #        }
-        exclude = ('directive','customer','patient', 'room')
+        exclude = ('directive','customer','patient', 'room','order_type')
 
 class PatientForm(ModelForm):
     class Meta:

@@ -27,6 +27,7 @@
     {% csrf_token %}
     <h1>{{ metadata.0 }}</h1>
     <table>{{ metadata.1.as_table }}</table>
-    <input type="submit" value="Сформировать">
+        <input name="s1" type="submit" value="Сформировать xls">
+        <input name="s2" type="submit" value="Сформировать html">
     </form>
  {%  endblock  %}
