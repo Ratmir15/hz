@@ -21,7 +21,7 @@ from django.shortcuts import redirect
 import logging
 from mysite.pansionat import gavnetso
 from mysite.pansionat.models import IllHistory, Customer, IllHistoryFieldType, IllHistoryFieldValue, IllHistoryRecord, OrderMedicalProcedure, MedicalProcedureType, OrderMedicalProcedureSchedule, Occupied, IllHistoryFieldTypeGroup, EmployerRoleHistory, Role, Employer, OrderDiet, Diet, OrderDay, OrderType, DietItems, Item, ItemPiece, Piece, MARRIAGE
-from mysite.pansionat.orders import room_availability
+from mysite.pansionat.orders import room_availability, fill_cust_list, return_orders_list
 from mysite.pansionat.proc import MenuRequestContext, MedicalPriceReport
 from mysite.pansionat.reports import DietForm, DateFilterForm, PFCondition, ElseCondition, SPCondition, PPCondition, RCondition, SzCondition, HzCondition, HzSzCondition
 from pytils import numeral
@@ -74,12 +74,6 @@ def clients(request):
 	})
 	return HttpResponse(t.render(c))
 
-def ordertr(item):
-    item["start_date"] = item["start_date"].strftime('%Y.%m.%d')
-    item["end_date"] = item["end_date"].strftime('%Y.%m.%d')
-    return item
-
-
 def return_order_menu(form, request):
     t = loader.get_template('pansionat/ordersmenu.html')
     months = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12']
@@ -98,19 +92,6 @@ def return_order_menu(form, request):
 def ordersmenu(request):
     form = DateFilterForm()
     return return_order_menu(form, request)
-
-
-def return_orders_list(occupied_list, request):
-    t = loader.get_template('pansionat/orders.html')
-    c = MenuRequestContext(request, {
-        'diet_en': request.user.has_perm('pansionat.add_orderdiet'),
-        'occupied_list': map(ordertr, occupied_list),
-        })
-    resp = HttpResponse(t.render(c))
-    #qs = connection.queries
-    #for q in qs:
-    #    print q
-    return resp
 
 @login_required
 def orders_by_month(request, year, month):
@@ -1758,7 +1739,11 @@ def order(request):
         if cus!="":
             cs = Customer.objects.filter(name = cus)
             if not len(cs):
-                cus_error = "Выберите корректный вариант. Вашего варианта нет среди допустимых значений."
+                if request.POST.has_key("c_add"):
+                    customer = Customer(name = cus,shortname = cus)
+                    customer.save()
+                else:
+                    cus_error = "Выберите корректный вариант. Вашего варианта нет среди допустимых значений."
             else:
                 customer = cs[0]
         dir = order_form.data.get("directive","")
@@ -1766,7 +1751,11 @@ def order(request):
         if dir!="":
             cs = Customer.objects.filter(name = dir)
             if not len(cs):
-                dir_error = "Выберите корректный вариант. Вашего варианта нет среди допустимых значений."
+                if request.POST.has_key("d_add"):
+                    directive = Customer(name = dir,shortname = dir)
+                    directive.save()
+                else:
+                    dir_error = "Выберите корректный вариант. Вашего варианта нет среди допустимых значений."
             else:
                 directive = cs[0]
 
@@ -1794,7 +1783,9 @@ def order(request):
         patient_form = PatientForm()
         values['patient_form'] = patient_form
 
-    values["customers"] = Customer.objects.all()
+    c_list = fill_cust_list()
+
+    values["customers"] = c_list
     values["cus_error"] = cus_error
     values["dir_error"] = dir_error
 

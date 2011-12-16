@@ -24,6 +24,10 @@ def getMenuItems(request):
         i.href = "/rooms/"
         i.label = "Номера"
         items.append(i)
+        i = MenuItem()
+        i.href = "/rmreg/"
+        i.label = "РМР"
+        items.append(i)
     if user.has_perm('pansionat.add_medicalproceduretypeprice'):
         i = MenuItem()
         i.href = "/mpp/"

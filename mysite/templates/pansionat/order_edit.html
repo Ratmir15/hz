@@ -12,6 +12,8 @@
         <script src="/static/dataTables/media/js/jquery.dataTables.js"></script>
         <script src="/static/jquery-ui/ui/jquery.ui.core.js"></script>
         <script src="/static/jquery-ui/ui/jquery.ui.widget.js"></script>
+        <script src="/static/jquery-ui/ui/jquery.ui.position.js"></script>
+        <script src="/static/jquery-ui/ui/jquery.ui.autocomplete.js"></script>
         <script src="/static/jquery-ui/ui/jquery.ui.datepicker.js"></script>
         <script src="/static/jquery-ui/ui/i18n/jquery.ui.datepicker-ru.js"></script>
         <script src="/static/jquery-ui/ui/jquery.ui.button.js"></script>
@@ -27,6 +29,24 @@
 //                    alert(o);
 //                    asasa
 //                });
+                var availableTags = [
+                    {% for customer in customers %}"{{ customer }}",{% endfor %}
+                ];
+                var availableTagsPatient = [
+                    {% for patient in patients %}"{{ patient }}",{% endfor %}
+                ];
+                var availableTagsRoomPatient = [
+                    {% for patient in patients %}"{{ patient }}",{% endfor %}
+                ];
+                $( "#patient" ).autocomplete({
+                    source: availableTagsPatient
+                });
+                $( "#customer" ).autocomplete({
+                    source: availableTags
+                });
+            $( "#directive" ).autocomplete({
+                source: availableTags
+            });
                 $('#id_start_date').datepicker();
                 $('#id_end_date').datepicker();
                 } );
@@ -44,6 +64,20 @@
 {#                    </select>#}
                 </td>
 {#                    <tr><td colspan="2">Свободных мест: {{ pl }}</td></tr>#}
+                    <tr><th><label for="customer">Направляющая организация</label></th>
+                        <td><input type="text" id="customer" name="customer" value="{{ cus }}">сз,хз,фсс,...{% if cus_error %}<ul class="errorlist"><li>{{ cus_error }}</li></ul>{% endif %}</td></tr>
+                    <tr><td><input type="checkbox" name="c_add">добавить</td></tr>
+                    <tr><th><label for="directive">Место работы</label></th>
+                        <td><input type="text" id="directive" name="directive" value="{{ dir }}">{% if dir_error %}<ul class="errorlist"><li>{{ dir_error }}</li></ul>{% endif %}</td>
+                    </tr>
+                    <tr><td><input type="checkbox" name="d_add">добавить</td></tr>
+                    <tr><th><label for="patient">Отдыхающий</label></th>
+                        <td><input type="text" id="patient" name="patient" value="{{ pat }}">{% if pat_error %}<ul class="errorlist"><li>{{ pat_error }}</li></ul>{% endif %}</td>
+                    </tr>
+                <tr><td colspan="2"><a href="/clients/new" target="_blank" style="font-size: 8px;">добавить организацию</a></td></tr>
+                    <tr><th><label for="patient">Комната</label></th>
+                        <td><input type="text" id="room" name="room" value="{{ rm }}">{% if rm_error %}<ul class="errorlist"><li>{{ rm_error }}</li></ul>{% endif %}</td>
+                    </tr>
                     {{ form.as_table }}
                 <input type="hidden" id="pr" name="pr" value="{{ pr }}"/>
                 <input type="hidden" id="md" name="md" value="730"/>

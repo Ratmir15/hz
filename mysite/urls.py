@@ -99,6 +99,7 @@ urlpatterns = patterns('',
     (r'^order/$', 'pansionat.views.order'),
     (r'^init/$', 'pansionat.views.init'),
     (r'^clear/$', 'pansionat.views.clear'),
+    (r'^search/$', 'pansionat.orders.search'),
     (r'^admin/', include(admin.site.urls)),
     (r'^$', 'pansionat.views.index'),
 )

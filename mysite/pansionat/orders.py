@@ -1,5 +1,6 @@
 # coding: utf-8
 import datetime
+from string import upper
 from django.contrib.auth.decorators import permission_required, login_required
 from django.core import serializers
 from django.db import connection
@@ -7,16 +8,21 @@ from django.forms import forms
 from django.forms.models import ModelForm
 from django.http import HttpResponse
 from django.shortcuts import render_to_response
+from django.template import loader
 from mysite import settings
 from mysite.pansionat.gavnetso import test_file, import_diets
 from mysite.pansionat.menu import MenuRequestContext
-from mysite.pansionat.models import OrderDay, Order, Room
+from mysite.pansionat.models import OrderDay, Order, Room, Customer, Patient
 
 __author__ = 'rpanov'
 
 class OrderEditForm(ModelForm):
     class Meta:
         model = Order
+#        widgets = {
+#            'customer': TextInput(),
+#        }
+        exclude = ('directive','customer','patient', 'room','order_type')
 
 @login_required
 def order_json(request, order_id):
@@ -26,6 +32,52 @@ def order_json(request, order_id):
     json_serializer.serialize(order, ensure_ascii=False, stream=response)
     return response
 
+def fill_cust_list():
+    customers = Customer.objects.all()
+    c_list = set()
+    for customer in customers:
+        c_list.add(upper(customer.name))
+    return c_list
+
+def ordertr(item):
+    item["start_date"] = item["start_date"].strftime('%Y.%m.%d')
+    item["end_date"] = item["end_date"].strftime('%Y.%m.%d')
+    return item
+
+def return_orders_list(occupied_list, request):
+    t = loader.get_template('pansionat/orders.html')
+    c = MenuRequestContext(request, {
+        'diet_en': request.user.has_perm('pansionat.add_orderdiet'),
+        'occupied_list': map(ordertr, occupied_list),
+        })
+    resp = HttpResponse(t.render(c))
+    #qs = connection.queries
+    #for q in qs:
+    #    print q
+    return resp
+
+@login_required
+def search(request):
+    values = {}
+    fv = request.POST.get('field_value')
+    orders = []
+    if request.POST.has_key('family_search'):
+        orders = Order.objects.filter(patient__family__contains=fv).values("id","code","putevka","room__name","patient__family","patient__name","patient__sname","start_date","end_date","customer__name","price").order_by("id")
+    if request.POST.has_key('pn_search'):
+        orders = Order.objects.filter(patient__passport_number__contains=fv).values("id","code","putevka","room__name","patient__family","patient__name","patient__sname","start_date","end_date","customer__name","price").order_by("id")
+    if request.POST.has_key('code_search'):
+        orders = Order.objects.filter(code__contains=fv).values("id","code","putevka","room__name","patient__family","patient__name","patient__sname","start_date","end_date","customer__name","price").order_by("id")
+    if request.POST.has_key('putevka_search'):
+        orders = Order.objects.filter(putevka__contains=fv).values("id","code","putevka","room__name","patient__family","patient__name","patient__sname","start_date","end_date","customer__name","price").order_by("id")
+
+    if not len(orders):
+        return render_to_response('pansionat/orders.html', MenuRequestContext(request, values))
+    else:
+        if len(orders)==1:
+            return order_edit(request, orders[0]["id"])
+        else:
+            return return_orders_list(orders, request)
+
 @login_required
 @permission_required('pansionat.add_order', login_url='/forbidden/')
 def order_edit(request, order_id):
@@ -34,6 +86,13 @@ def order_edit(request, order_id):
     order_days = OrderDay.objects.filter(order = order).order_by("busydate")
     values = {"id":order.id,"form":form}
     places = get_order_places(order)
+    c_list = fill_cust_list()
+    p_list = Patient.objects.all().order_by("family","name","sname")
+    r_list = Room.objects.all().order_by("name")
+
+    values["customers"] = c_list
+    values["patients"] = p_list
+    values["allrooms"] = r_list
     values["order_days"] = get_order_days_with_availability(order_days, places)
     return render_to_response('pansionat/order_edit.html', MenuRequestContext(request, values))
 

@@ -27,20 +27,26 @@
     <script src="/static/dataTables/media/js/jquery.dataTables.js"></script>
     <script src="/static/jquery-ui/ui/jquery.ui.core.js"></script>
     <script src="/static/jquery-ui/ui/jquery.ui.widget.js"></script>
+    <script src="/static/jquery-ui/ui/jquery.ui.mouse.js"></script>
+    <script src="/static/jquery-ui/ui/jquery.ui.draggable.js"></script>
+    <script src="/static/jquery-ui/ui/jquery.ui.position.js"></script>
+    <script src="/static/jquery-ui/ui/jquery.ui.resizable.js"></script>
+    <script src="/static/jquery-ui/ui/jquery.ui.dialog.js"></script>
     <script src="/static/jquery-ui/ui/jquery.ui.datepicker.js"></script>
     <script src="/static/jquery-ui/ui/i18n/jquery.ui.datepicker-ru.js"></script>
     <script src="/static/jquery-ui/ui/jquery.ui.button.js"></script>
     <script type="text/javascript">
         $(document).ready(function() {
             $.datepicker.setDefaults($.datepicker.regional['ru']);
-            $('#id_birth_date').datepicker();
+            $('#diary_date').datepicker();
+            $('#dl').dialog({ autoOpen: false });
             $('input:submit').button()
             $(':button').button()
             } );
     </script>
 </head>
 <body>
-<div>Рабочее место регистратора&nbsp;<a href="/rmreg/{{ pday }}">{{ pday }}</a>&nbsp;<a href="/rmreg/{{ nday }}">{{ nday }}</a>&nbsp;<a href="/reports/">Отчеты</a></div>
+<div style="width: 100%;background-color: #eeeeee;border-bottom: 1px solid;" align="center">Рабочее место регистратора&nbsp;<a href="/rmreg/{{ pday }}">{{ pday }}</a>&nbsp;<a href="/rmreg/{{ nday }}">{{ nday }}</a>&nbsp;<form action="/rmreg/" method="post" name="date_form">{% csrf_token %}<input type="text" id="diary_date"/><a href="#" onclick="document.date_form.submit(); return false;">Показать</a></form>&nbsp;<a href="/reports/">Отчеты</a>&nbsp;<a href="#" onclick="$('#dl').dialog('open'); return false;">Поиск</a></div>
 <a href="#" onclick="$('.addr').hide(); return false;">скрыть</a>/<a href="#" onclick="$('.addr').show();return false;">показать</a>
 
 <table class="tch"><tr>
@@ -77,6 +83,18 @@
     {% endfor %}
 
 </table>
+<div id="dl" title="Поиск">
+    <form action="/search/" method="POST">
+        {% csrf_token %}
+    <table width="100%"><tr><td colspan="2"><div id="dl_code"></div></td></tr>
+    <tr><td colspan="2"><input type="text" name="field_value"/></td></tr>
+        <tr><td colspan="2"><input type="submit" name="family_search" value="Найти по фамилии"/></td></tr>
+        <tr><td colspan="2"><input type="submit" name="pn_search" value="Найти по паспорту"/></td></tr>
+        <tr><td colspan="2"><input type="submit" name="code_search" value="Найти по коду"/></td></tr>
+        <tr><td colspan="2"><input type="submit" name="putevka_search" value="Найти по путевке"/></td></tr>
+    </table>
+        </form>
+</div>
 
 </body>
 </html>
