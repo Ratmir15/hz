@@ -28,7 +28,7 @@
     <table border="0" id = "occupied" class = "display">
             {% for q in res %}
                 <tr>{% for r in q %}
-                <td>{{ r.0.name }}</td>
+                <td><a href="/orders/room/{{ r.0.id }}/">{{ r.0.name }}</a></td>
                     <td>{{ r.1 }}</td>
                     {% endfor %}
             </tr>
