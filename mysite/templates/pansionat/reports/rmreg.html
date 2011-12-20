@@ -70,8 +70,8 @@
         <td>{{  rows.NUMBERYEAR }}</td>
         <td>{{  rows.DATEIN }}</td>
         <td>{{  rows.DATEOUT }}</td>
-        <td>{{  rows.ORDERNUMBER }}</td>
-        <td>{{  rows.FIO }}</td>
+        <td>{{  rows.PUTEVKA }}</td>
+        <td><a href="/patients/{{ rows.PID }}">-</a>{{  rows.FIO }}</td>
         <td>{% if rows.WHOIS %}{{  rows.WHOIS }}{% endif %}</td>
             <td>{% if rows.WHOM %}{{  rows.WHOM }}{% endif %}</td>
             <td>{{  rows.AMOUNT }}</td>

@@ -802,21 +802,31 @@ def prepare_rmreg_data(orders):
         i += 1
         innermap = dict()
         innermap['NUMBER'] = i
-        innermap['NUMBERYEAR'] = i
+        innermap['NUMBERYEAR'] = order.code
         innermap['ID'] = order.id
-        innermap['FIO'] = order.patient.__unicode__()
         innermap['AMOUNT'] = order.price
         innermap['DATEIN'] = str(order.start_date)
         innermap['DATEOUT'] = str(order.end_date)
         innermap['SROK'] = str(order.start_date) + ' - ' + str(order.end_date)
         innermap['ORDERNUMBER'] = order.code
-        innermap['WHOIS'] = order.patient.grade
+        innermap['PUTEVKA'] = order.putevka
         innermap['WHOM'] = order.directive.name
         innermap['TIME'] = str(order.start_date)
         innermap['WORK'] = order.customer.name
-        innermap['BIRTHDATE'] = str(order.patient.birth_date)
-        innermap['PASSPORT'] = order.patient.passport_number + ' ' + order.patient.passport_whom
-        innermap['ADDRESS'] = order.patient.address
+        if order.patient is None:
+            innermap['FIO'] = ""
+            innermap['PID'] = ""
+            innermap['WHOIS'] = ""
+            innermap['BIRTHDATE'] = ""
+            innermap['PASSPORT'] = ""
+            innermap['ADDRESS'] = ""
+        else:
+            innermap['FIO'] = order.patient.__unicode__()
+            innermap['PID'] = order.patient.id
+            innermap['WHOIS'] = order.patient.grade
+            innermap['BIRTHDATE'] = str(order.patient.birth_date)
+            innermap['PASSPORT'] = order.patient.passport_number + ' ' + order.patient.passport_whom
+            innermap['ADDRESS'] = order.patient.address
         innermap['ROOM'] = order.room.name
         l.append(innermap)
     return l
