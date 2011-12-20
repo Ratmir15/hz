@@ -163,14 +163,19 @@ def net(request):
             res.append(q)
         orders, booked, max , by_dates = room_availability(room,d,td)
         flag = False
+        lastkey = None
         for key,value in by_dates.items():
+            lastkey = key
             if value<room.room_type.places and not flag:
                 q.append((room,key.strftime('%d.%m')))
                 flag = True
-                print key
-                print value
+#                print key
+#                print value
         if not flag:
-            q.append((room,''))
+            if lastkey is None:
+                q.append((room,''))
+            else:
+                q.append((room,(lastkey+ datetime.timedelta(days=1)).strftime('%d.%m')))
         i +=1
         if i==8:
             i = 0
