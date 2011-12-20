@@ -35,8 +35,8 @@
                 var availableTagsPatient = [
                     {% for patient in patients %}"{{ patient }}",{% endfor %}
                 ];
-                var availableTagsRoomPatient = [
-                    {% for patient in patients %}"{{ patient }}",{% endfor %}
+                var availableTagsRoom = [
+                    {% for room in allrooms %}"{{ room }}",{% endfor %}
                 ];
                 $( "#patient" ).autocomplete({
                     source: availableTagsPatient
@@ -47,6 +47,9 @@
             $( "#directive" ).autocomplete({
                 source: availableTags
             });
+                $( "#room" ).autocomplete({
+                    source: availableTagsRoom
+                });
                 $('#id_start_date').datepicker();
                 $('#id_end_date').datepicker();
                 } );

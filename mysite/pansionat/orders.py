@@ -94,6 +94,10 @@ def order_edit(request, order_id):
     values["patients"] = p_list
     values["allrooms"] = r_list
     values["order_days"] = get_order_days_with_availability(order_days, places)
+    values["cus"] = order.customer.name
+    values["dir"] = order.directive.name
+    values["pat"] = order.patient.fio()
+    values["rm"] = order.room.name
     return render_to_response('pansionat/order_edit.html', MenuRequestContext(request, values))
 
 class FileForm(forms.Form):
@@ -176,28 +180,108 @@ def net(request):
 @login_required
 @permission_required('pansionat.add_order', login_url='/forbidden/')
 def order_save(request):
+    cus_error = None
+    dir_error = None
+    pat_error = None
+    rm_error = None
+    cus = ''
+    dir = ''
+    pat = ''
+    rm = ''
     if request.method == 'POST':
         id = request.POST.get('id')
         if id is None:
-            form = OrderEditForm(request.POST)
+            order_form = OrderEditForm(request.POST)
         else:
             instance = Order.objects.get(id = id)
-            form = OrderEditForm(request.POST, instance = instance)
+            order_form = OrderEditForm(request.POST, instance = instance)
 
-        if form.is_valid():
+        cus = request.POST.get("customer","")
+        customer = None
+        if cus!="":
+            cs = Customer.objects.filter(name = cus)
+            if not len(cs):
+                if request.POST.has_key("c_add"):
+                    customer = Customer(name = cus,shortname = cus)
+                    customer.save()
+                else:
+                    cus_error = "Выберите корректный вариант. Вашего варианта нет среди допустимых значений."
+            else:
+                customer = cs[0]
+        dir = order_form.data.get("directive","")
+        directive = None
+        if dir!="":
+            cs = Customer.objects.filter(name = dir)
+            if not len(cs):
+                if request.POST.has_key("d_add"):
+                    directive = Customer(name = dir,shortname = dir)
+                    directive.save()
+                else:
+                    dir_error = "Выберите корректный вариант. Вашего варианта нет среди допустимых значений."
+            else:
+                directive = cs[0]
+        rm = order_form.data.get("room","")
+        room = None
+        if rm!="":
+            rms = Room.objects.filter(name = rm)
+            if not len(rms):
+                rm_error = "Выберите корректный вариант. Вашего варианта нет среди допустимых значений."
+            else:
+                room = rms[0]
+        pat = order_form.data.get("patient","")
+        patient = None
+        if pat!="":
+            fio = pat.split(" ")
+            family = fio[0]
+            if len(fio)>1:
+                name = fio[1]
+            else:
+                name = ""
+            if len(fio)>2:
+                sname = fio[2]
+            else:
+                sname = ""
+            pt = Patient.objects.filter(family = family, name = name, sname = sname)
+            if not len(pt):
+                pat_error = "Выберите корректный вариант. Вашего варианта нет среди допустимых значений."
+            else:
+                patient = pt[0]
+
+
+        if order_form.is_valid() and cus_error is None and dir_error is None and pat_error is None and rm_error is None:
             #todo check available
-            instance = form.save()
+            instance = order_form.save(commit=False)
+            instance.directive = directive
+            instance.customer = customer
+            instance.room = room
+            instance.patient = patient
+            instance.save()
+
             fill_order_days(instance)
-            form = OrderEditForm(instance = instance)
-            values = {'form' : form, 'id' : instance.id}
+            order_form = OrderEditForm(instance = instance)
+            values = {'form' : order_form, 'id' : instance.id}
         else:
-            values = {'form' : form, 'id' : id}
+            values = {'form' : order_form, 'id' : id}
+        values["cus"] = cus
+        values["dir"] = dir
+        values["rm"] = rm
+        values["pat"] = pat
+        values["cus_error"] = cus_error
+        values["dir_error"] = dir_error
+        values["pat_error"] = pat_error
+        values["rm_error"] = rm_error
+        c_list = fill_cust_list()
+        p_list = Patient.objects.all().order_by("family","name","sname")
+        r_list = Room.objects.all().order_by("name")
+
+        values["customers"] = c_list
+        values["patients"] = p_list
+        values["allrooms"] = r_list
         order_days = OrderDay.objects.filter(order = instance).order_by("busydate")
         places = get_order_places(instance)
         values["order_days"] = get_order_days_with_availability(order_days, places)
         print_q()
         return render_to_response('pansionat/order_edit.html', MenuRequestContext(request, values))
-    return None
 
 
 def print_q():
