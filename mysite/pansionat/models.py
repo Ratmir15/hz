@@ -210,9 +210,10 @@ class RoomType(models.Model):
 
 
 class Room (models.Model):
-    name = models.CharField(max_length = 50) # it can be room number or name of room
+    name = models.CharField(max_length = 50, verbose_name='Наименование') # it can be room number or name of room
     room_type = models.ForeignKey(RoomType)
     description = models.CharField(max_length = 10000, blank=True)
+    disabled = models.BooleanField(verbose_name='Деактивирована')
     def __unicode__(self):
         return self.name
 

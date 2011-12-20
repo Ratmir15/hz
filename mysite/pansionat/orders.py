@@ -154,7 +154,7 @@ def importdiet(request):
 def net(request):
     d = datetime.date.today()
     td = d + datetime.timedelta(days=60)
-    rooms = Room.objects.all().order_by("name")
+    rooms = Room.objects.filter(disabled=False).order_by("name")
     res = []
     i = 0
     for room in rooms:
@@ -223,7 +223,7 @@ def order_save(request):
         rm = order_form.data.get("room","")
         room = None
         if rm!="":
-            rms = Room.objects.filter(name = rm)
+            rms = Room.objects.filter(name = rm, disabled = False)
             if not len(rms):
                 rm_error = "Выберите корректный вариант. Вашего варианта нет среди допустимых значений."
             else:
@@ -272,7 +272,7 @@ def order_save(request):
         values["rm_error"] = rm_error
         c_list = fill_cust_list()
         p_list = Patient.objects.all().order_by("family","name","sname")
-        r_list = Room.objects.all().order_by("name")
+        r_list = Room.objects.filter(disabled=False).order_by("name")
 
         values["customers"] = c_list
         values["patients"] = p_list
