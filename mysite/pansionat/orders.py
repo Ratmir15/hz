@@ -77,13 +77,13 @@ def search(request):
         msg  = u"Поиск по фамилии: "+fv
     if request.POST.has_key('pn_search'):
         orders = Order.objects.filter(patient__passport_number__contains=fv).values("id","code","putevka","room__name","patient__family","patient__name","patient__sname","start_date","end_date","customer__name","price").order_by("id")
-        msg  = "Поиск по номеру паспорта: "+fv
+        msg  = u"Поиск по номеру паспорта: "+fv
     if request.POST.has_key('code_search'):
         orders = Order.objects.filter(code__contains=fv).values("id","code","putevka","room__name","patient__family","patient__name","patient__sname","start_date","end_date","customer__name","price").order_by("id")
-        msg  = "Поиск по коду: "+fv
+        msg  = u"Поиск по коду: "+fv
     if request.POST.has_key('putevka_search'):
         orders = Order.objects.filter(putevka__contains=fv).values("id","code","putevka","room__name","patient__family","patient__name","patient__sname","start_date","end_date","customer__name","price").order_by("id")
-        msg  = "Поиск по путевке: "+fv
+        msg  = u"Поиск по путевке: "+fv
 
     if not len(orders):
         return return_orders_list(orders, request, msg)

@@ -222,9 +222,18 @@ def test_file(filename, flag):
                     sname = up_low_case(fios[2])
                 else:
                     sname = ""
-                row_info.append((family,""))
-                row_info.append((name,""))
-                row_info.append((sname,""))
+                if not duplicated or os[0].patient.family!=family:
+                    row_info.append((family,""))
+                else:
+                    row_info.append(("",""))
+                if not duplicated or os[0].patient.name!=name:
+                    row_info.append((name,""))
+                else:
+                    row_info.append(("",""))
+                if not duplicated or os[0].patient.sname!=sname:
+                    row_info.append((sname,""))
+                else:
+                    row_info.append(("",""))
                 grade = rsh.cell_value(rrowx,6)
                 row_info.append((grade,""))
                 v = rsh.cell_value(rrowx,7)
