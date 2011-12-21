@@ -807,16 +807,16 @@ def prepare_rmreg_data(orders):
         innermap['NUMBERYEAR'] = order.code
         innermap['ID'] = order.id
         innermap['AMOUNT'] = order.price
-        innermap['DATEIN'] = str(order.start_date)
-        innermap['DATEOUT'] = str(order.end_date)
-        innermap['SROK'] = str(order.start_date) + ' - ' + str(order.end_date)
+        innermap['DATEIN'] = order.start_date.strftime('%d.%m.%Y')
+        innermap['DATEOUT'] = order.end_date.strftime('%d.%m.%Y')
+        innermap['SROK'] = order.start_date.strftime('%d.%m.%Y') + ' - ' + order.end_date.strftime('%d.%m.%Y')
         innermap['ORDERNUMBER'] = order.code
         innermap['PUTEVKA'] = order.putevka
         if not order.directive is None:
             innermap['WHOM'] = order.directive.name
         else:
             innermap['WHOM'] = ''
-        innermap['TIME'] = str(order.start_date)
+        innermap['TIME'] = order.start_date.strftime('%d.%m.%Y')
         if not order.customer is None:
             innermap['WORK'] = order.customer.name
         else:
