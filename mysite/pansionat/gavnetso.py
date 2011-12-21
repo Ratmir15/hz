@@ -186,23 +186,34 @@ def test_file(filename, flag):
                 if len(arr)>1:
                     strdata = strip(arr[0])
                 os = Order.objects.filter(code = int(strdata))
+                duplicated = False
                 if not len(os):
                     row_info.append((int(strdata),""))
                 else:
                     do_import = False
+                    duplicated = True
                     row_info.append((int(strdata),"duplicated"))
                 v = rsh.cell_value(rrowx,2)
                 start_date = datetime.date(year = 1899, month = 12, day=30)+datetime.timedelta(days=v)
-                row_info.append((start_date,""))
+                if not duplicated or os[0].start_date!=start_date:
+                    row_info.append((start_date,""))
+                else:
+                    row_info.append(("",""))
                 v = rsh.cell_value(rrowx,3)
                 end_date = datetime.date(year = 1899, month = 12, day=30)+datetime.timedelta(days=v)
-                row_info.append((end_date,""))
+                if not duplicated or os[0].end_date!=end_date:
+                    row_info.append((end_date,""))
+                else:
+                    row_info.append(("",""))
                 putevka = rsh.cell_value(rrowx,4)
                 putevkas = str(putevka).split('.')
                 if len(putevkas)>1:
                     putevka = putevkas[0]
                 putevka = add_lead_zeros(putevka, 6)
-                row_info.append((putevka,""))
+                if not duplicated or os[0].putevka!=putevka:
+                    row_info.append((putevka,""))
+                else:
+                    row_info.append(("",""))
                 v = rsh.cell_value(rrowx,5)
                 fios = v.split(" ")
                 family = up_low_case(fios[0])
