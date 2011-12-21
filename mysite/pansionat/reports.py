@@ -49,6 +49,7 @@ class MedicalPriceForm(forms.Form):
 class LivingForm(forms.Form):
     report_date = forms.DateField(required=True, label='Дата формирования')
     order_type = forms.ChoiceField([("1","СЗ/ХЗ"),("2","Прочие"),("3","Реабилитация"),("4","Пенза проф"),("5","Самара проф"),("6","Пенза фсс")], label = 'Тип путевки')
+    summ_type = forms.ChoiceField([("1","Общая сумма"),("2","Сумма за день")], label = 'Тип вывода')
 
 class LeavingReport():
 
@@ -137,6 +138,7 @@ class LivingReport():
 
     def process(self, form):
         cleaned_report_date = form.cleaned_data['report_date']
+        cleaned_summ_type = form.cleaned_data['summ_type']
         title, title_eng, condition = tp_map[form.cleaned_data['order_type']]
         list = OrderDay.objects.filter(busydate = cleaned_report_date).order_by("order__code")
         d = []
@@ -150,7 +152,12 @@ class LivingReport():
                 innermap['ID'] = order.id
                 innermap['NUMBERYEAR'] = order.code
                 innermap['FIO'] = order.patient.__unicode__()
-                innermap['AMOUNT'] = order.price
+                if cleaned_summ_type=="2":
+                    dif = order.end_date - order.start_date
+                    price = order.price/(dif.days+1)
+                else:
+                    price = order.price
+                innermap['AMOUNT'] = price
                 innermap['DATEIN'] = str(order.start_date)
                 innermap['DATEOUT'] = str(order.end_date)
                 innermap['SROK'] = str(order.start_date)+' - '+str(order.end_date)
