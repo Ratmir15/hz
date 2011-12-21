@@ -121,11 +121,11 @@ def order_edit(request, order_id):
         values["dir"] = order.directive.name
     else:
         values["dir"] = ""
-    if not order.customer is None:
+    if not order.patient is None:
         values["pat"] = order.patient.fio()
     else:
         values["pat"] = ""
-    if not order.customer is None:
+    if not order.room is None:
         values["rm"] = order.room.name
     else:
         values["rm"] = ""
