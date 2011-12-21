@@ -208,12 +208,21 @@ class RoomType(models.Model):
         verbose_name = 'Тип номеров'
         verbose_name_plural = 'Типы номеров'
 
+class RoomPlace(models.Model):
+    name = models.CharField(max_length = 100)
+    def __unicode__(self):
+        return self.name
+
+    class Meta:
+        verbose_name = 'Расположение'
+        verbose_name_plural = 'Расположения'
 
 class Room (models.Model):
     name = models.CharField(max_length = 50, verbose_name='Наименование') # it can be room number or name of room
     room_type = models.ForeignKey(RoomType)
     description = models.CharField(max_length = 10000, blank=True)
     disabled = models.BooleanField(verbose_name='Деактивирована')
+    room_place = models.ForeignKey(RoomPlace)
     def __unicode__(self):
         return self.name
 
