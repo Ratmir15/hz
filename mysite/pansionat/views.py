@@ -129,6 +129,14 @@ def books(request):
     resp = HttpResponse(t.render(c))
     return resp
 
+@login_required
+def book_edit(request, instance_id):
+    instance = Book.objects.get(id = instance_id)
+    form = BookEditForm(instance=instance)
+    values = {'form' : form,\
+                'instance_id' : instance_id}
+    return render_to_response('pansionat/book_edit.html', MenuRequestContext(request, values))
+
 def my_view(request):
     username = request.POST.get('username','')
     password = request.POST.get('password','')
@@ -1656,6 +1664,13 @@ class OrderForm(ModelForm):
 #            'customer': TextInput(),
 #        }
         exclude = ('directive','customer','patient', 'room','order_type')
+
+class BookEditForm(ModelForm):
+    class Meta:
+        model = Book
+        widgets = {
+            'description': Textarea(attrs={'cols': 80, 'rows': 3}),
+        }
 
 class PatientForm(ModelForm):
     class Meta:
