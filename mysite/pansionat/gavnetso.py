@@ -262,7 +262,7 @@ def test_file(filename, flag):
                     price = decimal.Decimal(pr)
                 if not duplicated or os[0].price!=price:
                     row_info.append((price,""))
-                    if duplicated and do_import:
+                    if duplicated and flag:
                         os[0].price = price
                         os[0].save()
                         row_info.append((price,"Цена установлена"))
