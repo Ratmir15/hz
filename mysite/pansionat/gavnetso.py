@@ -235,7 +235,6 @@ def test_file(filename, flag):
                 else:
                     row_info.append(("",""))
                 grade = rsh.cell_value(rrowx,6)
-                row_info.append((grade,""))
                 v = rsh.cell_value(rrowx,7)
                 cs = Customer.objects.filter(Q(name = v,shortname = v))
                 if len(cs)>0:
@@ -263,6 +262,9 @@ def test_file(filename, flag):
                     price = decimal.Decimal(pr)
                 if not duplicated or os[0].price!=price:
                     row_info.append((price,""))
+                    if duplicated and do_import:
+                        os[0].price = price
+                        os[0].save()
                 else:
                     row_info.append(("",""))
 #                v = rsh.cell_value(rrowx,9)
@@ -311,6 +313,10 @@ def test_file(filename, flag):
                         row_info.append((address,""))
                     else:
                         row_info.append(("",""))
+                    if not duplicated or patient.grade!=grade:
+                        row_info.append((grade,""))
+                    else:
+                        row_info.append(("",""))
                 else:
                     row_info.append((s1,"Пациент не найден"))
                     if flag:
@@ -327,6 +333,7 @@ def test_file(filename, flag):
                                           address = address
                         )
                         patient.save()
+                    row_info.append((grade,""))
                     row_info.append((address,""))
                 row_info.append((s2,""))
                 v = rsh.cell_value(rrowx,14)
