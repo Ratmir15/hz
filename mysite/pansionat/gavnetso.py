@@ -294,7 +294,6 @@ def test_file(filename, flag):
                     birth_date = None
                     row_info.append((birth_date,""))
                 address = rsh.cell_value(rrowx,13)
-                row_info.append((address,""))
                 v = rsh.cell_value(rrowx,12)
                 s1 = v[:12]
                 s2 = v[13:]
@@ -308,6 +307,10 @@ def test_file(filename, flag):
                 if len(ps)>0:
                     row_info.append((s1,"Пациент найден"))
                     patient = ps[0]
+                    if not duplicated or patient.address!=address:
+                        row_info.append((address,""))
+                    else:
+                        row_info.append(("",""))
                 else:
                     row_info.append((s1,"Пациент не найден"))
                     if flag:
@@ -324,6 +327,7 @@ def test_file(filename, flag):
                                           address = address
                         )
                         patient.save()
+                    row_info.append((address,""))
                 row_info.append((s2,""))
                 v = rsh.cell_value(rrowx,14)
                 v = upper(v)
