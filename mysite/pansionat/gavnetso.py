@@ -265,6 +265,7 @@ def test_file(filename, flag):
                     if duplicated and do_import:
                         os[0].price = price
                         os[0].save()
+                        row_info.append((price,"Цена установлена"))
                 else:
                     row_info.append(("",""))
 #                v = rsh.cell_value(rrowx,9)
