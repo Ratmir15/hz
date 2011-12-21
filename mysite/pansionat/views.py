@@ -812,9 +812,15 @@ def prepare_rmreg_data(orders):
         innermap['SROK'] = str(order.start_date) + ' - ' + str(order.end_date)
         innermap['ORDERNUMBER'] = order.code
         innermap['PUTEVKA'] = order.putevka
-        innermap['WHOM'] = order.directive.name
+        if not order.directive is None:
+            innermap['WHOM'] = order.directive.name
+        else:
+            innermap['WHOM'] = ''
         innermap['TIME'] = str(order.start_date)
-        innermap['WORK'] = order.customer.name
+        if not order.customer is None:
+            innermap['WORK'] = order.customer.name
+        else:
+            innermap['WORK'] = ''
         if order.patient is None:
             innermap['FIO'] = ""
             innermap['PID'] = ""
