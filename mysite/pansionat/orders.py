@@ -164,7 +164,7 @@ def net(request):
         orders, booked, max , by_dates = room_availability(room,d,td)
         flag = False
         lastkey = None
-        for key,value in by_dates.items():
+        for key,value in sorted(by_dates.iteritems()):
             lastkey = key
             if value<room.room_type.places and not flag:
                 q.append((room,key.strftime('%d.%m')))
