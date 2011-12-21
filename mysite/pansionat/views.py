@@ -1396,7 +1396,7 @@ def schetfactura(request, occupied_id):
     days = delt.days + 1
     tovar = 'Пут. сан.-кур. на '+str(days)+' дней c '+str(order.start_date)+' по '+str(order.end_date) + '№ '+ str(order.code)
     tel = {'SALER': fullname, 'NUMBER': order.code,
-           'FILENAME': 'schetfaktura-'+order.code,
+           'FILENAME': 'schetfaktura-'+str(order.code),
            'CLIENT': order.patient.fio(), 'CLIENTADDRESS': order.patient.address,
            'CLIENTALL': client, 'VENDOR': vendor,
            'DIRECTOR': dir,
