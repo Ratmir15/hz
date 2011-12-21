@@ -813,7 +813,7 @@ def prepare_rmreg_data(orders):
         innermap['ORDERNUMBER'] = order.code
         innermap['PUTEVKA'] = order.putevka
         if not order.directive is None:
-            innermap['WHOM'] = order.directive.name
+            innermap['WHOM'] = order.directive.short_name
         else:
             innermap['WHOM'] = ''
         innermap['TIME'] = order.start_date.strftime('%d.%m.%Y')

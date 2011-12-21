@@ -163,7 +163,7 @@ class LivingReport():
                 innermap['SROK'] = str(order.start_date)+' - '+str(order.end_date)
                 innermap['ORDERNUMBER'] = order.putevka
                 innermap['WHOIS'] = order.patient.grade
-                innermap['WHOM'] = order.directive.name
+                innermap['WHOM'] = order.directive.shortname
                 innermap['TIME'] = str(order.start_date)
                 if order.customer is None:
                     innermap['WORK'] = ""
