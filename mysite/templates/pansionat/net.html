@@ -13,23 +13,32 @@
     <script src="/static/jquery-ui/ui/jquery.ui.core.js"></script>
     <script src="/static/jquery-ui/ui/jquery.ui.widget.js"></script>
     <script src="/static/jquery-ui/ui/jquery.ui.datepicker.js"></script>
+    <script src="/static/jquery-ui/ui/jquery.ui.mouse.js"></script>
+    <script src="/static/jquery-ui/ui/jquery.ui.draggable.js"></script>
+    <script src="/static/jquery-ui/ui/jquery.ui.position.js"></script>
+    <script src="/static/jquery-ui/ui/jquery.ui.resizable.js"></script>
+    <script src="/static/jquery-ui/ui/jquery.ui.dialog.js"></script>
     <script src="/static/jquery-ui/ui/i18n/jquery.ui.datepicker-ru.js"></script>
     <script src="/static/jquery-ui/ui/jquery.ui.button.js"></script>
 
 <link rel="stylesheet" href="/static/Refresh.css" type="text/css" />
     <script type="text/javascript">
         $(document).ready(function() {
+            $('#dl').dialog({ autoOpen: false });
             } );
     </script>
  {%  endblock  %}
 
 {% block allcontent %}
+    <div id="dl" title="Подменю путевки">
+        <div id="huynya" ></div>
+    </div>
     <h1>Сетка</h1>
     <table border="0" id = "occupied" class = "display">
             {% for q in res %}
                 <tr>{% for r in q %}
                 <td><a href="/orders/room/{{ r.0.id }}/">{{ r.0.name }}</a></td>
-                    <td>{{ r.1 }}</td>
+                    <td><a href="#" onclick="$('#huynya').html('{{ r.2 }}'); $('#dl').dialog('open');">{{ r.1 }}</a></td>
                     {% endfor %}
             </tr>
             {% endfor %}

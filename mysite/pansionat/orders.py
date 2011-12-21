@@ -162,20 +162,26 @@ def net(request):
             q = []
             res.append(q)
         orders, booked, max , by_dates = room_availability(room,d,td)
-        flag = False
+        choosedkey = None
         lastkey = None
-        for key,value in sorted(by_dates.iteritems()):
+        dateslist = sorted(by_dates.iteritems())
+        txt = "<table>"
+        for key,value in dateslist:
             lastkey = key
-            if value<room.room_type.places and not flag:
-                q.append((room,key.strftime('%d.%m')))
-                flag = True
+            txt += "<tr><td>"+key.strftime('%d.%m')+"</td><td>"+str(value)+"</td></tr>"
+            if value<room.room_type.places and choosedkey is None:
+                choosedkey = key
 #                print key
 #                print value
-        if not flag:
+        txt += "</table>"
+        if choosedkey is None:
             if lastkey is None:
-                q.append((room,''))
+                dt = ''
             else:
-                q.append((room,(lastkey+ datetime.timedelta(days=1)).strftime('%d.%m')))
+                dt = (lastkey+ datetime.timedelta(days=1)).strftime('%d.%m')
+        else:
+            dt = choosedkey.strftime('%d.%m')
+        q.append((room, dt, txt))
         i +=1
         if i==8:
             i = 0
