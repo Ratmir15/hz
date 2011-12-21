@@ -7,7 +7,7 @@ from django.db import connection
 from django.db.models.query_utils import Q
 from xlrd import open_workbook
 from mysite import settings
-from mysite.pansionat.models import Patient, Customer, Order, Occupied, Room, RoomType, EmployerRoleHistory, Role, Employer, IllHistoryFieldTypeGroup, IllHistoryFieldType, MedicalProcedureType, OrderMedicalProcedure, OrderMedicalProcedureSchedule, RoomBook, Book, Diet, Item, DietItems, OrderDay, MedicalProcedureTypePrice, OrderType, Piece, ItemPiece
+from mysite.pansionat.models import Patient, Customer, Order, Occupied, Room, RoomType, EmployerRoleHistory, Role, Employer, IllHistoryFieldTypeGroup, IllHistoryFieldType, MedicalProcedureType, OrderMedicalProcedure, OrderMedicalProcedureSchedule, RoomBook, Book, Diet, Item, DietItems, OrderDay, MedicalProcedureTypePrice, OrderType, Piece, ItemPiece, RoomPlace
 
 def nextmonthfirstday(year, month):
     if month==12:
@@ -481,6 +481,15 @@ def import_rooms():
     rb = open_workbook(settings.STATIC_ROOT + '/xls/rooms.xls',formatting_info=True)
     rsh = rb.sheet_by_index(0)
 
+    room_place_1 = RoomPlace(name = '1 этаж СК')
+    room_place_1.save()
+    room_place_2 = RoomPlace(name = '2 этаж СК')
+    room_place_2.save()
+    room_place_3 = RoomPlace(name = 'НК')
+    room_place_3.save()
+    room_place_4 = RoomPlace(name = 'Домики')
+    room_place_4.save()
+
     for rrowx in xrange(rsh.nrows):
         v = rsh.cell_value(rrowx, 0)
         name = upper(unicode(v))
@@ -495,7 +504,18 @@ def import_rooms():
             rt.save()
         else:
             rt = roomtypes[0]
-        room = Room(name = name, room_type = rt)
+#        if name.contains('Д'):
+#            room_place = room_place_4
+#        else:
+#            if name.contains('НК'):
+#                room_place = room_place_3
+#            else:
+#                if name.contains('СК'):
+#                    room_place = room_place_2
+#                else:
+        room_place = room_place_1
+
+        room = Room(name = name, room_type = rt,room_place = room_place)
         room.save()
 
 def inithistory(filename, input_columns, row_set):
@@ -588,7 +608,7 @@ def inithistory(filename, input_columns, row_set):
                     room = objs[0]
                 else:
                     #print unicode(rrowx)+":"+unicode(roomname)
-                    room = Room(name=roomname, room_type = rt1)
+                    room = Room(name=roomname, room_type = rt1, room_place = RoomPlace.objects.all()[0])
                     room.save()
                 dirname = rsh.cell_value(rrowx,columns["cv"])
                 objs = Customer.objects.filter(shortname = dirname)

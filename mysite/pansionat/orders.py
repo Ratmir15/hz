@@ -169,9 +169,12 @@ def importdiet(request):
 def net(request):
     d = datetime.date.today()
     td = d + datetime.timedelta(days=60)
-    rooms = Room.objects.filter(disabled=False).order_by("name")
+#    rooms = Room.objects.filter(disabled=False).values("name","order_day__set","room_type__places","room_place__id").order_by("name")
+    rooms = Room.objects.filter(disabled=False).order_by("room_place__id","name")
     res = []
     i = 0
+    j = 0
+    max_row = len(rooms)/8
     for room in rooms:
         if not i:
             q = []
@@ -198,9 +201,17 @@ def net(request):
             dt = choosedkey.strftime('%d.%m')
         q.append((room, dt, txt))
         i +=1
-        if i==8:
+        if i==max_row:
             i = 0
-    values = {"res" : res}
+            j += 1
+    res_t = []
+    for i in xrange(0,max_row):
+        q = []
+        for j in xrange(0,len(res)):
+            if len(res[j])>i:
+                q.append(res[j][i])
+        res_t.append(q)
+    values = {"res" : res_t}
     return render_to_response('pansionat/net.html', MenuRequestContext(request, values))
 
 @login_required
