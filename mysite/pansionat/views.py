@@ -100,7 +100,7 @@ def orders_by_month(request, year, month):
     cd = datetime.date(intyear, intmonth,1)
     fd = nextmonthfirstday(intyear, intmonth)
     occupied_list = Order.objects.filter(start_date__range=(cd,fd)).values("id","code","putevka","room__name","patient__family","patient__name","patient__sname","start_date","end_date","customer__name","price").order_by("id")
-    return return_orders_list(occupied_list, request)
+    return return_orders_list(occupied_list, request, str(intyear)+"/"+str(intmonth))
 
 
 @login_required
@@ -110,14 +110,14 @@ def filterorders(request):
         cd = form.cleaned_data.get("start_date",datetime.date.today())
         fd = form.cleaned_data.get("end_date",datetime.date.today())
         occupied_list = Order.objects.filter(start_date__range=(cd,fd)).values("id","code","putevka","room__name","patient__family","patient__name","patient__sname","start_date","end_date","customer__name","price").order_by("id")
-        return return_orders_list(occupied_list, request)
+        return return_orders_list(occupied_list, request,"С "+str(cd)+" по "+str(fd))
     else:
         return return_order_menu(form, request)
 
 @login_required
 def orders(request):
     occupied_list = Order.objects.all().values("id","code","putevka","room__name","patient__family","patient__name","patient__sname","start_date","end_date","customer__name","price").order_by("id")
-    return return_orders_list(occupied_list, request)
+    return return_orders_list(occupied_list, request,"")
 
 @login_required
 def books(request):
@@ -153,13 +153,13 @@ def logout_page(request):
 def orders_patient(request, patient_id):
     patient = Patient.objects.get(id=patient_id)
     occupied_list = Order.objects.filter(patient = patient).values("id","code","putevka","room__name","patient__family","patient__name","patient__sname","start_date","end_date","customer__name","price").order_by("id")
-    return return_orders_list(occupied_list, request)
+    return return_orders_list(occupied_list, request, "Пациент:"+patient.fio())
 
 @login_required
 def orders_room(request, room_id):
     room = Room.objects.get(id=room_id)
     occupied_list = Order.objects.filter(room = room).values("id","code","putevka","room__name","patient__family","patient__name","patient__sname","start_date","end_date","customer__name","price").order_by("-start_date")
-    return return_orders_list(occupied_list, request)
+    return return_orders_list(occupied_list, request, "Номер:"+room.name)
 
 @login_required
 def patient_edit(request, patient_id):

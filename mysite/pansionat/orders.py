@@ -44,11 +44,12 @@ def ordertr(item):
     item["end_date"] = item["end_date"].strftime('%Y.%m.%d')
     return item
 
-def return_orders_list(occupied_list, request):
+def return_orders_list(occupied_list, request, msg):
     t = loader.get_template('pansionat/orders.html')
     c = MenuRequestContext(request, {
         'diet_en': request.user.has_perm('pansionat.add_orderdiet'),
         'occupied_list': map(ordertr, occupied_list),
+        "msg": msg
         })
     resp = HttpResponse(t.render(c))
     #qs = connection.queries
@@ -58,25 +59,28 @@ def return_orders_list(occupied_list, request):
 
 @login_required
 def search(request):
-    values = {}
     fv = request.POST.get('field_value')
     orders = []
     if request.POST.has_key('family_search'):
         orders = Order.objects.filter(patient__family__contains=fv).values("id","code","putevka","room__name","patient__family","patient__name","patient__sname","start_date","end_date","customer__name","price").order_by("id")
+        msg  = u"Поиск по фамилии: "+fv
     if request.POST.has_key('pn_search'):
         orders = Order.objects.filter(patient__passport_number__contains=fv).values("id","code","putevka","room__name","patient__family","patient__name","patient__sname","start_date","end_date","customer__name","price").order_by("id")
+        msg  = "Поиск по номеру паспорта: "+fv
     if request.POST.has_key('code_search'):
         orders = Order.objects.filter(code__contains=fv).values("id","code","putevka","room__name","patient__family","patient__name","patient__sname","start_date","end_date","customer__name","price").order_by("id")
+        msg  = "Поиск по коду: "+fv
     if request.POST.has_key('putevka_search'):
         orders = Order.objects.filter(putevka__contains=fv).values("id","code","putevka","room__name","patient__family","patient__name","patient__sname","start_date","end_date","customer__name","price").order_by("id")
+        msg  = "Поиск по путевке: "+fv
 
     if not len(orders):
-        return render_to_response('pansionat/orders.html', MenuRequestContext(request, values))
+        return return_orders_list(orders, request, msg)
     else:
         if len(orders)==1:
             return order_edit(request, orders[0]["id"])
         else:
-            return return_orders_list(orders, request)
+            return return_orders_list(orders, request, msg)
 
 @login_required
 @permission_required('pansionat.add_order', login_url='/forbidden/')
