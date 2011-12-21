@@ -61,7 +61,18 @@ def return_orders_list(occupied_list, request, msg):
 def search(request):
     fv = request.POST.get('field_value')
     orders = []
+    msg = ""
     if request.POST.has_key('family_search'):
+        orders = Order.objects.filter(patient__family__contains=fv).values("id","code","putevka","room__name","patient__family","patient__name","patient__sname","start_date","end_date","customer__name","price").order_by("id")
+        msg  = u"Поиск по фамилии: "+fv
+    if request.POST.has_key('family_search'):
+        _orders = Order.objects.all().values("id","code","putevka","room__name","patient__family","patient__name","patient__sname","start_date","end_date","customer__name","price").order_by("id")
+        orders = []
+        for order in _orders:
+            if order["patient_family"].contains(fv):
+                orders.append(order)
+        msg  = u"Поиск по фамилии: "+fv
+    if request.POST.has_key('family_search2'):
         orders = Order.objects.filter(patient__family__contains=fv).values("id","code","putevka","room__name","patient__family","patient__name","patient__sname","start_date","end_date","customer__name","price").order_by("id")
         msg  = u"Поиск по фамилии: "+fv
     if request.POST.has_key('pn_search'):
