@@ -252,7 +252,7 @@ class Order(models.Model):
     reab = models.BooleanField(verbose_name = 'Реабилитация')
     order_type = models.ForeignKey(OrderType, verbose_name='Тип заказа',blank=True, null=True)
     def __unicode__(self):
-        return self.code
+        return str(self.code)
     def start_date_n(self):
         return self.start_date.strftime('%Y.%m.%d')
     def end_date_n(self):

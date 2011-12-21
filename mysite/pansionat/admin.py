@@ -30,6 +30,8 @@ class DietAdmin(admin.ModelAdmin):
     ]
     inlines = [DietInline]
 
+class RoomAdmin(admin.ModelAdmin):
+    list_display = ['name','room_place']
 
 
 admin.site.register(Employer)
@@ -40,7 +42,7 @@ admin.site.register(Diet, DietAdmin)
 admin.site.register(Item)
 admin.site.register(MedicalLocation)
 admin.site.register(MedicalRole)
-admin.site.register(Room)
+admin.site.register(Room, RoomAdmin)
 admin.site.register(RoomType)
 admin.site.register(Occupied)
 admin.site.register(Book)
