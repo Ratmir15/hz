@@ -7,7 +7,7 @@ from django.db import connection
 from django.forms import forms
 from django.forms.models import ModelForm
 from django.http import HttpResponse
-from django.shortcuts import render_to_response
+from django.shortcuts import render_to_response, redirect
 from django.template import loader
 from mysite import settings
 from mysite.pansionat.gavnetso import test_file, import_diets
@@ -233,6 +233,16 @@ def net(request):
 @login_required
 @permission_required('pansionat.add_order', login_url='/forbidden/')
 def order_save(request):
+    if request.POST.has_key('del'):
+        id = request.POST.get('id')
+        order = Order.objects.get(id = id)
+        orders = Order.objects.filter(start_date__year=order.start_date.year, code__gt= order.code)
+        if len(orders)==0 and request.user.has_perm('pansionat.delete_order'):
+            order.delete()
+            return redirect('/orders')
+        else:
+            return redirect('/order/'+str(id))
+
     cus_error = None
     dir_error = None
     pat_error = None
