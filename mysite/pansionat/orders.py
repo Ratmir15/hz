@@ -109,10 +109,26 @@ def order_edit(request, order_id):
     values["patients"] = p_list
     values["allrooms"] = r_list
     values["order_days"] = get_order_days_with_availability(order_days, places)
-    values["cus"] = order.customer.name
-    values["dir"] = order.directive.name
-    values["pat"] = order.patient.fio()
-    values["rm"] = order.room.name
+    if not order.customer is None:
+        values["cus"] = order.customer.name
+    else:
+        values["cus"] = ""
+    if not order.customer is None:
+        values["cus"] = order.customer.name
+    else:
+        values["cus"] = ""
+    if not order.directive is None:
+        values["dir"] = order.directive.name
+    else:
+        values["dir"] = ""
+    if not order.customer is None:
+        values["pat"] = order.patient.fio()
+    else:
+        values["pat"] = ""
+    if not order.customer is None:
+        values["rm"] = order.room.name
+    else:
+        values["rm"] = ""
     return render_to_response('pansionat/order_edit.html', MenuRequestContext(request, values))
 
 class FileForm(forms.Form):
