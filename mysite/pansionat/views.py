@@ -1753,7 +1753,7 @@ def order(request):
 
     order_form = OrderForm(initial={'start_date' : request.session['start_date'],\
                                     'end_date' : request.session['end_date'],\
-                                    'price': price,
+                                    'price_p': price,
                                     'code': code['code__max']+1})
     cus_error = None
     dir_error = None

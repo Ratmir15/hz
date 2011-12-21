@@ -41,7 +41,7 @@
                         if ($('#id_is_with_child')[0].checked) {
                             price += Number($('#md').val())
                         }
-                        $('#id_price').val(price*(1+((ed-sd)/86400000)));
+                        $('#id_price_p').val(price*(1+((ed-sd)/86400000)));
                 });
                 $('#id_end_date').change(
                     function() {
@@ -51,7 +51,7 @@
                         if ($('#id_is_with_child')[0].checked) {
                             price += Number($('#md').val())
                         }
-                        $('#id_price').val(price*(1+((ed-sd)/86400000)));
+                        $('#id_price_p').val(price*(1+((ed-sd)/86400000)));
                 });
                 $('#id_is_with_child').change(
                     function() {
@@ -61,7 +61,7 @@
                         if ($('#id_is_with_child')[0].checked) {
                             price += Number($('#md').val())
                         }
-                        $('#id_price').val(price*(1+((ed-sd)/86400000)));
+                        $('#id_price_p').val(price*(1+((ed-sd)/86400000)));
                 });
                 $('input:submit').button()
                 if ({{ pl }} < 2) {

@@ -638,7 +638,7 @@ def inithistory(filename, input_columns, row_set):
                 price = decimal.Decimal(pr)
                 order = Order(code = code, putevka = putevka, patient = p, customer = cust,
                               room = room, directive = dir, start_date = start_date, end_date = end_date,
-                              price = price, reab = reab)
+                              price = price, price_p=price, reab = reab)
                 order.save()
                 fillOrderDays(order)
                 # TODO WTF is_with_child = models.BooleanField(verbose_name = 'Мать и дитя')

@@ -246,6 +246,7 @@ class Order(models.Model):
     start_date = models.DateField('Дата заезда')
     end_date = models.DateField('Даты выезда')
     price = models.DecimalField(decimal_places = 2,max_digits=8, verbose_name = 'Стоимость')
+    price_p = models.DecimalField(decimal_places = 2,max_digits=8, verbose_name = 'Стоимость проживания')
     is_with_child = models.BooleanField(verbose_name = 'Мать и дитя')
     payd_by_patient = models.BooleanField(verbose_name = 'Оплачивается пациентом')
     reab = models.BooleanField(verbose_name = 'Реабилитация')
