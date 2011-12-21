@@ -25,20 +25,36 @@
     <script type="text/javascript">
         $(document).ready(function() {
             $('#dl').dialog({ autoOpen: false });
+            $('#dl_h').dialog({ autoOpen: false });
             } );
+        function update_links(id) {
+            ids = id.split("_")
+            id = ids[1]
+            $('#dl_code').html(ids[2]);
+            $('#dl_1').attr('href','/orders/room/'+id);
+            $('#dl_2').attr('href','/orders/room/'+id+'/book');
+            $('#dl').dialog('open');
+        }
     </script>
  {%  endblock  %}
 
 {% block allcontent %}
-    <div id="dl" title="Подменю путевки">
+    <div id="dl_h" title="Подменю">
         <div id="huynya" ></div>
+    </div>
+    <div id="dl" title="Подменю номера">
+        <table width="100%">
+            <tr><td colspan="2"><div id="dl_code"> мест</div></td></tr>
+            <tr><td><a id="dl_1" href="/orders/room/id/">Путевки</a></td></tr>
+            <tr><td><a id="dl_2" href="/orders/room/id/book/">Заезд</a></td></tr>
+        </table>
     </div>
     <h1>Сетка</h1>
     <table border="0" id = "occupied" class = "display">
             {% for q in res %}
                 <tr>{% for r in q %}
-                <td><a href="/orders/room/{{ r.0.id }}/">{{ r.0.name }}</a></td>
-                    <td><a href="#" onclick="$('#huynya').html('{{ r.2 }}'); $('#dl').dialog('open');">{{ r.1 }}</a></td>
+                <td><a href="#" onclick="update_links(this.id); return false;" id="m_{{ r.0.id }}_{{ r.0.room_type.places }}">{{ r.0.name }}</a></td>
+                    <td><a href="#" onclick="$('#huynya').html('{{ r.2 }}'); $('#dl_h').dialog('open');">{{ r.1 }}</a></td>
                     {% endfor %}
             </tr>
             {% endfor %}

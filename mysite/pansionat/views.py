@@ -1520,6 +1520,20 @@ def book_handler(request):
         return redirect('/bookit')
     return redirect('/order')
 
+@login_required
+def orders_room_book(request, room_id):
+    room_list = [room_id]
+
+    rooms = room_handler(room_list)
+    if not rooms is None:
+        request.session['rooms'] = rooms
+
+    td = datetime.date.today().strftime('%d.%m.%Y')
+    request.session['start_date'] = td
+    request.session['end_date'] = td
+
+    return redirect('/order')
+
 def clear_rooms_session(session):
     if 'rooms' in session:
         del session['rooms']
