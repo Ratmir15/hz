@@ -1,4 +1,5 @@
 # coding: utf-8
+from datetime import timedelta
 
 from django.http import HttpResponse
 from xlrd import open_workbook
@@ -267,6 +268,63 @@ def fill_excel_template_porcii(template_filename, tel, res):
 
     w.save(response)
     return response
+
+def fill_excel_template_net(template_filename, sd,ed, res, tel):
+    w = prepare_excel_template(template_filename, tel)
+    response = HttpResponse(mimetype='application/vnd.ms-excel')
+    filename = tel.get('FILENAME','report')
+    response['Content-Disposition'] = 'attachment; filename=' + filename + '.xls'
+    maxr = tel['max_row']
+    top_row = maxr
+    maxr += 1
+    wtsheet = w.get_sheet(0)
+    pieces = set()
+    pieces_indexes = dict()
+    di_pi = dict()
+    simple = easyxf('align: wrap on; font:name Arial, height 160; border: top thin, left thin, bottom thin, right thin')
+    bad = easyxf('align: wrap on; font:name Arial, height 160, italic 1; border: top thin, left thick, bottom thin, right thin')
+    wtsheet.write_merge(top_row,top_row+1, 0,0,"Номер", simple)
+    std = sd
+    td = timedelta(days=1)
+    i = 1
+    while std<=ed:
+        wtsheet.write_merge(top_row,top_row+1, i,i,std.day, simple)
+        std += td
+        i +=1
+
+    top_row +=2
+
+    for i in xrange(0,len(res)):
+        room, room_info = res[i]
+        h = 0
+        if len(room_info)>1:
+            h = len(room_info)-1
+        wtsheet.write_merge(top_row,top_row+h, 0,0,room.name, simple)
+
+        z = 0
+        for end_ddd,busy_array in room_info:
+            for name, start_date, end_date in busy_array:
+                td1 = start_date-sd
+                if td1.days<0:
+                    td1d = 0
+                else:
+                    td1d = td1.days
+                td2 = end_date-sd
+                if z>room.room_type.places:
+                    stl = bad
+                else:
+                    stl = simple
+                wtsheet.write_merge(top_row+z,top_row+z, td1d+1,td2.days+1,name, stl)
+            z +=1
+        top_row += h+1
+
+    left = easyxf('align: wrap on; font:name Arial, height 160; border: top thin, left thick, bottom thin, right thin')
+    right = easyxf('align: wrap on; font:name Arial, height 160; border: top thin, left thin, bottom thin, right thick')
+    bottom = easyxf('align: wrap on; font:name Arial, height 160; border: top thin, left thin, bottom thick, right thin')
+
+    w.save(response)
+    return response
+
 
 def prepare_excel_template(template_filename, tel):
     rb = open_workbook(settings.STATIC_ROOT + '/xls/' + template_filename,formatting_info=True)

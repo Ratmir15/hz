@@ -7,9 +7,10 @@ from django.shortcuts import render_to_response
 from django import forms
 from django.template import loader
 from mysite.pansionat.menu import MenuRequestContext
-from mysite.pansionat.models import Order, OrderType, OrderDay, OrderMedicalProcedure
+from mysite.pansionat.models import Order, OrderType, OrderDay, OrderMedicalProcedure, Room
+from mysite.pansionat.orders import room_availability
 from mysite.pansionat.proc import MedicalPriceReport
-from mysite.pansionat.xltemplates import fill_excel_template
+from mysite.pansionat.xltemplates import fill_excel_template, fill_excel_template_net
 
 __author__ = 'rpanov'
 
@@ -211,9 +212,65 @@ def reports(request):
     return HttpResponse(t.render(c))
 
 @login_required
+def netreport(request):
+    values = {}
+    return render_to_response('pansionat/netreport.html', MenuRequestContext(request, values))
+
+
+def get_date(dt):
+    dtv = dt.split(".")
+    year = int(dtv[2])
+    month = int(dtv[1])
+    day = int(dtv[0])
+    p_date = datetime.date(year, month, day)
+    return p_date
+
+
+@login_required
 def zreport(request):
     values = {}
     return render_to_response('pansionat/zreport.html', MenuRequestContext(request, values))
+
+@login_required
+def netprint(request):
+    d = get_date(request.POST.get("start_date",""))
+    td = get_date(request.POST.get("end_date",""))
+    rooms = Room.objects.filter(disabled=False).order_by("room_place__id","name")
+    res = []
+    for room in rooms:
+        orders, booked, max , by_dates = room_availability(room,d,td)
+        allinfo = []
+        for order in orders:
+            allinfo.append((order.patient.family, order.start_date, order.end_date))
+        for book in booked:
+            allinfo.append((book.name, book.start_date, book.end_date))
+
+        allinfo = sorted(allinfo)
+
+        row_info = []
+
+        for name,start_date,end_date in allinfo:
+            flag = False
+            for i in xrange(len(row_info)):
+                last_date,busy_array = row_info[i]
+                #            for last_date,busy_array in row_info:
+                if start_date>last_date:
+                    busy_array.append((name,start_date,end_date))
+                    row_info[i] = (end_date, busy_array)
+                    flag = True
+            if not flag:
+                busy_array = [(name, start_date, end_date)]
+                row_info.append((end_date,busy_array))
+
+        res.append((room, row_info))
+
+    tel = { 'RES': res,
+            'STARTDATE': d,
+            'ENDDATE': td,
+            'FILENAME': 'NET-'+d.strftime('%d-%m-%Y'),
+            }
+    template_filename = 'simplereport.xls'
+    return fill_excel_template_net(template_filename, d, td, res, tel)
 
 @login_required
 def zprint(request):
