@@ -255,7 +255,7 @@ def netprint(request):
         for book in booked:
             allinfo.append((book.name, book.start_date, book.end_date))
 
-        allinfo = sorted(allinfo)
+        allinfo = sorted(allinfo, cmp = lambda x,y: cmp(x[1], y[1]))
 
         row_info = []
 
