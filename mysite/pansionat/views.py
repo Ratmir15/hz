@@ -153,13 +153,13 @@ def logout_page(request):
 def orders_patient(request, patient_id):
     patient = Patient.objects.get(id=patient_id)
     occupied_list = Order.objects.filter(patient = patient).values("id","code","putevka","room__name","patient__family","patient__name","patient__sname","start_date","end_date","customer__name","price").order_by("id")
-    return return_orders_list(occupied_list, request, "Пациент:"+patient.fio())
+    return return_orders_list(occupied_list, request, u"Пациент:"+patient.fio())
 
 @login_required
 def orders_room(request, room_id):
     room = Room.objects.get(id=room_id)
     occupied_list = Order.objects.filter(room = room).values("id","code","putevka","room__name","patient__family","patient__name","patient__sname","start_date","end_date","customer__name","price").order_by("-start_date")
-    return return_orders_list(occupied_list, request, "Номер:"+room.name)
+    return return_orders_list(occupied_list, request, u"Номер:"+room.name)
 
 @login_required
 def patient_edit(request, patient_id):
@@ -834,7 +834,10 @@ def prepare_rmreg_data(orders):
             innermap['WHOIS'] = order.patient.grade
             innermap['BIRTHDATE'] = str(order.patient.birth_date)
             innermap['PASSPORT'] = order.patient.passport_number + ' ' + order.patient.passport_whom
-            innermap['ADDRESS'] = order.patient.address + ' ' + order.patient.phone
+            if order.patient.phone is None:
+                innermap['ADDRESS'] = order.patient.address
+            else:
+                innermap['ADDRESS'] = order.patient.address + ' ' + order.patient.phone
         innermap['ROOM'] = order.room.name
         l.append(innermap)
     return l
