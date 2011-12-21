@@ -239,7 +239,10 @@ def test_file(filename, flag):
                 v = rsh.cell_value(rrowx,7)
                 cs = Customer.objects.filter(Q(name = v,shortname = v))
                 if len(cs)>0:
-                    row_info.append((cs[0].name,""))
+                    if not duplicated or os[0].directive.name!=v:
+                        row_info.append((v,""))
+                    else:
+                        row_info.append(("",""))
                     directive = cs[0]
                 else:
 #                    do_import = False
@@ -258,14 +261,20 @@ def test_file(filename, flag):
                     if not len(str(pr)):
                         pr = 0
                     price = decimal.Decimal(pr)
-                row_info.append((price,""))
+                if not duplicated or os[0].price!=price:
+                    row_info.append((price,""))
+                else:
+                    row_info.append(("",""))
 #                v = rsh.cell_value(rrowx,9)
 #                s_date = datetime.date(year = 1899, month = 12, day=30)+datetime.timedelta(days=v)
 #                row_info.append((s_date,""))
                 v = rsh.cell_value(rrowx,10)
                 cs = Customer.objects.filter(Q(name = v,shortname = v))
                 if len(cs)>0:
-                    row_info.append((cs[0].name,""))
+                    if not duplicated or os[0].customer.name!=v:
+                        row_info.append((v,""))
+                    else:
+                        row_info.append(("",""))
                     customer = cs[0]
                 else:
                     #do_import = False
@@ -320,7 +329,10 @@ def test_file(filename, flag):
                 v = upper(v)
                 rooms = Room.objects.filter(name = v)
                 if len(rooms)>0:
-                    row_info.append((rooms[0].name,""))
+                    if not duplicated or os[0].room.name!=v:
+                        row_info.append((v,""))
+                    else:
+                        row_info.append(("",""))
                     room = rooms[0]
                 else:
                     do_import = False
