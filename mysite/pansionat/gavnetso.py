@@ -238,7 +238,7 @@ def test_file(filename, flag):
                 v = rsh.cell_value(rrowx,7)
                 cs = Customer.objects.filter(Q(name = v,shortname = v))
                 if len(cs)>0:
-                    if not duplicated or os[0].directive.name!=v:
+                    if not duplicated or upper(os[0].directive.name)!=upper(v):
                         row_info.append((v,""))
                     else:
                         row_info.append(("",""))
@@ -273,7 +273,7 @@ def test_file(filename, flag):
                 v = rsh.cell_value(rrowx,10)
                 cs = Customer.objects.filter(Q(name = v,shortname = v))
                 if len(cs)>0:
-                    if not duplicated or os[0].customer.name!=v:
+                    if not duplicated or upper(os[0].customer.name)!=upper(v):
                         row_info.append((v,""))
                     else:
                         row_info.append(("",""))
