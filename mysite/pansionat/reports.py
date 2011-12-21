@@ -165,7 +165,10 @@ class LivingReport():
                 innermap['WHOIS'] = order.patient.grade
                 innermap['WHOM'] = order.directive.name
                 innermap['TIME'] = str(order.start_date)
-                innermap['WORK'] = order.customer.name
+                if order.customer is None:
+                    innermap['WORK'] = ""
+                else:
+                    innermap['WORK'] = order.customer.name
                 innermap['BIRTHDATE'] = str(order.patient.birth_date)
                 innermap['PASSPORT'] = order.patient.passport_number+' '+order.patient.passport_whom
                 innermap['ADDRESS'] = order.patient.address

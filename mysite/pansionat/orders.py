@@ -261,28 +261,28 @@ def order_save(request):
 
         cus = request.POST.get("customer","")
         customer = None
-        if cus!="":
-            cs = Customer.objects.filter(name = cus)
-            if not len(cs):
-                if request.POST.has_key("c_add"):
-                    customer = Customer(name = cus,shortname = cus)
-                    customer.save()
-                else:
-                    cus_error = "Выберите корректный вариант. Вашего варианта нет среди допустимых значений."
+        #if cus!="":
+        cs = Customer.objects.filter(name = cus)
+        if not len(cs):
+            if request.POST.has_key("c_add"):
+                customer = Customer(name = cus,shortname = cus)
+                customer.save()
             else:
-                customer = cs[0]
+                cus_error = "Выберите корректный вариант. Вашего варианта нет среди допустимых значений."
+        else:
+            customer = cs[0]
         dir = order_form.data.get("directive","")
         directive = None
-        if dir!="":
-            cs = Customer.objects.filter(name = dir)
-            if not len(cs):
-                if request.POST.has_key("d_add"):
-                    directive = Customer(name = dir,shortname = dir)
-                    directive.save()
-                else:
-                    dir_error = "Выберите корректный вариант. Вашего варианта нет среди допустимых значений."
+#        if dir!="":
+        cs = Customer.objects.filter(name = dir)
+        if not len(cs):
+            if request.POST.has_key("d_add"):
+                directive = Customer(name = dir,shortname = dir)
+                directive.save()
             else:
-                directive = cs[0]
+                dir_error = "Выберите корректный вариант. Вашего варианта нет среди допустимых значений."
+        else:
+            directive = cs[0]
         rm = order_form.data.get("room","")
         room = None
         if rm!="":

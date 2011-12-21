@@ -1771,28 +1771,28 @@ def order(request):
 
         cus = request.POST.get("customer","")
         customer = None
-        if cus!="":
-            cs = Customer.objects.filter(name = cus)
-            if not len(cs):
-                if request.POST.has_key("c_add"):
-                    customer = Customer(name = cus,shortname = cus)
-                    customer.save()
-                else:
-                    cus_error = "Выберите корректный вариант. Вашего варианта нет среди допустимых значений."
+#        if cus!="":
+        cs = Customer.objects.filter(name = cus)
+        if not len(cs):
+            if request.POST.has_key("c_add"):
+                customer = Customer(name = cus,shortname = cus)
+                customer.save()
             else:
-                customer = cs[0]
+                cus_error = "Выберите корректный вариант. Вашего варианта нет среди допустимых значений."
+        else:
+            customer = cs[0]
         dir = order_form.data.get("directive","")
         directive = None
-        if dir!="":
-            cs = Customer.objects.filter(name = dir)
-            if not len(cs):
-                if request.POST.has_key("d_add"):
-                    directive = Customer(name = dir,shortname = dir)
-                    directive.save()
-                else:
-                    dir_error = "Выберите корректный вариант. Вашего варианта нет среди допустимых значений."
+#        if dir!="":
+        cs = Customer.objects.filter(name = dir)
+        if not len(cs):
+            if request.POST.has_key("d_add"):
+                directive = Customer(name = dir,shortname = dir)
+                directive.save()
             else:
-                directive = cs[0]
+                dir_error = "Выберите корректный вариант. Вашего варианта нет среди допустимых значений."
+        else:
+            directive = cs[0]
 
         if order_form.is_valid() and cus_error is None and dir_error is None:
             if not patient_form is None and patient_form.is_valid():
