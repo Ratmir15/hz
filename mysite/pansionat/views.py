@@ -834,7 +834,7 @@ def prepare_rmreg_data(orders):
             innermap['WHOIS'] = order.patient.grade
             innermap['BIRTHDATE'] = str(order.patient.birth_date)
             innermap['PASSPORT'] = order.patient.passport_number + ' ' + order.patient.passport_whom
-            innermap['ADDRESS'] = order.patient.address
+            innermap['ADDRESS'] = order.patient.address + ' ' + order.patient.phone
         innermap['ROOM'] = order.room.name
         l.append(innermap)
     return l
