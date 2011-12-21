@@ -31,7 +31,7 @@ class DietAdmin(admin.ModelAdmin):
     inlines = [DietInline]
 
 class RoomAdmin(admin.ModelAdmin):
-    list_display = ['name','room_place']
+    list_display = ['name','room_place','disabled']
 
 
 admin.site.register(Employer)
