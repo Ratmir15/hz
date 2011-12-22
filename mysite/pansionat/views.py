@@ -1839,7 +1839,7 @@ def order(request):
                 order.room = rooms[0] # Get first element because len of array should be 1
                 order.save()
                 fillOrderDays(order)
-                return redirect('/rooms')
+                return redirect('/rmreg')
 
     values = {'order_form': order_form, 'cus':cus, 'dir':dir, 'rooms': rooms, user: request.user, 'pr': int(rooms[0].room_type.price), 'pl': int(pl)}
     values.update(csrf(request))

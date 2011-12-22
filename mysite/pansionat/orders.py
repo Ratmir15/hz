@@ -249,6 +249,11 @@ def mainnet(request, d, td, show_p, columns):
 @login_required
 @permission_required('pansionat.add_order', login_url='/forbidden/')
 def order_save(request):
+    if request.POST.has_key('recalc'):
+        id = request.POST.get('id')
+        order = Order.objects.get(id = id)
+        recalc_order_days(order)
+        return redirect('/order/'+str(id))
     if request.POST.has_key('del'):
         id = request.POST.get('id')
         order = Order.objects.get(id = id)
@@ -393,6 +398,12 @@ def fill_order_days(order):
     ods = OrderDay.objects.filter(order = order).exclude(busydate__range = (order.start_date, order.end_date))
     for od in ods:
         od.delete()
+
+def recalc_order_days(order):
+    ods = OrderDay.objects.filter(order = order)
+    for od in ods:
+        od.delete()
+    fill_order_days(order)
 
 def room_availability(room, start_date, end_date):
     if start_date==end_date:
