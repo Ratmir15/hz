@@ -185,6 +185,16 @@ def importdiet(request):
 def net(request):
     d = datetime.date.today()
     td = d + datetime.timedelta(days=60)
+    return mainnet(request, d, td, False)
+
+@login_required
+def netp(request):
+    d = datetime.date.today()
+    td = d
+    return mainnet(request, d, td, True)
+
+@login_required
+def mainnet(request, d, td, show_p):
 #    rooms = Room.objects.filter(disabled=False).values("name","order_day__set","room_type__places","room_place__id").order_by("name")
     rooms = Room.objects.filter(disabled=False).order_by("room_place__id","name")
     res = []
@@ -208,14 +218,20 @@ def net(request):
 #                print key
 #                print value
         txt += "</table>"
-        if choosedkey is None:
-            if lastkey is None:
-                dt = ''
-            else:
-                dt = (lastkey+ datetime.timedelta(days=1)).strftime('%d.%m')
+        if show_p:
+            ar = []
+            for order in orders:
+                ar.append((order.family(),order.end_date_cool()))
+            q.append((room, "", txt, ar))
         else:
-            dt = choosedkey.strftime('%d.%m')
-        q.append((room, dt, txt))
+            if choosedkey is None:
+                if lastkey is None:
+                    dt = ''
+                else:
+                    dt = (lastkey+ datetime.timedelta(days=1)).strftime('%d.%m')
+            else:
+                dt = choosedkey.strftime('%d.%m')
+            q.append((room, dt, txt, None))
         i +=1
         if i==max_row:
             i = 0

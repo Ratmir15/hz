@@ -257,6 +257,15 @@ class Order(models.Model):
         return self.start_date.strftime('%Y.%m.%d')
     def end_date_n(self):
         return self.end_date.strftime('%Y.%m.%d')
+    def start_date_cool(self):
+        return self.start_date.strftime('%d.%m.%y')
+    def end_date_cool(self):
+        return self.end_date.strftime('%d.%m.%y')
+    def family(self):
+        if self.patient is None:
+            return ""
+        else:
+            return self.patient.family
 
     #create index idx_end_date on pansionat_order (end_date);
     #create index idx_start_date on pansionat_order (start_date);
