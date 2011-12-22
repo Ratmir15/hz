@@ -790,6 +790,10 @@ def clear(request):
     dellist(OrderType.objects.all())
 
 @login_required
+def br(request):
+    import_bron('soon.xls')
+
+@login_required
 def init(request):
     clear(request)
     import_ordertypes()

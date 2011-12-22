@@ -56,6 +56,17 @@ def import_bron(filename):
             description = up_low_case(rsh.cell_value(rrowx,4))
             book = Book(start_date = s_date, end_date = e_date, name = name, phone = phone, description = description)
             book.save()
+            rooms_s = up_low_case(rsh.cell_value(rrowx,9))
+            rooms = rooms_s.split(",")
+            for room_n in rooms:
+                rs = Room.objects.filter(name = upper(room_n))
+                if not len(rs):
+                    pass
+                else:
+                    r = rs[0]
+                    roombook = RoomBook(book = book, room = r)
+                    roombook.save()
+                    fillBookDays(book, r)
 
 def import_diets(filename):
     rb = open_workbook(settings.STATIC_ROOT + '/xls/' + filename,formatting_info=True)
