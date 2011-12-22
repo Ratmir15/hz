@@ -29,7 +29,7 @@ class Patient(models.Model):
     grade = models.CharField(max_length=50, verbose_name = 'Должность', blank=True, null=True)
     profession = models.CharField(max_length=50, verbose_name = 'Профессия', blank=True, null=True)
     marriage = models.CharField(max_length = 1, choices = MARRIAGE, verbose_name='Семейное положение', blank=True, null=True)
-    passport_number = models.CharField(unique = True, max_length=20,\
+    passport_number = models.CharField(max_length=20,\
                     verbose_name = 'Серия и номер паспорта')
     passport_whom = models.CharField(max_length=100, verbose_name = 'Кем выдан паспорт', blank=True)
     address = models.CharField(max_length=200, verbose_name = 'Адрес', blank=True, null=True)

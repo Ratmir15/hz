@@ -103,7 +103,7 @@ def order_edit(request, order_id):
     places = get_order_places(order)
     c_list = fill_cust_list()
     p_list = Patient.objects.all().order_by("family","name","sname")
-    r_list = Room.objects.all().order_by("name")
+    r_list = Room.objects.filter(disabled=False).order_by("name")
 
     values["customers"] = c_list
     values["patients"] = p_list

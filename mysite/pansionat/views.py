@@ -1370,8 +1370,8 @@ def delbook(request, roombook_id):
 @login_required
 def delorder(request, order_id):
     ord = Order.objects.get(id=order_id)
-    clearOrderDays(ord)
-    ord.delete()
+#    clearOrderDays(ord)
+#    ord.delete()
     return redirect('/rooms/')
 
 @login_required
@@ -1693,7 +1693,7 @@ class PatientForm(ModelForm):
     def clean_passport_number(self):
         data = self.cleaned_data['passport_number']
         matchObj = re.match( '\d\d\s\d\d\s\d\d\d\d\d\d$', data, flags = 0)
-        if not matchObj:
+        if not data=='-' and not matchObj:
             raise forms.ValidationError("Поле должно быть вида XX XX XXXXXX")
         return data
 
