@@ -221,7 +221,7 @@ def mainnet(request, d, td, show_p):
         if show_p:
             ar = []
             for order in orders:
-                ar.append((order.family(),order.end_date_cool()))
+                ar.append((order.family(),order.end_date_cool_and_short()))
             q.append((room, "", txt, ar))
         else:
             if choosedkey is None:

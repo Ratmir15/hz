@@ -55,11 +55,11 @@
                 <tr>{% for r in q %}
                 <td><a href="#" onclick="update_links(this.id); return false;" id="m_{{ r.0.id }}_{{ r.0.room_type.places }}">{{ r.0.name }}</a></td>
                     {% if r.3 %}
-                        <table>
+                        <td><table>
                         {% for pi in r.3 %}
                             <tr><td>{{ pi.0 }}</td><td>{{ pi.1 }}</td></tr>
                         {% endfor %}
-                        </table>
+                        </table></td>
                     {% else %}
                         <td><a href="#" onclick="$('#huynya').html('{{ r.2 }}'); $('#dl_h').dialog('open');">{{ r.1 }}</a></td>
                     {% endif %}
