@@ -262,7 +262,7 @@ class Order(models.Model):
     def end_date_cool(self):
         return self.end_date.strftime('%d.%m.%y')
     def end_date_cool_and_short(self):
-        return self.end_date.strftime('%d.%m.%y')
+        return self.end_date.strftime('%d.%m')
     def family(self):
         if self.patient is None:
             return ""
