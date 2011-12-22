@@ -392,9 +392,9 @@ class Book(models.Model):
     phone = models.CharField(max_length = 100, blank=True)
     description = models.CharField(max_length = 10000, blank=True)
     def start_date_n(self):
-        return self.start_date.strfdate('%Y.%m.%d')
+        return self.start_date.strftime('%Y.%m.%d')
     def end_date_n(self):
-        return self.end_date.strfdate('%Y.%m.%d')
+        return self.end_date.strftime('%Y.%m.%d')
 
 class OrderDay(models.Model):
     room = models.ForeignKey(Room, verbose_name = 'Комната')
