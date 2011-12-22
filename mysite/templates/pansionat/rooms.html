@@ -130,7 +130,7 @@
                                                 <td>{{ order.end_date_n }}</td>
                                                 <td>{% if order.is_with_child %}МД{% endif %}</td>
                                                 <td><a href="/patients/{{ order.patient.id }}/">{{ order.patient.family  }}</a></td>
-                                                <td><a style="font-size: 8px;" href="/order/delete/{{ order.id }}">удалить</a></td>
+                                                <td><a style="font-size: 8px;" href="/order/{{ order.id }}">ред</a></td>
                                                 </tr>
                                             {% endfor %}
                                             {% if book_flag %}
