@@ -1,0 +1,16 @@
+<html><head><title>Сетка</title></head><body>
+    <h1>Сетка</h1>
+    <table border="0" id = "occupied" class = "mdisplay">
+            {% for q in res %}
+                <tr>{% for r in q %}
+                <td>{{ r.0.name }}</td>
+                        <td><table>
+                        {% for pi in r.3 %}
+                            <tr><td>{{ pi.0 }}</td><td>{{ pi.1 }}</td></tr>
+                        {% endfor %}
+                        </table></td>
+                    {% endfor %}
+            </tr>
+            {% endfor %}
+    </table>
+</body></html>

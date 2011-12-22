@@ -185,16 +185,22 @@ def importdiet(request):
 def net(request):
     d = datetime.date.today()
     td = d + datetime.timedelta(days=60)
-    return mainnet(request, d, td, False, 8)
+    return mainnet(request, d, td, False, 8,'pansionat/net.html')
 
 @login_required
 def netp(request):
     d = datetime.date.today()
     td = d
-    return mainnet(request, d, td, True, 5)
+    return mainnet(request, d, td, True, 5,'pansionat/net.html')
 
 @login_required
-def mainnet(request, d, td, show_p, columns):
+def netpprint(request):
+    d = datetime.date.today()
+    td = d
+    return mainnet(request, d, td, True, 5,'pansionat/netprint.html')
+
+@login_required
+def mainnet(request, d, td, show_p, columns, tmpl):
 #    rooms = Room.objects.filter(disabled=False).values("name","order_day__set","room_type__places","room_place__id").order_by("name")
     rooms = Room.objects.filter(disabled=False).order_by("room_place__id","name")
     res = []
@@ -244,7 +250,7 @@ def mainnet(request, d, td, show_p, columns):
                 q.append(res[j][i])
         res_t.append(q)
     values = {"res" : res_t}
-    return render_to_response('pansionat/net.html', MenuRequestContext(request, values))
+    return render_to_response(tmpl, MenuRequestContext(request, values))
 
 @login_required
 @permission_required('pansionat.add_order', login_url='/forbidden/')
