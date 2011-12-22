@@ -172,15 +172,32 @@ def orders_room(request, room_id):
 @login_required
 def patient_edit(request, patient_id):
     patient = Patient.objects.get(id = patient_id)
+    grades = set()
+    pwhs = set()
+    ps = Patient.objects.all()
+    for p in ps:
+        grades.add(p.grade)
+        pwhs.add(p.passport_whom)
     patient_form = PatientForm(instance=patient)
     values = {'patient_form' : patient_form,\
-                'patient_id' : patient_id}        
+                'allgrades' : grades,
+                'allpw' : pwhs,
+                'patient_id' : patient_id}
     return render_to_response('pansionat/patient.html', MenuRequestContext(request, values))
 
 @login_required
 def patient_new(request):
     patient_form = PatientForm()
-    values = {'patient_form' : patient_form}
+    grades = set()
+    pwhs = set()
+    ps = Patient.objects.all()
+    for p in ps:
+        grades.add(p.grade)
+        pwhs.add(p.passport_whom)
+    values = {'patient_form' : patient_form,
+              'allgrades' : grades,
+              'allpw' : pwhs
+    }
     return render_to_response('pansionat/patient.html', MenuRequestContext(request, values))
 
 @login_required
@@ -854,7 +871,7 @@ def prepare_rmreg_data(orders):
 def prepare_reestr_data(month, year):
     intyear = int(year)
     intmonth = int(month)
-    orders = Order.objects.filter(start_date__year=intyear, start_date__month=intmonth)
+    orders = Order.objects.filter(start_date__year=intyear, start_date__month=intmonth).order_by("start_date","code")
     template_filename = 'registrydiary.xls'
     map = {'MONTH': monthlabel(intmonth) + ' ' + str(intyear) + ' год',
            'TITLE': 'Журнал регистрации отдыхающих',

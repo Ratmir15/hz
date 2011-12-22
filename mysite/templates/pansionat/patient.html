@@ -12,6 +12,8 @@
     <script src="/static/dataTables/media/js/jquery.dataTables.js"></script>
     <script src="/static/jquery-ui/ui/jquery.ui.core.js"></script>
     <script src="/static/jquery-ui/ui/jquery.ui.widget.js"></script>
+    <script src="/static/jquery-ui/ui/jquery.ui.position.js"></script>
+    <script src="/static/jquery-ui/ui/jquery.ui.autocomplete.js"></script>
     <script src="/static/jquery-ui/ui/jquery.ui.datepicker.js"></script>
     <script src="/static/jquery-ui/ui/i18n/jquery.ui.datepicker-ru.js"></script>
     <script src="/static/jquery-ui/ui/jquery.ui.button.js"></script>
@@ -21,6 +23,18 @@
             $('#id_birth_date').datepicker();
             $('input:submit').button()
             $(':button').button()
+            var availableTagsGrade = [
+                {% for grade in allgrades %}"{{ grade }}",{% endfor %}
+            ];
+            $( "#id_grade" ).autocomplete({
+                source: availableTagsGrade
+            });
+            var availableTagsPW = [
+                {% for p in allpw %}"{{ p }}",{% endfor %}
+            ];
+            $( "#id_passport_whom" ).autocomplete({
+                source: availableTagsPW
+            });
             } );
     </script> 
 <link rel="stylesheet" href="/static/Refresh.css" type="text/css" />

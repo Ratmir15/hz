@@ -27,6 +27,9 @@
 
 {% block allcontent %}
     <h1>Пациенты</h1>
+    <form action="/patients/new/">
+        <input type="submit" value="Добавить пациента"/>
+    </form>
     <table border="0" id = "occupied" class = "display">
     <thead>
     <th>Фамилия</th>
@@ -55,7 +58,4 @@
                 </tr>
             {% endfor %}
     </table>
-    <form action="/patients/new/">
-        <input type="submit" value="Добавить пациента"/>
-    </form>
 {%  endblock  %}
