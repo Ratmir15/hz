@@ -1694,7 +1694,7 @@ class PatientForm(ModelForm):
         data = self.cleaned_data['passport_number']
         matchObj = re.match( '\d\d\s\d\d\s\d\d\d\d\d\d$', data, flags = 0)
         if not data=='-' and not matchObj:
-            raise forms.ValidationError("Поле должно быть вида XX XX XXXXXX")
+            raise forms.ValidationError("Поле должно быть вида XX XX XXXXXX или -")
         return data
 
 class CustomerForm(ModelForm):
