@@ -68,7 +68,7 @@
                 </td>
 {#                    <tr><td colspan="2">Свободных мест: {{ pl }}</td></tr>#}
                     <tr><th><label for="directive">Направляющая организация</label></th>
-                        <td><input type="text" id="directive" name="directive" value="{{ dir }}">сз,хз,фсс,...{% if dir_error %}<ul class="errorlist"><li>{{ dir_error }}</li></ul>{% endif %}</td></tr>
+                        <td><input type="text" id="directive" name="directive" value="{{ dir }}">сельская здравница,хопровские зори,фсс,...{% if dir_error %}<ul class="errorlist"><li>{{ dir_error }}</li></ul>{% endif %}</td></tr>
                     <tr><td><input type="checkbox" name="d_add">добавить</td></tr>
                     <tr><th><label for="customer">Место работы</label></th>
                         <td><input type="text" id="customer" name="customer" value="{{ cus }}">{% if cus_error %}<ul class="errorlist"><li>{{ cus_error }}</li></ul>{% endif %}</td>
@@ -96,6 +96,9 @@
                     {% for order_day in order_days %}
                         <tr><td>{{ order_day.0.busydate_n }}</td><td>{{ order_day.0.room.name }}</td><td>{{ order_day.1 }}</td></tr>
                     {% endfor %}
+                    <tr><td colspan="2">
+                    <input type="submit" name="recalc" value="Перерасчет" />
+                    </td></tr>
                 </table>
             </form>
         {% endblock %}
