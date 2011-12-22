@@ -50,7 +50,7 @@
         </table>
     </div>
     <h1>Сетка</h1>
-    <table border="0" id = "occupied" class = "display">
+    <table border="0" id = "occupied" class = "mdisplay">
             {% for q in res %}
                 <tr>{% for r in q %}
                 <td><a href="#" onclick="update_links(this.id); return false;" id="m_{{ r.0.id }}_{{ r.0.room_type.places }}">{{ r.0.name }}</a></td>
