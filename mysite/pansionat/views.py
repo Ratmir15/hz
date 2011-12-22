@@ -1483,7 +1483,8 @@ def room_with_orders(start_date, end_date, room_type, room_book):
     if not room_type is None:
         room_list = Room.objects.filter(room_type__id = room_type)
     else:
-        room_list = Room.objects.filter(disabled=True)
+#        room_list = Room.objects.filter(disabled=True)
+        room_list = Room.objects.all()
 
     ordered_rooms = [] 
 
