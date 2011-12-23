@@ -11,6 +11,7 @@
     <th>Пациент</th>
     <th>Телефон</th>
     <th>Комментарий</th>
+    <th>Комната</th>
     </thead>
             {% for occupied in occupied_list %}
                 <tr>
@@ -28,6 +29,11 @@
                 </td>
                     <td>
                         {{ occupied.description }}
+                    </td>
+                    <td>
+                        {% for z in occupied.roombook_set %}
+                            {{ z.room.name }}
+                        {% endfor %}
                     </td>
                 </tr>
             {% endfor %}
