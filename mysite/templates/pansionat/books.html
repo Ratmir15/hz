@@ -31,7 +31,7 @@
                         {{ occupied.description }}
                     </td>
                     <td>
-                        {% for z in occupied.roombook_set %}
+                        {% for z in occupied.roombook_set.all %}
                             {{ z.room.name }}
                         {% endfor %}
                     </td>
