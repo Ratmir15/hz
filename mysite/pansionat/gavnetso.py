@@ -44,6 +44,7 @@ def import_bron(filename):
     rb = open_workbook(settings.STATIC_ROOT + '/xls/' + filename,formatting_info=True)
     rsh = rb.sheet_by_index(0)
 
+    res = []
     for rrowx in xrange(rsh.nrows):
         v = rsh.cell_value(rrowx, 1)
         if v != "":
@@ -54,19 +55,21 @@ def import_bron(filename):
             name = up_low_case(rsh.cell_value(rrowx,7))
             phone = up_low_case(unicode(rsh.cell_value(rrowx,8)))
             description = up_low_case(rsh.cell_value(rrowx,4))
-            book = Book(start_date = s_date, end_date = e_date, name = name, phone = phone, description = description)
-            book.save()
+#            book = Book(start_date = s_date, end_date = e_date, name = name, phone = phone, description = description)
+#            book.save()
             rooms_s = up_low_case(rsh.cell_value(rrowx,9))
             rooms = rooms_s.split(",")
             for room_n in rooms:
                 rs = Room.objects.filter(name = upper(room_n))
                 if not len(rs):
+                    res.append([(name, room_n)])
                     pass
                 else:
                     r = rs[0]
-                    roombook = RoomBook(book = book, room = r)
-                    roombook.save()
-                    fillBookDays(book, r)
+#                    roombook = RoomBook(book = book, room = r)
+#                    roombook.save()
+#                    fillBookDays(book, r)
+    return res
 
 def import_diets(filename):
     rb = open_workbook(settings.STATIC_ROOT + '/xls/' + filename,formatting_info=True)

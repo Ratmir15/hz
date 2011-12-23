@@ -119,7 +119,7 @@ def orders(request):
     occupied_list = Order.objects.all().values("id","code","putevka","room__name","patient__family","patient__name","patient__sname","start_date","end_date","customer__name","price").order_by("id")
     return return_orders_list(occupied_list, request,"")
 
-#login_required
+@login_required
 def books(request):
     occupied_list = Book.objects.all()
     t = loader.get_template('pansionat/books.html')
@@ -791,7 +791,9 @@ def clear(request):
 
 @login_required
 def br(request):
-    import_bron('soon.xls')
+    res = import_bron('soon.xls')
+    values = {"res":res}
+    return render_to_response('pansionat/importorder.html', MenuRequestContext(request, values))
 
 @login_required
 def init(request):
