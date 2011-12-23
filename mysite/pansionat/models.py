@@ -391,6 +391,8 @@ class Book(models.Model):
     name = models.CharField(max_length = 10000, blank=True)
     phone = models.CharField(max_length = 100, blank=True)
     description = models.CharField(max_length = 10000, blank=True)
+    def __unicode__(self):
+        return self.name
     def start_date_n(self):
         return self.start_date.strftime('%Y.%m.%d')
     def end_date_n(self):
