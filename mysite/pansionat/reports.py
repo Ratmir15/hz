@@ -145,35 +145,36 @@ class LivingReport():
         i = 0
         for obj in list:
             order = obj.order
-            if condition.process(order):
-                i += 1
-                innermap = dict()
-                innermap['NUMBER'] = i
-                innermap['ID'] = order.id
-                innermap['NUMBERYEAR'] = order.code
-                innermap['FIO'] = order.patient.__unicode__()
-                if cleaned_summ_type=="2":
-                    dif = order.end_date - order.start_date
-                    price = order.price/(dif.days+1)
-                else:
-                    price = order.price
-                innermap['AMOUNT'] = price
-                innermap['DATEIN'] = str(order.start_date)
-                innermap['DATEOUT'] = str(order.end_date)
-                innermap['SROK'] = str(order.start_date)+' - '+str(order.end_date)
-                innermap['ORDERNUMBER'] = order.putevka
-                innermap['WHOIS'] = order.patient.grade
-                innermap['WHOM'] = order.directive.shortname
-                innermap['TIME'] = str(order.start_date)
-                if order.customer is None:
-                    innermap['WORK'] = ""
-                else:
-                    innermap['WORK'] = order.customer.name
-                innermap['BIRTHDATE'] = str(order.patient.birth_date)
-                innermap['PASSPORT'] = order.patient.passport_number+' '+order.patient.passport_whom
-                innermap['ADDRESS'] = order.patient.address
-                innermap['ROOM'] = order.room.name
-                d.append(innermap)
+            if not order is None:
+                if condition.process(order):
+                    i += 1
+                    innermap = dict()
+                    innermap['NUMBER'] = i
+                    innermap['ID'] = order.id
+                    innermap['NUMBERYEAR'] = order.code
+                    innermap['FIO'] = order.patient.__unicode__()
+                    if cleaned_summ_type=="2":
+                        dif = order.end_date - order.start_date
+                        price = order.price/(dif.days+1)
+                    else:
+                        price = order.price
+                    innermap['AMOUNT'] = price
+                    innermap['DATEIN'] = str(order.start_date)
+                    innermap['DATEOUT'] = str(order.end_date)
+                    innermap['SROK'] = str(order.start_date)+' - '+str(order.end_date)
+                    innermap['ORDERNUMBER'] = order.putevka
+                    innermap['WHOIS'] = order.patient.grade
+                    innermap['WHOM'] = order.directive.shortname
+                    innermap['TIME'] = str(order.start_date)
+                    if order.customer is None:
+                        innermap['WORK'] = ""
+                    else:
+                        innermap['WORK'] = order.customer.name
+                    innermap['BIRTHDATE'] = str(order.patient.birth_date)
+                    innermap['PASSPORT'] = order.patient.passport_number+' '+order.patient.passport_whom
+                    innermap['ADDRESS'] = order.patient.address
+                    innermap['ROOM'] = order.room.name
+                    d.append(innermap)
         title = "Список заселенных "+title
         month  = ""#order_type.__unicode__()
         z = {'TITLE': title+". "+str(cleaned_report_date),'MONTH':month, 'REPORTDATE': str(cleaned_report_date)}
