@@ -155,7 +155,7 @@ class LivingReport():
                     innermap['FIO'] = order.patient.__unicode__()
                     if cleaned_summ_type=="2":
                         dif = order.end_date - order.start_date
-                        price = order.price/(dif.days+1)
+                        price = order.price_p/(dif.days+1)
                     else:
                         price = order.price
                     innermap['AMOUNT'] = price
