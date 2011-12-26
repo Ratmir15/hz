@@ -388,9 +388,9 @@ class Occupied(models.Model):
 class Book(models.Model):
     start_date = models.DateField(verbose_name='Дата заезда', blank=True,null=True)
     end_date = models.DateField(verbose_name='Дата отъезда', blank=True,null=True)
-    name = models.CharField(max_length = 10000, blank=True)
-    phone = models.CharField(max_length = 100, blank=True)
-    description = models.CharField(max_length = 10000, blank=True)
+    name = models.CharField(max_length = 10000, blank=True, verbose_name='Имя')
+    phone = models.CharField(max_length = 100, blank=True, verbose_name='Телефон')
+    description = models.CharField(max_length = 10000, blank=True,verbose_name='Описание')
     def __unicode__(self):
         return self.name
     def start_date_n(self):

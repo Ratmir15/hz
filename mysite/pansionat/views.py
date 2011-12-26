@@ -6,6 +6,7 @@ import user
 from django.contrib.auth import logout, login, authenticate
 from django.contrib.auth.decorators import login_required, permission_required
 from django.db.models.aggregates import Count, Sum, Max
+from django.forms.fields import CharField
 from django.forms.widgets import Textarea
 
 from django.template import loader
@@ -132,7 +133,14 @@ def books(request):
 @login_required
 def book_edit(request, instance_id):
     instance = Book.objects.get(id = instance_id)
-    form = BookEditForm(instance=instance)
+    rbs = instance.roombook_set.all()
+    rooms = ""
+    for rb in rbs:
+        if rooms == "":
+            rooms += upper(rb.room.name)
+        else:
+            rooms += ","+upper(rb.room.name)
+    form = BookEditForm(initial = {'rooms' : rooms}, instance=instance)
     values = {'form' : form,\
                 'instance_id' : instance_id}
     return render_to_response('pansionat/book_edit.html', MenuRequestContext(request, values))
@@ -896,6 +904,68 @@ def reestr(request, year, month):
 def reestrxls(request, year, month):
     map, template_filename = prepare_reestr_data(month, year)
     return fill_excel_template(template_filename, map)
+
+@login_required
+def book_save(request):
+    if request.method == 'POST':
+        instance_id = request.POST.get('instance_id')
+        instance = None
+        if instance_id is None:
+            form = BookEditForm(request.POST)
+        else:
+            instance = Book.objects.get(id = instance_id)
+            form = BookEditForm(request.POST, instance = instance)
+
+        if form.is_valid():
+            if not instance is None:
+                ods = OrderDay.objects.filter(book = instance)
+                ods.delete()
+                rbs = RoomBook.objects.filter(book = instance)
+                rbs.delete()
+
+            instance = form.save()
+            rooms = form.cleaned_data["rooms"]
+            for r_name in rooms.split(","):
+                room = Room.objects.get(name=upper(r_name))
+                rb = RoomBook(room =room, book = instance)
+                rb.save()
+                fillBookDays(instance, room)
+            return  redirect('/rmregbook/')
+        else:
+            values = {'form' : form, 'instance_id' : instance_id}
+            return render_to_response('pansionat/book_edit.html', MenuRequestContext(request, values))
+    return patient_new(request) #if method is't post then show empty form
+
+@login_required
+def rmregbook(request):
+    books = Book.objects.all().order_by("start_date")
+    l = []
+    i = 0
+    for book in books:
+        i += 1
+        innermap = dict()
+        innermap['NUMBER'] = i
+        innermap['ID'] = book.id
+        innermap['NAME'] = book.name
+        innermap['PHONE'] = book.phone
+        innermap['DESC'] = book.description
+        innermap['DATEIN'] = book.start_date.strftime('%d.%m.%Y')
+        innermap['DATEOUT'] = book.end_date.strftime('%d.%m.%Y')
+        roombooks = book.roombook_set.all()
+        q = ""
+        for s in roombooks:
+            q += s.room.name+" "
+        innermap['ROOMS'] = q
+        l.append(innermap)
+    map = dict()
+    map['T'] = l
+    dt = datetime.date.today()
+    td = datetime.timedelta(days=1)
+    pday = dt - td
+    nday = dt + td
+    map["pday"] = str(pday)
+    map["nday"] = str(nday)
+    return render_to_response('pansionat/rmregbook.html', MenuRequestContext(request, map))
 
 @login_required
 def rmreg(request, year, month, day):
@@ -1690,11 +1760,23 @@ class OrderForm(ModelForm):
         exclude = ('directive','customer','patient', 'room','order_type')
 
 class BookEditForm(ModelForm):
+    rooms = CharField(label = 'Комнаты')
     class Meta:
         model = Book
         widgets = {
             'description': Textarea(attrs={'cols': 80, 'rows': 3}),
         }
+        additional_fields = { 'rooms': CharField() }
+#        exclude = ('rooms')
+    def clean_rooms(self):
+        data = self.cleaned_data['rooms']
+        rooms = data.split(',')
+        for room in rooms:
+            r_name = upper(room)
+            rs = Room.objects.filter(name = r_name)
+            if not len(rs):
+                raise forms.ValidationError(u"Не найдена комната " + r_name)
+        return data
 
 class PatientForm(ModelForm):
     class Meta:
