@@ -162,6 +162,15 @@ def book_edit(request, instance_id):
                 'instance_id' : instance_id}
     return render_to_response('pansionat/book_edit.html', MenuRequestContext(request, values))
 
+@login_required
+def book_new(request):
+    instance = Book()
+    rooms = ""
+    form = BookEditForm(initial = {'rooms' : rooms}, instance=instance)
+    values = {'form' : form,\
+                'instance_id' : ""}
+    return render_to_response('pansionat/book_edit.html', MenuRequestContext(request, values))
+
 def my_view(request):
     username = request.POST.get('username','')
     password = request.POST.get('password','')
