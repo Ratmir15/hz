@@ -26,7 +26,7 @@ from mysite.pansionat.orders import room_availability, fill_cust_list, return_or
 from mysite.pansionat.proc import MenuRequestContext, MedicalPriceReport
 from mysite.pansionat.reports import DietForm, DateFilterForm, PFCondition, ElseCondition, SPCondition, PPCondition, RCondition, SzCondition, HzCondition, HzSzCondition
 from pytils import numeral
-from mysite.pansionat.gavnetso import monthlabel, nextmonthfirstday, initbase, initroles, initroomtypes, initp, initdiet, fillBookDays, fillOrderDays, inithistory, import_bron, import_proc, import_rooms, import_ordertypes
+from mysite.pansionat.gavnetso import monthlabel, nextmonthfirstday, initbase, initroles, initroomtypes, initp, initdiet, fillBookDays, fillOrderDays, inithistory, import_bron, import_proc, import_rooms, import_ordertypes, fillBookAllDays
 import datetime
 import time
 from django import forms
@@ -129,6 +129,23 @@ def books(request):
     })
     resp = HttpResponse(t.render(c))
     return resp
+
+@login_required
+def book_enable(request, instance_id):
+    instance = Book.objects.get(id = instance_id)
+    clearBookDays(instance)
+    instance.status = 0
+    instance.save()
+    fillBookAllDays(instance)
+    return redirect("/rmregbook/")
+
+@login_required
+def book_disable(request, instance_id):
+    instance = Book.objects.get(id = instance_id)
+    clearBookDays(instance)
+    instance.status = -1
+    instance.save()
+    return redirect("/rmregbook/")
 
 @login_required
 def book_edit(request, instance_id):
@@ -905,6 +922,13 @@ def reestrxls(request, year, month):
     map, template_filename = prepare_reestr_data(month, year)
     return fill_excel_template(template_filename, map)
 
+
+def clearBookDays(instance):
+    ods = OrderDay.objects.filter(book=instance)
+    ods.delete()
+    rbs = RoomBook.objects.filter(book=instance)
+    rbs.delete()
+
 @login_required
 def book_save(request):
     if request.method == 'POST':
@@ -918,10 +942,7 @@ def book_save(request):
 
         if form.is_valid():
             if not instance is None:
-                ods = OrderDay.objects.filter(book = instance)
-                ods.delete()
-                rbs = RoomBook.objects.filter(book = instance)
-                rbs.delete()
+                clearBookDays(instance)
 
             instance = form.save()
             rooms = form.cleaned_data["rooms"]
@@ -936,15 +957,14 @@ def book_save(request):
             return render_to_response('pansionat/book_edit.html', MenuRequestContext(request, values))
     return patient_new(request) #if method is't post then show empty form
 
-@login_required
-def rmregbook(request):
-    books = Book.objects.all().order_by("start_date")
+def booklist(books, request):
     l = []
     i = 0
     for book in books:
         i += 1
         innermap = dict()
         innermap['NUMBER'] = i
+        innermap['STATUS'] = book.status
         innermap['ID'] = book.id
         innermap['NAME'] = book.name
         innermap['PHONE'] = book.phone
@@ -954,7 +974,7 @@ def rmregbook(request):
         roombooks = book.roombook_set.all()
         q = ""
         for s in roombooks:
-            q += s.room.name+" "
+            q += s.room.name + " "
         innermap['ROOMS'] = q
         l.append(innermap)
     map = dict()
@@ -966,6 +986,17 @@ def rmregbook(request):
     map["pday"] = str(pday)
     map["nday"] = str(nday)
     return render_to_response('pansionat/rmregbook.html', MenuRequestContext(request, map))
+
+
+@login_required
+def rmregbook(request):
+    books = Book.objects.filter(status = 0).order_by("start_date")
+    return booklist(books, request)
+
+@login_required
+def rmregbookold(request):
+    books = Book.objects.filter(status = -1).order_by("start_date")
+    return booklist(books, request)
 
 @login_required
 def rmreg(request, year, month, day):
@@ -1675,6 +1706,7 @@ def bookit(request):
         if form.is_valid():
             #TODO: use ModelFrom instead of simple form
             book = Book()
+            book.status = 0
             book.start_date = form.cleaned_data['start_date']
             book.end_date = form.cleaned_data['end_date']
             book.name = form.cleaned_data['name']
@@ -1767,7 +1799,7 @@ class BookEditForm(ModelForm):
             'description': Textarea(attrs={'cols': 80, 'rows': 3}),
         }
         additional_fields = { 'rooms': CharField() }
-#        exclude = ('rooms')
+        exclude = ('status')
     def clean_rooms(self):
         data = self.cleaned_data['rooms']
         rooms = data.split(',')

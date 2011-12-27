@@ -878,13 +878,18 @@ def fillOrderDays(order):
         orderDay.save()
         date += delta
 
+def fillBookAllDays(book):
+    for roombook in book.roombook_set.all():
+        fillBookDays(book,roombook.room)
+
 def fillBookDays(book, room):
-    date = book.start_date
-    delta = datetime.timedelta(days=1)
-    while date<= book.end_date:
-        orderDay = OrderDay(book = book, busydate = date, room = room)
-        orderDay.save()
-        date += delta
+    if book.status==0:
+        date = book.start_date
+        delta = datetime.timedelta(days=1)
+        while date<= book.end_date:
+            orderDay = OrderDay(book = book, busydate = date, room = room)
+            orderDay.save()
+            date += delta
 
 def initroles():
     role1 = Role(name = 'Директор')

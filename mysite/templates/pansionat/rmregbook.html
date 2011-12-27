@@ -47,7 +47,7 @@
 </head>
 <body>
 <div style="width: 100%;background-color: #eeeeee;border-bottom: 1px solid;" align="center">Рабочее место регистратора&nbsp;<a href="/rmreg/{{ pday }}">{{ pday }}</a>&nbsp;<a href="/rmreg/{{ nday }}">{{ nday }}</a>&nbsp;<form action="/rmreg/" method="post" name="date_form">{% csrf_token %}<input type="text" id="diary_date" name="diary_date"/><a href="#" onclick="document.date_form.action = '/rmreg/'+$('#diary_date').val()+'/'; document.date_form.submit(); return false;">Показать</a></form>
-    &nbsp;<a href="/reports/">Отчеты</a>&nbsp;<a href="/patients/new">Добавить пациента</a>&nbsp;<a href="/net/">Сетка</a>&nbsp;<a href="/netp/">Сетка с пациентами</a>&nbsp;<a href="#" onclick="$('#dl').dialog('open'); return false;">Поиск</a></div>
+    &nbsp;<a href="/reports/">Отчеты</a>&nbsp;<a href="/rmregbook/">Бронь</a>&nbsp;<a href="/rmregbook/old">Отмененная бронь</a>&nbsp;<a href="/patients/new">Добавить пациента</a>&nbsp;<a href="/net/">Сетка</a>&nbsp;<a href="/netp/">Сетка с пациентами</a>&nbsp;<a href="#" onclick="$('#dl').dialog('open'); return false;">Поиск</a></div>
 <a href="#" onclick="$('.addr').hide(); return false;">скрыть</a>/<a href="#" onclick="$('.addr').show();return false;">показать</a>
 
 <table class="tch"><tr>
@@ -61,7 +61,13 @@
     </tr>
     {% for rows in T %}
         <tr>
-        <td><a href="/books/{{ rows.ID }}">{{  rows.NUMBER }}</a></td>
+        <td><a href="/books/{{ rows.ID }}">{{  rows.NUMBER }}</a><br/>
+            {% if rows.STATUS == 0 %}
+            <a href="/books/{{ rows.ID }}/disable" title="В архив">x</a>
+            {% else %}
+            <a href="/books/{{ rows.ID }}/enable" title="Из архива">Активировать</a>
+            {% endif %}
+        </td>
         <td>{{  rows.DATEIN }}</td>
         <td>{{  rows.DATEOUT }}</td>
         <td>{{  rows.NAME }}</td>

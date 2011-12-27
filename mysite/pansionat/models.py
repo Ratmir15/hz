@@ -391,6 +391,7 @@ class Book(models.Model):
     name = models.CharField(max_length = 10000, blank=True, verbose_name='Имя')
     phone = models.CharField(max_length = 100, blank=True, verbose_name='Телефон')
     description = models.CharField(max_length = 10000, blank=True,verbose_name='Описание')
+    status = models.IntegerField(verbose_name='Статус')
     def __unicode__(self):
         return self.name
     def start_date_n(self):
