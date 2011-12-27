@@ -179,11 +179,29 @@ class LivingReport():
         z = {'TITLE': title+". "+str(cleaned_report_date),'MONTH':month, 'REPORTDATE': str(cleaned_report_date)}
         return z,d
 
+class RoomsReport():
+
+    def process(self, form):
+        list = Room.objects.filter(disabled = False).order_by("room_place__id","name")
+        d = []
+        i = 0
+        for room in list:
+            i += 1
+            innermap = dict()
+            innermap['FIO'] = room.name
+            innermap['ROOM'] = room.room_type.places
+            innermap['PRICE'] = room.room_type.price
+            d.append(innermap)
+        title = "Список номеров"
+        z = {'TITLE': title, 'REPORTDATE': str(datetime.date.today())}
+        return z,d
+
 report_map = {"1":('Список заезжающих',EnteringForm,'simplereport.xls',EnteringReport(),""),
               "2":('Список съезжающих',LeavingForm,'simplereport.xls',LeavingReport(),""),
               "3":('Прайс-лист',MedicalPriceForm,'simplereport.xls',MedicalPriceReport(),""),
               "4":('Отчет по заселенным',LivingForm,'registrydiary.xls',LivingReport(),'pansionat/reports/rmreg.html'),
               "5":('Список съезжающих с учетом типа путевки)',LeavingForm2,'simplereport.xls',LeavingReport2(),'pansionat/reports/rmreg.html'),
+              "6":('Комнаты)',EnteringForm,'report2.xls',RoomsReport(),''),
 }
 
 @login_required
