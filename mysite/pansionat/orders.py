@@ -12,7 +12,7 @@ from django.template import loader
 from mysite import settings
 from mysite.pansionat.gavnetso import test_file, import_diets
 from mysite.pansionat.menu import MenuRequestContext
-from mysite.pansionat.models import OrderDay, Order, Room, Customer, Patient
+from mysite.pansionat.models import OrderDay, Order, Room, Customer, Patient, PutevkaD
 
 __author__ = 'rpanov'
 
@@ -180,6 +180,55 @@ def importdiet(request):
     res = import_diets('dietitems.xls')
     values = {"res":res}
     return render_to_response('pansionat/importorder.html', MenuRequestContext(request, values))
+
+@login_required
+def putevkas(request):
+    l = PutevkaD.objects.all()
+    t = loader.get_template('pansionat/putevkas.html')
+    c = MenuRequestContext(request, {
+        'l': l,
+    })
+    resp = HttpResponse(t.render(c))
+    return resp
+
+class PutevkaForm(ModelForm):
+    class Meta:
+        model = PutevkaD
+
+@login_required
+def putevka_edit(request, instance_id):
+    instance = PutevkaD.objects.get(id = instance_id)
+    form = PutevkaForm(instance=instance)
+    values = {'form' : form,\
+                'instance_id' : instance_id}
+    return render_to_response('pansionat/putevka_edit.html', MenuRequestContext(request, values))
+
+@login_required
+def putevka_new(request):
+    instance = PutevkaD()
+    form = PutevkaForm(instance=instance)
+    values = {'form' : form,\
+                'instance_id' : ""}
+    return render_to_response('pansionat/putevka_edit.html', MenuRequestContext(request, values))
+
+@login_required
+def putevkas_save(request):
+    if request.method == 'POST':
+        instance_id = request.POST.get('instance_id')
+        instance = None
+        if instance_id is None:
+            form = PutevkaForm(request.POST)
+        else:
+            instance = PutevkaD.objects.get(id = instance_id)
+            form = PutevkaForm(request.POST, instance = instance)
+
+        if form.is_valid():
+            instance = form.save()
+            return  redirect('/putevkas/')
+        else:
+            values = {'form' : form, 'instance_id' : instance_id}
+            return render_to_response('pansionat/putevka_edit.html', MenuRequestContext(request, values))
+    return putevka_new(request) #if method is't post then show empty form
 
 @login_required
 def net(request):

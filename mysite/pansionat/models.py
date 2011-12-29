@@ -420,3 +420,10 @@ class TypeBook(models.Model):
     room_type = models.ForeignKey(RoomType)
     amount = models.IntegerField()
     book = models.ForeignKey(Book)
+
+class PutevkaD(models.Model):
+    givedate = models.DateField(verbose_name='Дата выдачи')
+    firstnumber = models.CharField(verbose_name='Первый номер диапазона', max_length=6)
+    lastnumber = models.CharField(verbose_name='Последний номер диапазона', max_length=6)
+    def givedate_n(self):
+        return self.givedate.strftime('%d.%m.%y')

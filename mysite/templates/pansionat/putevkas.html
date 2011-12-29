@@ -1,0 +1,31 @@
+{% extends "pansionat/orders.html" %}
+
+{% block title %} Диапазоны путевок {%  endblock  %}
+
+{% block allcontent %}
+    <div><a href="/putevkas/new/">Новый диапазон путевок</a></div>
+    <table border="0" id = "occupied" class = "display">
+    <thead>
+    <th>Дата получения</th>
+    <th>Первый номер</th>
+    <th>Последний номер</th>
+    <th></th>
+    </thead>
+            {% for item in l %}
+                <tr>
+                <td>
+                    {{ item.givedate_n }}
+                </td>
+                <td>
+                    {{ item.firstnumber }}
+                </td>
+                    <td>
+                        {{ item.lastnumber }}
+                    </td>
+                    <td>
+                        <a href="/putevkas/{{ item.id }}">ред</a>
+                    </td>
+                </tr>
+            {% endfor %}
+    </table>
+{%  endblock  %}

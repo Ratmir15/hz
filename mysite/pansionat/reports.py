@@ -6,8 +6,9 @@ from django.http import HttpResponse
 from django.shortcuts import render_to_response
 from django import forms
 from django.template import loader
+from mysite.pansionat.gavnetso import add_lead_zeros
 from mysite.pansionat.menu import MenuRequestContext
-from mysite.pansionat.models import Order, OrderType, OrderDay, OrderMedicalProcedure, Room
+from mysite.pansionat.models import Order, OrderType, OrderDay, OrderMedicalProcedure, Room, PutevkaD
 from mysite.pansionat.orders import room_availability
 from mysite.pansionat.proc import MedicalPriceReport
 from mysite.pansionat.xltemplates import fill_excel_template, fill_excel_template_net
@@ -196,12 +197,79 @@ class RoomsReport():
         z = {'TITLE': title, 'REPORTDATE': str(datetime.date.today())}
         return z,d
 
+class PutevkaReport():
+
+    def process(self, form):
+        list = PutevkaD.objects.all().order_by("givedate")
+        d = []
+        i = 0
+        for putevkad in list:
+            i += 1
+            innermap = dict()
+            innermap['FIO'] = putevkad.firstnumber+"-"+putevkad.lastnumber
+            cur = putevkad.firstnumber
+            flag = True
+            sm1 = 0
+            sm2 = 0
+            while flag:
+                ors = Order.objects.filter(putevka = cur)
+                sm1 += 1
+                if len(ors)>0:
+                    sm2 += 1
+                cur = add_lead_zeros(str(int(cur)+1),6)
+                if cur==putevkad.lastnumber:
+                    flag = False
+            innermap['ROOM'] = sm1
+            innermap['PRICE'] = sm2
+            d.append(innermap)
+        title = "Отчет по неиспользованным путевкам"
+        z = {'TITLE': title, 'REPORTDATE': str(datetime.date.today())}
+        return z,d
+
+class PutevkaDReport():
+
+    def process(self, form):
+        list = PutevkaD.objects.all().order_by("givedate")
+        d = []
+        i = 0
+        for putevkad in list:
+            i += 1
+            innermap = dict()
+            innermap['FIO'] = putevkad.firstnumber+"-"+putevkad.lastnumber
+            d.append(innermap)
+            cur = putevkad.firstnumber
+            flag = True
+            sm1 = 0
+            sm2 = 0
+            while flag:
+                ors = Order.objects.filter(putevka = cur)
+                sm1 += 1
+                innermap = dict()
+                innermap['ROOM'] = cur
+                if len(ors)>0:
+                    innermap['FIO'] = ors[0].patient.fio()
+                    sm2 += 1
+                    d.append(innermap)
+                cur = add_lead_zeros(str(int(cur)+1),6)
+                if cur==putevkad.lastnumber:
+                    flag = False
+            innermap = dict()
+            innermap['FIO'] = putevkad.firstnumber+"-"+putevkad.lastnumber
+            innermap['ROOM'] = sm1
+            innermap['PRICE'] = sm2
+            d.append(innermap)
+        title = "Отчет по неиспользованным путевкам"
+        z = {'TITLE': title, 'REPORTDATE': str(datetime.date.today())}
+        return z,d
+
 report_map = {"1":('Список заезжающих',EnteringForm,'simplereport.xls',EnteringReport(),""),
               "2":('Список съезжающих',LeavingForm,'simplereport.xls',LeavingReport(),""),
               "3":('Прайс-лист',MedicalPriceForm,'simplereport.xls',MedicalPriceReport(),""),
               "4":('Отчет по заселенным',LivingForm,'registrydiary.xls',LivingReport(),'pansionat/reports/rmreg.html'),
               "5":('Список съезжающих с учетом типа путевки)',LeavingForm2,'simplereport.xls',LeavingReport2(),'pansionat/reports/rmreg.html'),
-              "6":('Комнаты)',EnteringForm,'report2.xls',RoomsReport(),''),
+              "6":('Комнаты',EnteringForm,'report2.xls',RoomsReport(),''),
+              "7":('Отчет по неиспользованным путевкам',EnteringForm,'report2.xls',PutevkaReport(),''),
+              "8":('Отчет по неиспользованным путевкам с детализацией',EnteringForm,'report2.xls',PutevkaDReport(),''),
 }
 
 @login_required
