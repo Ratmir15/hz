@@ -1913,10 +1913,15 @@ def order(request):
 
     code = Order.objects.filter(start_date__year = start_date.year).aggregate(Max("code"))
 
+    mcode = code['code__max']
+
+    if mcode is None:
+        mcode = 0
+
     order_form = OrderForm(initial={'start_date' : request.session['start_date'],\
                                     'end_date' : request.session['end_date'],\
                                     'price_p': price,
-                                    'code': code['code__max']+1})
+                                    'code': mcode+1})
     cus_error = None
     dir_error = None
     cus = ''
