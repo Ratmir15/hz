@@ -875,7 +875,7 @@ def prepare_rmreg_data(orders):
         innermap['DATEIN'] = order.start_date.strftime('%d.%m.%Y')
         innermap['DATEOUT'] = order.end_date.strftime('%d.%m.%Y')
         innermap['SROK'] = order.start_date.strftime('%d.%m.%Y') + ' - ' + order.end_date.strftime('%d.%m.%Y')
-        innermap['ORDERNUMBER'] = order.code
+        innermap['ORDERNUMBER'] = order.putevka
         innermap['PUTEVKA'] = order.putevka
         if not order.directive is None:
             innermap['WHOM'] = order.directive.shortname
