@@ -1400,7 +1400,7 @@ def nakl(request, occupied_id):
            'GBUH': gb,
            'KASSIR': kassir,
            'SP': rub,
-           'DATE':order.start_date, 'QTYSUM':1, 'AMOUNTSUM':order.price, 'AMOUNTNDSSUM':order.price, 'ALLAMOUNTSUM':order.price,
+           'DATE':order.start_date.strftime('%d.%m.%Y'), 'QTYSUM':1, 'AMOUNTSUM':order.price, 'AMOUNTNDSSUM':order.price, 'ALLAMOUNTSUM':order.price,
            'TOVAR': [{'ROWINDEX':1,'NAME':tovar,'QTY':1,'PRICE':order.price,'AMOUNT':order.price,
                       'PNDS':0,'AMOUNTNDS':'-','ALLAMOUNT':order.price}]}
     return fill_excel_template(template_filename, tel)
@@ -1552,7 +1552,7 @@ def schetfactura(request, occupied_id):
            'DIRECTOR': dir,
            'GBUH': gb,
            'KASSIR': kassir,
-           'INN': '5817000430',
+           'INN': '5817000430 / 581701001',
            'SALEADDRESS': saleaddress,
            'DATE':order.start_date, 'QTYSUM':1, 'AMOUNTSUM':order.price, 'AMOUNTNDSSUM':order.price, 'ALLAMOUNTSUM':order.price,
            'TOVAR': [{'ROWINDEX':1,'NAME':tovar,'QTY':1,'PRICE':order.price,'AMOUNT':order.price,
