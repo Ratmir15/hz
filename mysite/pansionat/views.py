@@ -1078,7 +1078,7 @@ def mov(request, year, month):
     intyear = int(year)
     intmonth = int(month)
     fd = nextmonthfirstday(intyear, intmonth)
-    orders = Order.objects.filter(start_date__year=intyear, start_date__month=intmonth).order_by("code")
+    orders = Order.objects.filter(start_date__year=intyear, start_date__month=intmonth).order_by("start_date","code")
     template_filename = 'reestrz.xls'
     map = {'MONTH': monthlabel(intmonth)+' '+str(intyear),
            'MONTHC':monthlabel(intmonth),
@@ -1277,7 +1277,7 @@ def movtp(request, year, month,tp):
     intyear = int(year)
     intmonth = int(month)
     fd = nextmonthfirstday(intyear, intmonth)
-    orders = Order.objects.filter(start_date__year=intyear, start_date__month=intmonth).order_by("code")
+    orders = Order.objects.filter(start_date__year=intyear, start_date__month=intmonth).order_by("start_date","code")
     template_filename = 'reestrzd.xls'
     map = {'MONTH': monthlabel(intmonth)+' '+str(intyear),
            'MONTHC':monthlabel(intmonth),
