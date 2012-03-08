@@ -124,7 +124,7 @@
     </script>
 <link rel="stylesheet" href="/static/Refresh.css" type="text/css" />
     <style type="text/css">
-    table.display td.slot {
+    table.display td.slot, table.display th {
         width: 40px;
         text-align: center;
         font-size: 9px;
@@ -154,6 +154,9 @@
     td.blocked{
       background-color: red;
     }
+    th.available{
+        background-color: #90ee90;
+    }
     td.another{
       background-color: #f08080;
     }
@@ -182,7 +185,7 @@
                 {% for times in blockdates %}
                     <tr><th></th>
                     {% for field in times.1 %}
-                        <th>{{ field }}</th>
+                        <th {% if field.1 %} class="available" {% endif %}>{{ field.0 }}</th>
                     {% endfor %}
                     </tr>
                     {% for field in times.2 %}

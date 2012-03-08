@@ -407,7 +407,7 @@ def medical_procedures_schedule(request, order_id, mp_type_order):
             if len(month)==1:
                 month = "0"+month
             strd = day+"."+month
-            dates.append(strd)
+            dates.append((strd,cdate>=ord.start_date and cdate<=ord.end_date))
 
         while t<= finish_datetime:
             hour = str(t.hour)
