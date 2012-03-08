@@ -371,6 +371,8 @@ def medical_procedures_schedule(request, order_id, mp_type_order):
             curcnt +=1
             set_checked.add(key)
 
+    days_per_row = 14
+
     set_another = set()
     order_scheduled = OrderMedicalProcedureSchedule.objects.filter(order = ord, p_date__gte = ord.start_date, p_date__lte = ord.end_date)
     another_sched = dict()
@@ -398,7 +400,7 @@ def medical_procedures_schedule(request, order_id, mp_type_order):
         slot = 1
         dates = []
         times = []
-        for i in xrange(0,7):
+        for i in xrange(0,days_per_row):
             cdate = d + datetime.timedelta(days=i)
             day = str(cdate.day)
             if len(day)==1:
@@ -417,7 +419,7 @@ def medical_procedures_schedule(request, order_id, mp_type_order):
             if len(minute)==1:
                 minute = "0"+minute
             slots = []
-            for i in xrange(0,7):
+            for i in xrange(0,days_per_row):
 
                 cdate = d + datetime.timedelta(days=i)
 
@@ -450,8 +452,8 @@ def medical_procedures_schedule(request, order_id, mp_type_order):
 
         strd = str(d.year)+"."+str(d.month)+str(d.day)
         blockdates.append((strd,dates,times))
-        d+=7*delta
-        c_day += 7
+        d+=days_per_row*delta
+        c_day += days_per_row
         if d>ord.end_date:
             hasMoreDays = False
 
