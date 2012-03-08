@@ -10,6 +10,7 @@ from django.forms.fields import CharField
 from django.forms.widgets import Textarea
 
 from django.template import loader
+from pansionat.gavnetso import initfuckinghistory
 from pansionat.models import Patient
 from pansionat.models import RoomType
 from pansionat.models import Room
@@ -843,6 +844,9 @@ def init(request):
     #inithistory("201105.xls",columns, row_set)
     columns = [{"n1":0,"n2":1,"d1":2,"put":5,"fio":6,"d":7,"cv":8,"price":9,"c":11,"dr":12,"pd":13,"address":14,"room":15}]
     inithistory("201110.xls",columns,set())
+    columns = [{"n1":0,"put":1,"fio":2,"d":3,"cv":4,"price":5,"days":6,"days2":8}]
+    initfuckinghistory("201201.xls",columns,set(),datetime.date(2012,1,1),datetime.date(2012,1,31))
+    initfuckinghistory("201202.xls",columns,set(),datetime.date(2012,2,1),datetime.date(2012,2,29))
     list = RoomType.objects.all()
     if not len(list):
         initroomtypes()

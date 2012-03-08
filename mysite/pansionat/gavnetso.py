@@ -4,6 +4,7 @@ import decimal
 import re
 from string import lower, upper, strip
 from django.db import connection
+from django.db.models.aggregates import Max
 from django.db.models.query_utils import Q
 from xlrd import open_workbook
 from mysite import settings
@@ -658,6 +659,116 @@ def inithistory(filename, input_columns, row_set):
                 # TODO WTF is_with_child = models.BooleanField(verbose_name = 'Мать и дитя')
                 # TODO WTF payd_by_patient = models.BooleanField(verbose_name = 'Оплачивается пациентом')
 
+
+def initfuckinghistory(filename, input_columns, row_set, start_date, last_date):
+    rt1 = RoomType(name = 'Двухместный номер блочный повышенной комфортности',
+        description = 'телевизор, холодильник, душевая кабина, кондиционер',
+        places = 2, price = 1310, price_alone = 2120)
+    rt1.save()
+    rb = open_workbook(settings.STATIC_ROOT + '/xls/' + filename,formatting_info=True)
+    rsh = rb.sheet_by_index(0)
+
+    mc_map = {}
+    for crange in rsh.merged_cells:
+        rlo, rhi, clo, chi = crange
+        if not clo:
+            mc_map[rlo] = rhi
+
+    #start_date = last_date - datetime.timedelta(month=1) + datetime.timedelta(days=1)
+
+    columns = input_columns[0]
+
+    for rrowx in xrange(rsh.nrows):
+        if rrowx in row_set:
+            columns = input_columns[1]
+        v = rsh.cell_value(rrowx,columns["n1"])
+        if v != "":
+            code_r = Order.objects.filter(start_date__year = last_date.year).aggregate(Max("code"))
+
+            code = code_r['code__max']
+
+            if code is None:
+                code = 1
+            else:
+                code += 1
+            putevka = str(rsh.cell_value(rrowx,columns["put"]))
+            putevkas = putevka.split('.')
+            if len(putevkas)>1:
+                putevka = putevkas[0]
+            putevka = add_lead_zeros(putevka, 6)
+            rhi = mc_map.get(rrowx,rrowx)
+            pn = code
+#                cnt = 3
+#                pv = pdd[cnt]
+#                while cnt<len(pdd)-1:
+#                    cnt += 1
+#                    pv = pv + " "+ pdd[cnt]
+            fio = rsh.cell_value(rrowx,columns["fio"])
+            cr = rrowx
+            while cr<rhi-1:
+                cr +=1
+                fio = fio + " "+unicode(rsh.cell_value(cr,columns["fio"]))
+            fios = fio.split(" ")
+#            if len(fios)==3:
+#                family,name, sname = fio.split(" ")
+#            else:
+            family = up_low_case(fios[0])
+            name = up_low_case(fios[1])
+            sname = up_low_case(fios[2])
+            p = Patient(family = family,name = name, sname = sname, passport_number = pn, passport_whom = "")
+            p.save()
+            objs = Room.objects.all()
+            if len(objs)>0:
+                room = objs[0]
+            else:
+                #print unicode(rrowx)+":"+unicode(roomname)
+                room = Room(name=roomname, room_type = rt1, room_place = RoomPlace.objects.all()[0])
+                room.save()
+            dirname = rsh.cell_value(rrowx,columns["cv"])
+            objs = Customer.objects.filter(shortname = dirname)
+            if len(objs)>0:
+                dir = objs[0]
+            else:
+                dir = Customer(name=dirname, shortname = dirname)
+                dir.save()
+            cust = dir
+
+#                dts = unicode(rsh.cell_value(rrowx,columns["d1"]))
+#                cr = rrowx
+#                while cr<rhi-1:
+#                    cr +=1
+#                    dts = dts + " "+unicode(rsh.cell_value(cr,columns["d1"]))
+#                dtss = dts.split(" ")
+#
+#                dts = dtss[0].split(".")
+#                dtf = dtss[2].split(".")
+            dts = unicode(rsh.cell_value(rrowx,columns["days"]))
+            dtss = dts.split('.')
+            if len(dtss)>1:
+                dts = dtss[0]
+            edts = unicode(rsh.cell_value(rrowx,columns["days2"]))
+            edtss = edts.split('.')
+            if len(edtss)>1:
+                edts = edtss[0]
+            if int(edts)>0:
+                start_date = last_date - datetime.timedelta(days=(int(dts)-1))
+                end_date = last_date + datetime.timedelta(days=int(edts))
+            else:
+                end_date = start_date + datetime.timedelta(days=int(dts))
+            pr = str(rsh.cell_value(rrowx,columns["price"]))
+            prs = pr.split(',')
+            if len(prs)>1:
+                pr = prs[0]+'.'+prs[1]
+            if not len(str(pr)):
+                pr = 0
+            price = decimal.Decimal(pr)
+            order = Order(code = code, putevka = putevka, patient = p, customer = cust,
+                room = room, directive = dir, start_date = start_date, end_date = end_date,
+                price = price, price_p=price, reab = False)
+            order.save()
+            fillOrderDays(order)
+            # TODO WTF is_with_child = models.BooleanField(verbose_name = 'Мать и дитя')
+            # TODO WTF payd_by_patient = models.BooleanField(verbose_name = 'Оплачивается пациентом')
 
 def initbase(doit):
     if not doit:
