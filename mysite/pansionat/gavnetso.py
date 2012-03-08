@@ -126,6 +126,7 @@ def import_diets(filename):
 def import_proc():
     rb = open_workbook(settings.STATIC_ROOT + '/xls/mproc.xls',formatting_info=True)
     rsh = rb.sheet_by_index(0)
+    new_world_order = 0
 
     for rrowx in xrange(rsh.nrows):
         v = rsh.cell_value(rrowx, 0)
@@ -139,7 +140,8 @@ def import_proc():
         add_info = rsh.cell_value(rrowx,2)
         mpts = MedicalProcedureType.objects.filter(name = name)
         if not len(mpts):
-            mpt = MedicalProcedureType(name = name, order = 0, capacity = 1, duration =30,
+            new_world_order +=1
+            mpt = MedicalProcedureType(name = name, order = new_world_order, capacity = 1, duration =30,
                                    start_time = datetime.time(hour = 8, minute = 30),
                                    finish_time = datetime.time(hour = 17, minute = 30),
                                    optional = add_info)
