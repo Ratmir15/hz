@@ -1,5 +1,6 @@
 # coding: utf-8
 from datetime import timedelta
+from itertools import count
 
 from django.http import HttpResponse
 from xlrd import open_workbook
@@ -329,6 +330,7 @@ def fill_excel_template_net(template_filename, sd,ed, res, tel):
 def prepare_excel_template(template_filename, tel):
     rb = open_workbook(settings.STATIC_ROOT + '/xls/' + template_filename,formatting_info=True)
     rsh = rb.sheet_by_index(0)
+    sheets = rb.sheets()
     w = xlwt.Workbook(encoding="utf-8", style_compression=2)
     wtsheet = w.add_sheet('Shit', cell_overwrite_ok=True)
     rdsheet = rsh
@@ -344,10 +346,17 @@ def prepare_excel_template(template_filename, tel):
             for colx in xrange(clo, chi):
                 mc_nfa.add((rowx, colx))
 
+    #if count(sheets)>1:
+    #    prop_sh = sheets[1]
+
     #self.merged_cell_top_left_map = mc_map
     #self.merged_cell_already_set = mc_nfa
     if not rdsheet.formatting_info:
         return
+
+    for p_b in rdsheet.horizontal_page_breaks:
+        wtsheet.horz_page_breaks.append(p_b)
+
     #
     # default column width: STANDARDWIDTH, DEFCOLWIDTH
     #
