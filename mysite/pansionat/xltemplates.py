@@ -472,8 +472,25 @@ def prepare_excel_template(template_filename, tel):
                 write_and_clone_cell(wtsheet, mc_map, v, style, rrowx, col, rrowx + ymargin, col, i)
         if rsh.rowinfo_map.has_key(rrowx):
             #print str(rrowx)+":"+str(rsh.rowinfo_map[rrowx].height)
-            wtsheet.row(rrowx + ymargin).height = rsh.rowinfo_map[rrowx].height
+            value = rsh.rowinfo_map[rrowx]
+            wtsheet.row(rrowx + ymargin).height = value.height
             wtsheet.row(rrowx + ymargin).height_mismatch = True
+            wtsheet.row(rrowx + ymargin).hidden = value.hidden
+
+    portrait = tel.get('PORTRAIT', None)
+    if not portrait is None:
+        wtsheet.portrait = portrait
+    num_pages = tel.get('NUMPAGES', None)
+    if not num_pages is None:
+        wtsheet.fit_num_pages = num_pages
+
+    wtsheet.paper_size_code = 9      # A3: 8, A4: 9 (see BIFFRecords.py)
+    wtsheet.left_margin = 0.1         # 1.2cm (in inch)
+    wtsheet.right_margin = 0.1
+    wtsheet.top_margin = 0.1
+    wtsheet.bottom_margin = 0.1
+    wtsheet.header_str = u""
+    wtsheet.footer_str = u""
 
     tel['max_row'] = rsh.nrows + ymargin
 

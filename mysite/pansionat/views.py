@@ -1384,7 +1384,7 @@ def movtp(request, year, month,tp):
 @login_required
 def nakl(request, occupied_id):
     order = Order.objects.get(id=occupied_id)
-    template_filename = 'tov_nakl1.xls'
+    template_filename = 'torg12_0.xls'
     fullname = str('ООО санаторий "Хопровские зори"')
     vendor = str('КПП 581701001 ')+ fullname + str(' Пензенская обл., п.Колышлей, ул.Лесная 1а')
     if order.patient.address is None:
@@ -1399,7 +1399,7 @@ def nakl(request, occupied_id):
     tovar = str('Пут. сан.-кур. на ')+str(days)+str(' дней c ')+str(order.start_date)+str(' по ')+str(order.end_date) + str('№ ')+ str(order.code)
     price = order.price
     rub = numeral.rubles(float(price), True)
-    tel = {'PIZDEZ': fullname, 'NUMBER': order.code,
+    tel = {'PORTRAIT':False, 'NUMPAGES':1, 'PIZDEZ': fullname, 'NUMBER': order.code,
            'FILENAME': 'nakladnaya-'+str(order.code),
            'CLIENT': client, 'VENDOR': vendor,
            'DIRECTOR': dir,
