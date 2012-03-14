@@ -956,6 +956,36 @@ def prepare_rmreg_data(orders):
         l.append(innermap)
     return l
 
+def prepare_rmdoc_data(ihs):
+    m = dict()
+    mx = 0
+    for ih in ihs:
+        if m.has_key(ih.doctor):
+            ih_l = m.get(ih.doctor)
+        else:
+            ih_l = []
+            m[ih.doctor] = ih_l
+
+        ih_l.append(ih.order)
+        cur = len(ih_l)
+        if cur>mx:
+            mx = cur
+
+    l_k = []
+    l_v = []
+    for k in m.iterkeys():
+        l_k.append(k)
+
+    for i in xrange(0,mx):
+        l2= []
+        for j in xrange(0,len(l_k)):
+            l3 = m.get(l_k[j])
+            if len(l3)>i:
+                l2.append(m.get(l_k[j])[i])
+            else:
+                l2.append(None)
+        l_v.append(l2)
+    return l_k,l_v
 
 def prepare_reestr_data(month, year):
     intyear = int(year)
@@ -1074,9 +1104,26 @@ def rmreg(request, year, month, day):
 def rmregtoday(request):
     td = datetime.date.today()
     return rmreg(request, td.year, td.month, td.day )
-#    orders = Order.objects.filter(start_date__year=intyear, start_date__month=intmonth)
-#    map, template_filename = prepare_rmreg_data(td.day, td.month, td.year)
-#    return render_to_response('pansionat/rmreg.html', MenuRequestContext(request, map))
+
+@login_required
+def rmdoc(request, year, month, day):
+    dt = datetime.date(int(year),int(month),int(day))
+    ihs = IllHistory.objects.filter(order__start_date=dt)
+    l_k,l_v = prepare_rmdoc_data(ihs)
+    map = dict()
+    map['doctors'] = l_k
+    map['patients'] = l_v
+    td = datetime.timedelta(days=1)
+    pday = dt - td
+    nday = dt + td
+    map["pday"] = str(pday)
+    map["nday"] = str(nday)
+    return render_to_response('pansionat/rmdoc.html', MenuRequestContext(request, map))
+
+@login_required
+def rmdoctoday(request):
+    td = datetime.date.today()
+    return rmdoc(request, td.year, td.month, td.day )
 
 @login_required
 def moves(request, year, month):

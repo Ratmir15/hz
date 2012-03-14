@@ -1,0 +1,68 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+        "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+    <title>Рабочее место врача</title>
+    <style type="text/css">
+        table.tch td {
+            border: 1px solid;
+        }
+        table.tch th {
+            border: 1px solid;
+            text-align: center;
+        }
+        table.tch {
+            border:0;
+            padding: 0;
+            border-spacing: 0;
+        }
+        a:visited {
+            color:blue;
+        }
+    </style>
+    <style type="text/css">
+        @import "/static/jquery-ui/themes/base/jquery.ui.all.css";
+    </style>
+    <script src="/static/dataTables/media/js/jquery.js"></script>
+    <script src="/static/dataTables/media/js/jquery.dataTables.js"></script>
+    <script src="/static/jquery-ui/ui/jquery.ui.core.js"></script>
+    <script src="/static/jquery-ui/ui/jquery.ui.widget.js"></script>
+    <script src="/static/jquery-ui/ui/jquery.ui.mouse.js"></script>
+    <script src="/static/jquery-ui/ui/jquery.ui.draggable.js"></script>
+    <script src="/static/jquery-ui/ui/jquery.ui.position.js"></script>
+    <script src="/static/jquery-ui/ui/jquery.ui.resizable.js"></script>
+    <script src="/static/jquery-ui/ui/jquery.ui.dialog.js"></script>
+    <script src="/static/jquery-ui/ui/jquery.ui.datepicker.js"></script>
+    <script src="/static/jquery-ui/ui/i18n/jquery.ui.datepicker-ru.js"></script>
+    <script src="/static/jquery-ui/ui/jquery.ui.button.js"></script>
+    <script type="text/javascript">
+        $(document).ready(function() {
+            $.datepicker.setDefaults($.datepicker.regional['ru']);
+            $('#diary_date').datepicker({dateFormat: 'yy-mm-dd'});
+            $('#dl').dialog({ autoOpen: false });
+            $('input:submit').button()
+            $(':button').button()
+        } );
+    </script>
+</head>
+<body>
+<div style="width: 100%;background-color: #eeeeee;border-bottom: 1px solid;" align="center">Рабочее место доктора&nbsp;<a href="/rmdoc/{{ pday }}">{{ pday }}</a>&nbsp;<a href="/rmdoc/{{ nday }}">{{ nday }}</a>&nbsp;<form action="/rmreg/" method="post" name="date_form">{% csrf_token %}<input type="text" id="diary_date" name="diary_date"/><a href="#" onclick="document.date_form.action = '/rmdoc/'+$('#diary_date').val()+'/'; document.date_form.submit(); return false;">Показать</a></form>
+    &nbsp;<a href="/reports/">Отчеты</a>&nbsp;</div>
+
+<table class="tch" width="100%"><tr>
+    {% for doc in doctors %}
+    <th rowspan="1"> {{ doc.fio }}</th>
+    {% endfor %}
+</tr>
+    {% for l in patients %}
+        <tr>
+        {% for o in l %}
+            <td><a href="/order/{{ o.id }}">{{ o.patient.fio }}</a></td>
+        {% endfor %}
+        </tr>
+    {% endfor %}
+
+</table>
+
+</body>
+</html>
