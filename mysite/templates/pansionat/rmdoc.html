@@ -29,12 +29,17 @@
     <script src="/static/jquery-ui/ui/jquery.ui.widget.js"></script>
     <script src="/static/jquery-ui/ui/jquery.ui.mouse.js"></script>
     <script src="/static/jquery-ui/ui/jquery.ui.draggable.js"></script>
+    <script src="/static/jquery-ui/ui/jquery.ui.droppable.js"></script>
     <script src="/static/jquery-ui/ui/jquery.ui.position.js"></script>
     <script src="/static/jquery-ui/ui/jquery.ui.resizable.js"></script>
     <script src="/static/jquery-ui/ui/jquery.ui.dialog.js"></script>
     <script src="/static/jquery-ui/ui/jquery.ui.datepicker.js"></script>
     <script src="/static/jquery-ui/ui/i18n/jquery.ui.datepicker-ru.js"></script>
     <script src="/static/jquery-ui/ui/jquery.ui.button.js"></script>
+    <style>
+        #draggable { width: 100px; height: 100px; padding: 0.5em; float: left; margin: 10px 10px 10px 0; }
+        #droppable { width: 150px; height: 150px; padding: 0.5em; float: left; margin: 10px; }
+    </style>
     <script type="text/javascript">
         $(document).ready(function() {
             $.datepicker.setDefaults($.datepicker.regional['ru']);
@@ -42,6 +47,18 @@
             $('#dl').dialog({ autoOpen: false });
             $('input:submit').button()
             $(':button').button()
+            $( ".draggable" ).draggable(({ revert: "invalid" }));
+            $( ".droppable" ).droppable({
+                drop: function( event, ui ) {
+                    d_id_array = this.id.split('_');
+                    q_id_array = ui.draggable[0].id.split('_');
+                    document.location = "/illhistory/doctor2/"+q_id_array[1]+"/"+d_id_array[1];
+                    $( this )
+                            .addClass( "ui-state-highlight" )
+                            .find( "p" )
+                            .html( "Dropped!" );
+                }
+            });
         } );
     </script>
 </head>
@@ -51,13 +68,13 @@
 
 <table class="tch" width="100%"><tr>
     {% for doc in doctors %}
-    <th rowspan="1"> {{ doc.fio }}</th>
+    <th rowspan="1" class="droppable" id="d_{{ doc.id }}"> {{ doc.fio }}</th>
     {% endfor %}
 </tr>
     {% for l in patients %}
         <tr>
         {% for o in l %}
-            <td><a href="/order/{{ o.id }}">{{ o.patient.fio }}</a></td>
+            <td><div class="draggable" id="q_{{ o.id }}"><a href="/order/{{ o.id }}">{{ o.patient.fio }}</a></div></td>
         {% endfor %}
         </tr>
     {% endfor %}

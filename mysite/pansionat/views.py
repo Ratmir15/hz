@@ -730,7 +730,15 @@ def ill_history_doctor(request, order_id):
     return render_to_response('pansionat/doctor.html', MenuRequestContext(request, values))
 
 @login_required
-def ill_history_doctor_save(request, order_id, doctor_id):
+def ill_history_doctor_save1(request, order_id, doctor_id):
+    return ill_history_doctor_save(request, order_id, doctor_id, False)
+
+@login_required
+def ill_history_doctor_save2(request, order_id, doctor_id):
+    return ill_history_doctor_save(request, order_id, doctor_id, True)
+
+@login_required
+def ill_history_doctor_save(request, order_id, doctor_id, doc):
     ord = Order.objects.get(id = order_id)
     ill_historys = IllHistory.objects.filter(order = ord)
     doctor = Employer.objects.get(id = doctor_id)
@@ -742,7 +750,11 @@ def ill_history_doctor_save(request, order_id, doctor_id):
 
     ill_history.save()
 
-    return rmregtoday(request)
+    if doc:
+        return rmdoc(request, ord.start_date.year, ord.start_date.month, ord.start_date.day)
+    else:
+        return rmregtoday(request)
+
 
 @login_required
 @permission_required('pansionat.add_orderdiet', login_url='/forbidden/')
