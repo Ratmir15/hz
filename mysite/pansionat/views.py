@@ -968,17 +968,26 @@ def prepare_rmreg_data(orders):
         l.append(innermap)
     return l
 
-def prepare_rmdoc_data(ihs):
+def prepare_rmdoc_data(orders):
     m = dict()
     mx = 0
-    for ih in ihs:
-        if m.has_key(ih.doctor):
-            ih_l = m.get(ih.doctor)
+    l_e = False
+    e_l = []
+    for order in orders:
+        ihs = IllHistory.objects.filter(order = order)
+        if len(ihs)>0:
+            ih = ihs[0]
+            if m.has_key(ih.doctor):
+                ih_l = m.get(ih.doctor)
+            else:
+                ih_l = []
+                m[ih.doctor] = ih_l
         else:
-            ih_l = []
-            m[ih.doctor] = ih_l
+            if not l_e:
+                m["Не указан"] = e_l
+            ih_l = e_l
 
-        ih_l.append(ih.order)
+        ih_l.append(order)
         cur = len(ih_l)
         if cur>mx:
             mx = cur
@@ -1120,8 +1129,8 @@ def rmregtoday(request):
 @login_required
 def rmdoc(request, year, month, day):
     dt = datetime.date(int(year),int(month),int(day))
-    ihs = IllHistory.objects.filter(order__start_date=dt)
-    l_k,l_v = prepare_rmdoc_data(ihs)
+    orders = Order.objects.filter(start_date=dt)
+    l_k,l_v = prepare_rmdoc_data(orders)
     map = dict()
     map['doctors'] = l_k
     map['patients'] = l_v
