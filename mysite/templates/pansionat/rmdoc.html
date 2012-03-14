@@ -40,6 +40,7 @@
         #draggable { width: 100px; height: 100px; padding: 0.5em; float: left; margin: 10px 10px 10px 0; }
         #droppable { width: 150px; height: 150px; padding: 0.5em; float: left; margin: 10px; }
         table.tch div { float: left;}
+        .ui-state-active { color: red; font: bold; }
     </style>
     <script type="text/javascript">
         $(document).ready(function() {
@@ -50,10 +51,13 @@
             $(':button').button()
             $( ".draggable" ).draggable(({ revert: "invalid" }));
             $( ".droppable" ).droppable({
+                hoverClass: "ui-state-active",
                 drop: function( event, ui ) {
                     d_id_array = this.id.split('_');
                     q_id_array = ui.draggable[0].id.split('_');
-                    document.location = "/illhistory/doctor2/"+q_id_array[1]+"/"+d_id_array[1];
+                    if (d_id_array[1]!='') {
+                        document.location = "/illhistory/doctor2/"+q_id_array[1]+"/"+d_id_array[1];
+                    }
                     $( this )
                             .addClass( "ui-state-highlight" )
                             .find( "p" )
