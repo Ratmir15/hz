@@ -1013,6 +1013,8 @@ def initroles():
     role3.save()
     role4 = Role(name = 'Маркетинг')
     role4.save()
+    role5 = Role(name = "Врач")
+    role5.save()
     e1 = Employer(family = 'Зитев',name='С.',sname='А.')
     e1.save()
     e2 = Employer(family = 'Киселев',name='В.',sname='И.')
@@ -1021,6 +1023,14 @@ def initroles():
     e3.save()
     e4 = Employer(family = 'Кузьмина',name='В.',sname='В.')
     e4.save()
+    e5_1 = Employer(family = 'Врач 1',name='В.',sname='В.')
+    e5_1.save()
+    e5_2 = Employer(family = 'Врач 2',name='В.',sname='В.')
+    e5_2.save()
+    e5_3 = Employer(family = 'Врач 3',name='В.',sname='В.')
+    e5_3.save()
+    e5_4 = Employer(family = 'Врач 4',name='В.',sname='В.')
+    e5_4.save()
     erh1 = EmployerRoleHistory(employer = e1, role = role4, start_date=datetime.date(2007,1,1),end_date=datetime.date(2015,1,1))
     erh1.save()
     erh2 = EmployerRoleHistory(employer = e2, role = role1, start_date=datetime.date(2007,1,1),end_date=datetime.date(2015,1,1))
@@ -1029,6 +1039,14 @@ def initroles():
     erh3.save()
     erh4 = EmployerRoleHistory(employer = e4, role = role3, start_date=datetime.date(2007,1,1),end_date=datetime.date(2015,1,1))
     erh4.save()
+    erh5_1 = EmployerRoleHistory(employer = e5_1, role = role5, start_date=datetime.date(2007,1,1),end_date=datetime.date(2015,1,1))
+    erh5_1.save()
+    erh5_2 = EmployerRoleHistory(employer = e5_2, role = role5, start_date=datetime.date(2007,1,1),end_date=datetime.date(2015,1,1))
+    erh5_2.save()
+    erh5_3 = EmployerRoleHistory(employer = e5_3, role = role5, start_date=datetime.date(2007,1,1),end_date=datetime.date(2015,1,1))
+    erh5_3.save()
+    erh5_4 = EmployerRoleHistory(employer = e5_4, role = role5, start_date=datetime.date(2007,1,1),end_date=datetime.date(2015,1,1))
+    erh5_4.save()
 
 def initdiet():
     d1  = Diet(name = 'Диета №1 (вегетерианская)')
@@ -1165,10 +1183,19 @@ def monthlabel(month):
 
 def getEmployerByRoleAndDate(erole, date):
     roles = EmployerRoleHistory.objects.filter(role=erole,start_date__lte=date,end_date__gte=date)
-    print len(roles)
-    print connection.queries
+   # print len(roles)
+   # print connection.queries
     for role in roles:
         return role.employer
+
+def getEmployersByRoleAndDate(erole, date):
+    roles = EmployerRoleHistory.objects.filter(role=erole,start_date__lte=date,end_date__gte=date)
+    # print len(roles)
+    # print connection.queries
+    employers = []
+    for role in roles:
+        employers.append(role.employer)
+    return employers
 
 def getEmployerByRoleNameAndDate(rolename, date):
     return getEmployerByRoleAndDate(Role.objects.get_or_create(name = rolename)[0], date)

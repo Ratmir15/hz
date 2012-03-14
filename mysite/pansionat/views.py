@@ -27,7 +27,7 @@ from mysite.pansionat.orders import room_availability, fill_cust_list, return_or
 from mysite.pansionat.proc import MenuRequestContext, MedicalPriceReport
 from mysite.pansionat.reports import DietForm, DateFilterForm, PFCondition, ElseCondition, SPCondition, PPCondition, RCondition, SzCondition, HzCondition, HzSzCondition
 from pytils import numeral
-from mysite.pansionat.gavnetso import monthlabel, nextmonthfirstday, initbase, initroles, initroomtypes, initp, initdiet, fillBookDays, fillOrderDays, inithistory, import_bron, import_proc, import_rooms, import_ordertypes, fillBookAllDays
+from mysite.pansionat.gavnetso import monthlabel, nextmonthfirstday, initbase, initroles, initroomtypes, initp, initdiet, fillBookDays, fillOrderDays, inithistory, import_bron, import_proc, import_rooms, import_ordertypes, fillBookAllDays, getEmployersByRoleAndDate
 import datetime
 import time
 from django import forms
@@ -700,6 +700,49 @@ def ill_history_edit(request, order_id):
     values['order_id'] = order_id
     values['patient_name'] = ord.patient.fio()
     return render_to_response('pansionat/illhistory.html', MenuRequestContext(request, values))
+
+@login_required
+def ill_history_doctor(request, order_id):
+    ord = Order.objects.get(id = order_id)
+    ill_historys = IllHistory.objects.filter(order = ord)
+    values = {}
+    if len(ill_historys)>0:
+        ill_history = ill_historys[0]
+        values['ill_history_id'] = ill_history.id
+        doctor_name = ill_history.doctor.__unicode__()
+    else:
+        ill_history = IllHistory(order = ord)
+        doctor_name = ""
+
+    doctor_role = Role.objects.get(name = "Врач")
+
+    employers = getEmployersByRoleAndDate(doctor_role, ord.start_date)
+
+    doctors_capacity = []
+    for emp in employers:
+        capacity = IllHistory.objects.filter(order__start_date = ord.start_date, doctor = emp).count()
+        doctors_capacity.append((emp, capacity))
+
+    values['doctors_capacity'] = doctors_capacity
+    values['doctor_name'] = doctor_name
+    values['order_id'] = order_id
+    values['patient_name'] = ord.patient.fio()
+    return render_to_response('pansionat/doctor.html', MenuRequestContext(request, values))
+
+@login_required
+def ill_history_doctor_save(request, order_id, doctor_id):
+    ord = Order.objects.get(id = order_id)
+    ill_historys = IllHistory.objects.filter(order = ord)
+    doctor = Employer.objects.get(id = doctor_id)
+    if len(ill_historys)>0:
+        ill_history = ill_historys[0]
+        ill_history.doctor = doctor
+    else:
+        ill_history = IllHistory(order = ord, doctor = doctor)
+
+    ill_history.save()
+
+    return rmregtoday(request)
 
 @login_required
 @permission_required('pansionat.add_orderdiet', login_url='/forbidden/')

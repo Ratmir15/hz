@@ -7,8 +7,10 @@ class Employer(models.Model):
     family = models.CharField(max_length=50, verbose_name = 'Фамилия')
     name = models.CharField(max_length=50, verbose_name = 'Имя')
     sname = models.CharField(max_length=50, verbose_name = 'Отчество')
-    def __unicode__(self):
+    def fio(self):
         return self.family+' '+self.name+' '+self.sname
+    def __unicode__(self):
+        return self.fio()
 
     class Meta:
         verbose_name = 'Сотрудник'
@@ -329,6 +331,7 @@ class IllHistoryFieldType(models.Model):
 
 class IllHistory(models.Model):
     order = models.OneToOneField(Order, verbose_name='Путевка')
+    doctor = models.ForeignKey(Employer, verbose_name='Врач')
 #    first_diagnose = models.CharField(max_length=255, blank=True, verbose_name='Диагноз поступления')
 #    main_diagnose = models.CharField(max_length=255, blank=True, verbose_name='Основной диагноз')
 #    secondary_diagnose = models.CharField(max_length=255, blank=True, verbose_name='Сопутствующий диагноз')

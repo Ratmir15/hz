@@ -1,0 +1,46 @@
+{% extends "pansionat/index.html" %}
+
+{% block title %} История болезни {%  endblock  %}
+
+{% block head %}
+    <style type="text/css">
+        @import "/static/dataTables/media/css/demo_page.css";
+        @import "/static/dataTables/media/css/demo_table.css";
+        @import "/static/jquery-ui/themes/base/jquery.ui.all.css";
+    </style>
+    <script src="/static/dataTables/media/js/jquery.js"></script>
+    <script src="/static/dataTables/media/js/jquery.dataTables.js"></script>
+    <script src="/static/jquery-ui/ui/jquery.ui.core.js"></script>
+    <script src="/static/jquery-ui/ui/jquery.ui.widget.js"></script>
+    <script src="/static/jquery-ui/ui/jquery.ui.datepicker.js"></script>
+    <script src="/static/jquery-ui/ui/i18n/jquery.ui.datepicker-ru.js"></script>
+    <script src="/static/jquery-ui/ui/jquery.ui.button.js"></script>
+    <script type="text/javascript">
+        $(document).ready(function() {
+            $.datepicker.setDefaults($.datepicker.regional['ru']);
+            $('input:submit').button()
+            $(':button').button()
+        } );
+    </script>
+    <link rel="stylesheet" href="/static/Refresh.css" type="text/css" />
+{%  endblock  %}
+
+{% block allcontent %}
+    <h1>Назначение врача</h1>
+        <table border="0" id = "occupied" class = "display">
+            <tr><td colspan="2">{{ patient_name }}</td></tr>
+            {% if order_id %}
+                <input type="hidden" name="order_id" value="{{ order_id }}"/>
+            {% endif %}
+            {% for doctor, capacity in doctors_capacity %}
+                <tr>
+                    <td>
+                        <a href="/illhistory/doctor/{{ order_id }}/{{ doctor.id }}">{{ doctor.fio }}</a>
+                    </td>
+                    <td>
+                        {{ capacity }}
+                    </td>
+                </tr>
+            {% endfor %}
+        </table>
+{%  endblock  %}

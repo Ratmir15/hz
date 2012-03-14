@@ -67,6 +67,7 @@
 {#                    </select>#}
                 </td>
 {#                    <tr><td colspan="2">Свободных мест: {{ pl }}</td></tr>#}
+                <tr><td><a href="/illhistory/doctor/{{ form.instance.id }}">направить ко врачу</a></td></tr>
                     <tr><th><label for="directive">Направляющая организация</label></th>
                         <td><input type="text" id="directive" name="directive" value="{{ dir }}">сельская здравница,хопровские зори,фсс,...{% if dir_error %}<ul class="errorlist"><li>{{ dir_error }}</li></ul>{% endif %}</td></tr>
                     <tr><td><input type="checkbox" name="d_add">добавить</td></tr>
