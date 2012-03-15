@@ -15,17 +15,37 @@
     <script src="/static/jquery-ui/ui/jquery.ui.datepicker.js"></script>
     <script src="/static/jquery-ui/ui/jquery.ui.mouse.js"></script>
     <script src="/static/jquery-ui/ui/jquery.ui.draggable.js"></script>
+    <script src="/static/jquery-ui/ui/jquery.ui.droppable.js"></script>
     <script src="/static/jquery-ui/ui/jquery.ui.position.js"></script>
     <script src="/static/jquery-ui/ui/jquery.ui.resizable.js"></script>
     <script src="/static/jquery-ui/ui/jquery.ui.dialog.js"></script>
     <script src="/static/jquery-ui/ui/i18n/jquery.ui.datepicker-ru.js"></script>
     <script src="/static/jquery-ui/ui/jquery.ui.button.js"></script>
-
+    <style>
+        #draggable { width: 100px; height: 100px; padding: 0.5em; float: left; margin: 10px 10px 10px 0; }
+        #droppable { width: 150px; height: 150px; padding: 0.5em; float: left; margin: 10px; }
+        .ui-state-active { color: red; font: bold; }
+    </style>
 <link rel="stylesheet" href="/static/Refresh.css" type="text/css" />
     <script type="text/javascript">
         $(document).ready(function() {
             $('#dl').dialog({ autoOpen: false });
             $('#dl_h').dialog({ autoOpen: false });
+            $( ".draggable" ).draggable(({ revert: "invalid" }));
+            $( ".droppable" ).droppable({
+                hoverClass: "ui-state-active",
+                drop: function( event, ui ) {
+                    d_id_array = this.id.split('_');
+                    q_id_array = ui.draggable[0].id.split('_');
+                    if (d_id_array[1]!='') {
+                        document.location = "/order/move/"+q_id_array[1]+"/"+d_id_array[1];
+                    }
+                    $( this )
+                            .addClass( "ui-state-highlight" )
+                            .find( "p" )
+                            .html( "Dropped!" );
+                }
+            });
             } );
         function update_links(id) {
             ids = id.split("_")
@@ -53,11 +73,11 @@
     <table border="0" id = "occupied" class = "mdisplay">
             {% for q in res %}
                 <tr>{% for r in q %}
-                <td><a href="#" onclick="update_links(this.id); return false;" id="m_{{ r.0.id }}_{{ r.0.room_type.places }}">{{ r.0.name }}</a></td>
+                <td><a href="#" onclick="update_links(this.id); return false;" id="m_{{ r.0.id }}_{{ r.0.room_type.places }}"><div class='droppable' id="hz_{{ r.0.id }}">{{ r.0.name }}</div></a></td>
                     {% if r.3 %}
                         <td><table>
                         {% for pi in r.3 %}
-                            <tr><td>{{ pi.0 }}</td><td>{{ pi.1 }}</td></tr>
+                            <tr><td><div class='draggable' id="zh_{{ pi.2 }}">{{ pi.0 }}</div></td><td>{{ pi.1 }}</td></tr>
                         {% endfor %}
                         </table></td>
                     {% else %}

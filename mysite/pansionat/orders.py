@@ -276,7 +276,7 @@ def mainnet(request, d, td, show_p, columns, tmpl):
         if show_p:
             ar = []
             for order in orders:
-                ar.append((order.family(),order.end_date_cool_and_short()))
+                ar.append((order.family(),order.end_date_cool_and_short(),order.id))
             q.append((room, "", txt, ar))
         else:
             if choosedkey is None:
@@ -300,6 +300,16 @@ def mainnet(request, d, td, show_p, columns, tmpl):
         res_t.append(q)
     values = {"res" : res_t}
     return render_to_response(tmpl, MenuRequestContext(request, values))
+
+@login_required
+@permission_required('pansionat.add_order', login_url='/forbidden/')
+def order_move(request, order_id, room_id):
+    order = Order.objects.get(id = order_id)
+    room = Room.objects.get(id = room_id)
+    order.room = room
+    order.save()
+    recalc_order_days(order)
+    return redirect('/netp/')
 
 @login_required
 @permission_required('pansionat.add_order', login_url='/forbidden/')
