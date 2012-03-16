@@ -75,7 +75,7 @@
     {% for l in patients %}
         <tr>
         {% for o in l %}
-            <td><div class="draggable" id="q_{{ o.id }}"><a href="/order/{{ o.id }}">{{ o.patient.fio }}</a></div>{% if o %}<div style="float:right;"><a href="/ih/{{ o.id }}">*</a></div>{% endif %}</td>
+            <td><div class="draggable" id="q_{{ o.id }}"><a href="/order/{{ o.id }}">{{ o.patient.fio }}</a></div>{% if o %}<div style="float:right;"><a href="/ih/{{ o.id }}">x</a>&nbsp;&nbsp;<a href="/mp/{{ o.id }}">*</a></div>{% endif %}</td>
         {% endfor %}
         </tr>
     {% endfor %}
