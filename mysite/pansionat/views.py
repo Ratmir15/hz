@@ -561,7 +561,7 @@ def medical_procedures_print(request, order_id):
         p.append(entry)
 
     tel = { 'P': p,
-           'FILENAME': 'procedures-'+ord.code,
+           'FILENAME': 'procedures-'+str(ord.code),
            'PATIENT': ord.patient.fio(),
     }
     template_filename = 'mp.xls'
