@@ -1008,7 +1008,7 @@ def prepare_rmdoc_data(dt):
     for i in xrange(0,mx):
         l2= []
         for j in xrange(0,len(l_k)):
-            l3 = m.get(l_k[j])
+            l3 = m.get(l_k[j],[])
             if len(l3)>i:
                 l2.append(m.get(l_k[j])[i])
             else:
