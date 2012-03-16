@@ -985,12 +985,13 @@ def prepare_rmdoc_data(dt):
         ihs = IllHistory.objects.filter(order = order)
         if len(ihs)>0:
             ih = ihs[0]
-            if m.has_key(ih.doctor):
-                ih_l = m.get(ih.doctor)
+            d = ih.doctor
+            if m.has_key(d):
+                ih_l = m.get(d)
             else:
                 ih_l = []
-                m[ih.doctor] = ih_l
-                l_k.append(ih.doctor)
+                m[d] = ih_l
+                l_k.append(d)
         else:
             if not l_e:
                 m["Не указан"] = e_l
