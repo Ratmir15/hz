@@ -39,6 +39,7 @@
     <style>
         #draggable { width: 100px; height: 100px; padding: 0.5em; float: left; margin: 10px 10px 10px 0; }
         #droppable { width: 150px; height: 150px; padding: 0.5em; float: left; margin: 10px; }
+        table.tch div { float: left;}
     </style>
     <script type="text/javascript">
         $(document).ready(function() {
@@ -74,7 +75,7 @@
     {% for l in patients %}
         <tr>
         {% for o in l %}
-            <td><div class="draggable" id="q_{{ o.id }}"><a href="/order/{{ o.id }}">{{ o.patient.fio }}</a></div></td>
+            <td><div class="draggable" id="q_{{ o.id }}"><a href="/order/{{ o.id }}">{{ o.patient.fio }}</a></div>{% if o %}<div style="float:right;"><a href="/ih/{{ o.id }}">*</a></div>{% endif %}</td>
         {% endfor %}
         </tr>
     {% endfor %}

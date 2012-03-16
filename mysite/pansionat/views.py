@@ -1527,10 +1527,17 @@ def nakl(request, occupied_id):
 def ill_history(request, order_id):
     order = Order.objects.get(id=order_id)
     template_filename = 'history.xls'
-    delt = datetime.date.today() - order.patient.birth_date
-    years = int (delt.days / 365.25)
+    if order.patient.birth_date:
+        delt = datetime.date.today() - order.patient.birth_date
+        years = int (delt.days / 365.25)
+    else:
+        years = ""
     srok = 'c '+str(order.start_date)+' по '+str(order.end_date)
-    ill_history = IllHistory.objects.get(order = order)
+    ill_historys = IllHistory.objects.filter(order = order)
+    if len(ill_historys)>0:
+        ill_history = ill_historys[0]
+    else:
+        ill_history = IllHistory(order = order)
     ill_history_fields = IllHistoryFieldValue.objects.filter(ill_history = ill_history)
     ill_history_records = IllHistoryRecord.objects.filter(ill_history = ill_history).order_by('datetime')
     #first_diagnose = ill_history.first_diagnose
