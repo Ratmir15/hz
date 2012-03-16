@@ -968,11 +968,19 @@ def prepare_rmreg_data(orders):
         l.append(innermap)
     return l
 
-def prepare_rmdoc_data(orders):
+def prepare_rmdoc_data(dt):
+    orders = Order.objects.filter(start_date=dt)
     m = dict()
     mx = 0
     l_e = False
     e_l = []
+    doctor_role = Role.objects.get(name = "Врач")
+    employers = getEmployersByRoleAndDate(doctor_role, dt)
+    l_k = ["Не указан"]
+    for emp in employers:
+        m[emp] = []
+        l_k.append(emp)
+
     for order in orders:
         ihs = IllHistory.objects.filter(order = order)
         if len(ihs)>0:
@@ -982,6 +990,7 @@ def prepare_rmdoc_data(orders):
             else:
                 ih_l = []
                 m[ih.doctor] = ih_l
+                l_k.append(ih.doctor)
         else:
             if not l_e:
                 m["Не указан"] = e_l
@@ -992,10 +1001,9 @@ def prepare_rmdoc_data(orders):
         if cur>mx:
             mx = cur
 
-    l_k = []
     l_v = []
-    for k in m.iterkeys():
-        l_k.append(k)
+#    for k in m.iterkeys():
+#        l_k.append(k)
 
     for i in xrange(0,mx):
         l2= []
@@ -1129,8 +1137,7 @@ def rmregtoday(request):
 @login_required
 def rmdoc(request, year, month, day):
     dt = datetime.date(int(year),int(month),int(day))
-    orders = Order.objects.filter(start_date=dt)
-    l_k,l_v = prepare_rmdoc_data(orders)
+    l_k,l_v = prepare_rmdoc_data(dt)
     map = dict()
     map['doctors'] = l_k
     map['patients'] = l_v
