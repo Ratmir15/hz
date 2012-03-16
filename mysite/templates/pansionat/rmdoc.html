@@ -69,7 +69,7 @@
 
 <table class="tch" width="100%"><tr>
     {% for doc in doctors %}
-    <th rowspan="1" class="droppable" id="d_{{ doc.id }}"> {{ doc.fio }}</th>
+    <th rowspan="1" {% if doc.id %}  class="droppable" {% endif %} id="d_{{ doc.id }}"> {{ doc.fio }}</th>
     {% endfor %}
 </tr>
     {% for l in patients %}
