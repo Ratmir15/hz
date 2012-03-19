@@ -1616,8 +1616,8 @@ def pko(request, occupied_id):
     delt = order.end_date - order.start_date
     days = delt.days + 1
     tovar = 'Пут. сан.-кур. на '+str(days)+' дней c '+str(order.start_date)+' по '+str(order.end_date) + '№ '+ str(order.code)
-    tel = {'FULLNAME': fullname, 'NUMBER': order.code,
-           'FILENAME': 'pko-'+order.code,
+    tel = { 'NUMPAGES':1,'FULLNAME': fullname, 'NUMBER': order.code,
+           'FILENAME': 'pko-'+str(order.code),
            'CLIENT': client,
            'GBUH': gb,
            'KASSIR': kassir,
@@ -1670,14 +1670,18 @@ def schetfactura(request, occupied_id):
     fullname = 'ООО санаторий "Хопровские зори"'
     saleaddress = 'Пензенская обл., п.Колышлей, ул.Лесная 1а'
     vendor = fullname + ' ' + saleaddress
-    client  = order.patient.fio()+','+order.patient.address
+    if order.patient.address:
+        a = order.patient.address
+    else:
+        a = ""
+    client  = order.patient.fio()+a
     dir = gavnetso.getEmployerByRoleNameAndDate('Директор',order.start_date).__unicode__()
     gb = gavnetso.getEmployerByRoleNameAndDate('Главный бухгалтер',order.start_date).__unicode__()
     kassir = gavnetso.getEmployerByRoleNameAndDate('Кассир',order.start_date).__unicode__()
     delt = order.end_date - order.start_date
     days = delt.days + 1
     tovar = 'Пут. сан.-кур. на '+str(days)+' дней c '+str(order.start_date)+' по '+str(order.end_date) + '№ '+ str(order.code)
-    tel = {'SALER': fullname, 'NUMBER': order.code,
+    tel = {'PORTRAIT':False, 'NUMPAGES':1,'SALER': fullname, 'NUMBER': order.code,
            'FILENAME': 'schetfaktura-'+str(order.code),
            'CLIENT': order.patient.fio(), 'CLIENTADDRESS': order.patient.address,
            'CLIENTALL': client, 'VENDOR': vendor,
