@@ -287,7 +287,7 @@ def processreport(request, tp):
         if request.POST.has_key("s2") and report_metadata[4]!="":
             return render_to_response(report_metadata[4], MenuRequestContext(request, tel))
         else:
-            return fill_excel_template(report_metadata[2], tel)
+            return fill_excel_template(report_metadata[2], tel, request)
     else:
         values = {"tp": tp, "metadata": report_metadata}
         return render_to_response('pansionat/report.html', MenuRequestContext(request, values))
@@ -393,6 +393,6 @@ def zprint(request):
            'FILENAME': 'procedures-'+str(mp_type_id)+"-"+p_date.strftime('%d-%m-%Y'),
     }
     template_filename = 'mps.xls'
-    return fill_excel_template(template_filename, tel)
+    return fill_excel_template(template_filename, tel, request)
 
 

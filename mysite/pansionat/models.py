@@ -1,5 +1,6 @@
 # coding: utf-8
 import datetime
+from django.contrib.auth.models import User
 from django.db import models, connection
 
 # Create your models here.
@@ -434,3 +435,11 @@ class PutevkaD(models.Model):
     lastnumber = models.CharField(verbose_name='Последний номер диапазона', max_length=6)
     def givedate_n(self):
         return self.givedate.strftime('%d.%m.%y')
+
+class ActionLog(models.Model):
+    user = models.ForeignKey(User, verbose_name='Пользователь')
+    ip = models.CharField(verbose_name='IP', max_length=15)
+    path = models.CharField(verbose_name='Path',max_length=100)
+    message = models.CharField(verbose_name='Сообщение',max_length=100)
+    dt = models.DateTimeField(verbose_name='Дата/Время')
+

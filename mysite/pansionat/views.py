@@ -565,7 +565,7 @@ def medical_procedures_print(request, order_id):
            'PATIENT': ord.patient.fio(),
     }
     template_filename = 'mp.xls'
-    return fill_excel_template(template_filename, tel)
+    return fill_excel_template(template_filename, tel, request)
 
 @login_required
 def schedule_print(request):
@@ -600,7 +600,7 @@ def schedule_print(request):
            'FILENAME': 'procedures-'+str(mp_type_id)+"-"+p_date.strftime('%d-%m-%Y'),
     }
     template_filename = 'mps.xls'
-    return fill_excel_template(template_filename, tel)
+    return fill_excel_template(template_filename, tel, request)
 
 @login_required
 @permission_required('pansionat.add_orderdiet', login_url='/forbidden/')
@@ -633,7 +633,7 @@ def diets_print(request):
            'FILENAME': 'diets-'+p_date.strftime('%d-%m-%Y'),
     }
     template_filename = 'diets.xls'
-    return fill_excel_template(template_filename, tel)
+    return fill_excel_template(template_filename, tel, request)
 
 @login_required
 @permission_required('pansionat.add_ordermedicalprocedure', login_url='/forbidden/')
@@ -1038,7 +1038,7 @@ def reestr(request, year, month):
 @login_required
 def reestrxls(request, year, month):
     map, template_filename = prepare_reestr_data(month, year)
-    return fill_excel_template(template_filename, map)
+    return fill_excel_template(template_filename, map, request)
 
 
 def clearBookDays(instance):
@@ -1179,7 +1179,7 @@ def moves(request, year, month):
         l.append(innermap)
 
     map['T'] = l
-    return fill_excel_template(template_filename, map)
+    return fill_excel_template(template_filename, map, request)
 
 
 def calc_bm(fd, order):
@@ -1236,7 +1236,7 @@ def mov(request, year, month):
         l.append(innermap)
 
     map['T'] = l
-    return fill_excel_template(template_filename, map)
+    return fill_excel_template(template_filename, map, request)
 
 tp_map = {
     "1":('ХЗ,СЗ',"hzsz",HzSzCondition()),
@@ -1312,7 +1312,7 @@ def movinfo(request, year, month):
     l.append(innermap)
 
     map['T'] = l
-    return fill_excel_template(template_filename, map)
+    return fill_excel_template(template_filename, map, request)
 
 def prepare_anal_data(month, year):
     intyear = int(year)
@@ -1394,7 +1394,7 @@ def movanal(request, year, month):
 @login_required
 def movanalxls(request, year, month):
     map, template_filename = prepare_anal_data(month, year)
-    return fill_excel_template(template_filename, map)
+    return fill_excel_template(template_filename, map, request)
 
 @login_required
 def movtp(request, year, month,tp):
@@ -1528,7 +1528,7 @@ def nakl(request, occupied_id):
            'DATE':order.start_date.strftime('%d.%m.%Y'), 'QTYSUM':1, 'AMOUNTSUM':order.price, 'AMOUNTNDSSUM':order.price, 'ALLAMOUNTSUM':order.price,
            'TOVAR': [{'ROWINDEX':1,'NAME':tovar,'QTY':1,'PRICE':order.price,'AMOUNT':order.price,
                       'PNDS':0,'AMOUNTNDS':'-','ALLAMOUNT':order.price}]}
-    return fill_excel_template(template_filename, tel)
+    return fill_excel_template(template_filename, tel, request)
 
 @login_required
 @permission_required('pansionat.add_order', login_url='/forbidden/')
@@ -1616,7 +1616,7 @@ def ill_history_head(request, order_id):
            'SROK':srok,
            'DATEIN':str(order.start_date),
     }
-    return fill_excel_template(template_filename, tel)
+    return fill_excel_template(template_filename, tel, request)
 
 @login_required
 def rootik(request, order_id):
@@ -1624,7 +1624,7 @@ def rootik(request, order_id):
     template_filename = 'rootik.xls'
     tel = {'FIO': order.patient.fio(), 'ROOM': order.room.name,
            'DATEIN': str(order.start_date) }
-    return fill_excel_template(template_filename, tel)
+    return fill_excel_template(template_filename, tel, request)
 
 @login_required
 def pko(request, occupied_id):
@@ -1645,7 +1645,7 @@ def pko(request, occupied_id):
            'PRICE': order.price,
            'DATE':order.start_date,
            'DESCRIPTION':tovar}
-    return fill_excel_template(template_filename, tel)
+    return fill_excel_template(template_filename, tel, request)
 
 @login_required
 def delbook(request, roombook_id):
@@ -1682,7 +1682,7 @@ def zayava(request, occupied_id):
            'STARTDATE': str(order.start_date),
            'ENDDATE': str(order.end_date),
            'DATE':order.start_date, 'QTYSUM':1, 'AMOUNTSUM':order.price, 'AMOUNTNDSSUM':order.price, 'ALLAMOUNTSUM':order.price}
-    return fill_excel_template(template_filename, tel)
+    return fill_excel_template(template_filename, tel, request)
 
 @login_required
 def schetfactura(request, occupied_id):
@@ -1714,7 +1714,7 @@ def schetfactura(request, occupied_id):
            'DATE':order.start_date, 'QTYSUM':1, 'AMOUNTSUM':order.price, 'AMOUNTNDSSUM':order.price, 'ALLAMOUNTSUM':order.price,
            'TOVAR': [{'ROWINDEX':1,'NAME':tovar,'QTY':1,'PRICE':order.price,'AMOUNT':order.price,
                       'PNDS':0,'AMOUNTNDS':'-','ALLAMOUNT':order.price}]}
-    return fill_excel_template(template_filename, tel)
+    return fill_excel_template(template_filename, tel, request)
 
 @login_required
 def xt(request):
@@ -1724,7 +1724,7 @@ def xt(request):
                    {'ROWINDEX':2,'NAME':'TOVAR2','QTY':2,'PRICE':17810,'AMOUNT':17810,
                       'PNDS':0,'AMOUNTNDS':'-','ALLAMOUNT':17810}]}
     template_filename = '/Users/rpanov/Downloads/tov_nakl1.xls'
-    return fill_excel_template(template_filename, tel)
+    return fill_excel_template(template_filename, tel, request)
 
 class FilterForm(forms.Form):
     start_date = forms.DateField(label = 'Дата въезда', input_formats = ('%d.%m.%Y',))

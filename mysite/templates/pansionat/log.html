@@ -1,0 +1,92 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+        "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+    <title>Рабочее место врача</title>
+    <style type="text/css">
+        table.tch td {
+            border: 1px solid;
+        }
+        table.tch th {
+            border: 1px solid;
+            text-align: center;
+        }
+        table.tch {
+            border:0;
+            padding: 0;
+            border-spacing: 0;
+        }
+        a:visited {
+            color:blue;
+        }
+    </style>
+    <style type="text/css">
+        @import "/static/jquery-ui/themes/base/jquery.ui.all.css";
+    </style>
+    <script src="/static/dataTables/media/js/jquery.js"></script>
+    <script src="/static/dataTables/media/js/jquery.dataTables.js"></script>
+    <script src="/static/jquery-ui/ui/jquery.ui.core.js"></script>
+    <script src="/static/jquery-ui/ui/jquery.ui.widget.js"></script>
+    <script src="/static/jquery-ui/ui/jquery.ui.mouse.js"></script>
+    <script src="/static/jquery-ui/ui/jquery.ui.draggable.js"></script>
+    <script src="/static/jquery-ui/ui/jquery.ui.droppable.js"></script>
+    <script src="/static/jquery-ui/ui/jquery.ui.position.js"></script>
+    <script src="/static/jquery-ui/ui/jquery.ui.resizable.js"></script>
+    <script src="/static/jquery-ui/ui/jquery.ui.dialog.js"></script>
+    <script src="/static/jquery-ui/ui/jquery.ui.datepicker.js"></script>
+    <script src="/static/jquery-ui/ui/i18n/jquery.ui.datepicker-ru.js"></script>
+    <script src="/static/jquery-ui/ui/jquery.ui.button.js"></script>
+    <style>
+        #draggable { width: 100px; height: 100px; padding: 0.5em; float: left; margin: 10px 10px 10px 0; }
+        #droppable { width: 150px; height: 150px; padding: 0.5em; float: left; margin: 10px; }
+        table.tch div { float: left;}
+        .ui-state-active { color: red; font: bold; }
+    </style>
+    <script type="text/javascript">
+        $(document).ready(function() {
+            $.datepicker.setDefaults($.datepicker.regional['ru']);
+            $('#diary_date').datepicker({dateFormat: 'yy-mm-dd'});
+            $('#dl').dialog({ autoOpen: false });
+            $('input:submit').button()
+            $(':button').button()
+            $( ".draggable" ).draggable(({ revert: "invalid" }));
+            $( ".droppable" ).droppable({
+                hoverClass: "ui-state-active",
+                drop: function( event, ui ) {
+                    d_id_array = this.id.split('_');
+                    q_id_array = ui.draggable[0].id.split('_');
+                    if (d_id_array[1]!='') {
+                        document.location = "/illhistory/doctor2/"+q_id_array[1]+"/"+d_id_array[1];
+                    }
+                    $( this )
+                            .addClass( "ui-state-highlight" )
+                            .find( "p" )
+                            .html( "Dropped!" );
+                }
+            });
+        } );
+    </script>
+</head>
+<body>
+<div style="width: 100%;background-color: #eeeeee;border-bottom: 1px solid;" align="center">Лог&nbsp;<a href="/rmdoc/{{ pday }}">{{ pday }}</a>&nbsp;<a href="/rmdoc/{{ nday }}">{{ nday }}</a>&nbsp;<form action="/rmreg/" method="post" name="date_form">{% csrf_token %}<input type="text" id="diary_date" name="diary_date"/><a href="#" onclick="document.date_form.action = '/rmdoc/'+$('#diary_date').val()+'/'; document.date_form.submit(); return false;">Показать</a></form>
+    &nbsp;<a href="/reports/">Отчеты</a>&nbsp;</div>
+
+<table class="tch" width="100%"><tr>
+    <th>Пользователь</th>
+    <th>IP</th>
+    <th>Path</th>
+    <th>Сообщение</th>
+</tr>
+    {% for l in ls %}
+        <tr>
+                <td>{{ l.user }}</td>
+                <td>{{ l.ip }}</td>
+                <td>{{ l.path }}</td>
+                <td>{{ l.message }}</td>
+        </tr>
+    {% endfor %}
+
+</table>
+
+</body>
+</html>

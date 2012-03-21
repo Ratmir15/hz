@@ -9,6 +9,7 @@ import re
 import xlwt
 from xlwt.Style import easyxf
 from mysite import settings
+from mysite.pansionat.alog import log_it
 
 def get_xlwt_style_list(rdbook):
     wt_style_list = []
@@ -109,12 +110,13 @@ def write_cell(wtsheet, merged_cell_top_left_map, value, style, rdrowx, rdcolx, 
     else:
         wtsheet.write(wtrowx, wtcolx, value, style)
 
-def fill_excel_template(template_filename, tel):
+def fill_excel_template(template_filename, tel, request):
     w = prepare_excel_template(template_filename, tel)
     response = HttpResponse(mimetype='application/vnd.ms-excel')
     filename = tel.get('FILENAME','report')
     response['Content-Disposition'] = 'attachment; filename=' + filename + '.xls'
     w.save(response)
+    log_it(request)
     return response
 
 def fill_excel_template_s_gavnom(template_filename, tel, fields, records):
