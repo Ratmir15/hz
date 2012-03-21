@@ -57,6 +57,10 @@ class Role(models.Model):
         verbose_name = 'Должность'
         verbose_name_plural = 'Должности'
 
+class EmployerCabinet(models.Model):
+    employer = models.OneToOneField(Employer, verbose_name='Сотрудник')
+    cabinet_name = models.CharField(verbose_name='Кабинет', max_length=10)
+
 class EmployerRoleHistory(models.Model):
     employer = models.ForeignKey(Employer, verbose_name = 'Сотрудник')
     role = models.ForeignKey(Role, verbose_name = 'Должность')

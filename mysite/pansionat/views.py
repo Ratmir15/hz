@@ -22,7 +22,7 @@ from django.shortcuts import render_to_response
 from django.shortcuts import redirect 
 import logging
 from mysite.pansionat import gavnetso
-from mysite.pansionat.models import IllHistory, Customer, IllHistoryFieldType, IllHistoryFieldValue, IllHistoryRecord, OrderMedicalProcedure, MedicalProcedureType, OrderMedicalProcedureSchedule, Occupied, IllHistoryFieldTypeGroup, EmployerRoleHistory, Role, Employer, OrderDiet, Diet, OrderDay, OrderType, DietItems, Item, ItemPiece, Piece, MARRIAGE
+from mysite.pansionat.models import IllHistory, Customer, IllHistoryFieldType, IllHistoryFieldValue, IllHistoryRecord, OrderMedicalProcedure, MedicalProcedureType, OrderMedicalProcedureSchedule, Occupied, IllHistoryFieldTypeGroup, EmployerRoleHistory, Role, Employer, OrderDiet, Diet, OrderDay, OrderType, DietItems, Item, ItemPiece, Piece, MARRIAGE, EmployerCabinet
 from mysite.pansionat.orders import room_availability, fill_cust_list, return_orders_list
 from mysite.pansionat.proc import MenuRequestContext, MedicalPriceReport
 from mysite.pansionat.reports import DietForm, DateFilterForm, PFCondition, ElseCondition, SPCondition, PPCondition, RCondition, SzCondition, HzCondition, HzSzCondition
@@ -1582,8 +1582,29 @@ def ill_history_head(request, order_id):
         client = "-"
     else:
         client = order.customer.name
+
+    ill_historys = IllHistory.objects.filter(order = order)
+    values = {}
+    if len(ill_historys)>0:
+        ill_history = ill_historys[0]
+    else:
+        ill_history = IllHistory(order = order)
+        ill_history.save()
+
+    doctor = ill_history.doctor
+    if doctor:
+        cabinets = EmployerCabinet.objects.filter(employer = doctor)
+        if len(cabinets):
+            cabinet_name = cabinets[0].cabinet_name
+        else:
+            cabinet_name = ""
+    else:
+        cabinet_name = ""
+
     tel = { 'NUMBER': order.putevka,
            'FILENAME': 'ill_history-'+str(order.code),
+           'ROOM': order.room.name,
+           'CABINET': cabinet_name,
            'SURNAME': order.patient.family, 'NAME': order.patient.name,
            'SNAME': order.patient.sname,
            'WHOIS': order.patient.profession,

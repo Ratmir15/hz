@@ -18,7 +18,7 @@ from pansionat.models import Customer
 from pansionat.models import OrderType
 
 from django.contrib import admin
-from mysite.pansionat.models import Order, Customer, IllHistoryFieldValue, IllHistoryFieldType, MedicalProcedureType, RoomPlace
+from mysite.pansionat.models import Order, Customer, IllHistoryFieldValue, IllHistoryFieldType, MedicalProcedureType, RoomPlace, EmployerCabinet
 
 class DietInline(admin.TabularInline):
     model = DietItems
@@ -35,6 +35,7 @@ class RoomAdmin(admin.ModelAdmin):
 
 
 admin.site.register(Employer)
+admin.site.register(EmployerCabinet)
 admin.site.register(EmployerRoleHistory)
 admin.site.register(Patient)
 admin.site.register(Role)
