@@ -15,8 +15,26 @@ def log_it(request):
 
 @login_required
 def lastlog(request):
+    dt = datetime.date.today()
     ls = ActionLog.objects.all().order_by('-dt')[:100]
     m = dict()
     m["ls"] = ls
+    td = datetime.timedelta(days=1)
+    pday = dt - td
+    nday = dt + td
+    m["pday"] = str(pday)
+    m["nday"] = str(nday)
     return render_to_response('pansionat/log.html', MenuRequestContext(request, m))
 
+@login_required
+def lastlog_day(request, year, month, day):
+    dt = datetime.date(int(year),int(month),int(day))
+    td = datetime.timedelta(days=1)
+    pday = dt - td
+    nday = dt + td
+    ls = ActionLog.objects.filter(dt__range = (dt,nday)).order_by('-dt')[:100]
+    m = dict()
+    m["ls"] = ls
+    m["pday"] = str(pday)
+    m["nday"] = str(nday)
+    return render_to_response('pansionat/log.html', MenuRequestContext(request, m))

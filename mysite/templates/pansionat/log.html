@@ -68,7 +68,7 @@
     </script>
 </head>
 <body>
-<div style="width: 100%;background-color: #eeeeee;border-bottom: 1px solid;" align="center">Лог&nbsp;<a href="/rmdoc/{{ pday }}">{{ pday }}</a>&nbsp;<a href="/rmdoc/{{ nday }}">{{ nday }}</a>&nbsp;<form action="/rmreg/" method="post" name="date_form">{% csrf_token %}<input type="text" id="diary_date" name="diary_date"/><a href="#" onclick="document.date_form.action = '/rmdoc/'+$('#diary_date').val()+'/'; document.date_form.submit(); return false;">Показать</a></form>
+<div style="width: 100%;background-color: #eeeeee;border-bottom: 1px solid;" align="center">Лог&nbsp;<a href="/log/{{ pday }}">{{ pday }}</a>&nbsp;<a href="/log/{{ nday }}">{{ nday }}</a>&nbsp;<form action="/log/" method="post" name="date_form">{% csrf_token %}<input type="text" id="diary_date" name="diary_date"/><a href="#" onclick="document.date_form.action = '/log/'+$('#diary_date').val()+'/'; document.date_form.submit(); return false;">Показать</a></form>
     &nbsp;<a href="/reports/">Отчеты</a>&nbsp;</div>
 
 <table class="tch" width="100%"><tr>
@@ -76,13 +76,15 @@
     <th>IP</th>
     <th>Path</th>
     <th>Сообщение</th>
+    <th>Дата</th>
 </tr>
     {% for l in ls %}
         <tr>
                 <td>{{ l.user }}</td>
                 <td>{{ l.ip }}</td>
-                <td>{{ l.path }}</td>
+                <td><a href="/{{ l.path }}">{{ l.path }}</a></td>
                 <td>{{ l.message }}</td>
+                <td>{{ l.dt_cool }}</td>
         </tr>
     {% endfor %}
 

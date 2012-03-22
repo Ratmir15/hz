@@ -442,4 +442,6 @@ class ActionLog(models.Model):
     path = models.CharField(verbose_name='Path',max_length=100)
     message = models.CharField(verbose_name='Сообщение',max_length=100)
     dt = models.DateTimeField(verbose_name='Дата/Время')
+    def dt_cool(self):
+        return self.dt.strftime('%Y.%m.%d %H:%M:%S')
 
