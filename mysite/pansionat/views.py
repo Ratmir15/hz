@@ -1643,8 +1643,33 @@ def pko(request, occupied_id):
            'GBUH': gb,
            'KASSIR': kassir,
            'PRICE': order.price,
-           'DATE':order.start_date,
+           'DATE':order.start_date.strftime('%d.%m.%Y'),
            'DESCRIPTION':tovar}
+    return fill_excel_template(template_filename, tel, request)
+
+@login_required
+def rko(request, occupied_id):
+    order = Order.objects.get(id=occupied_id)
+    template_filename = 'rko.xls'
+    fullname = 'ООО санаторий "Хопровские зори"'
+    client  = order.patient.fio()
+    gb = gavnetso.getEmployerByRoleNameAndDate('Главный бухгалтер',order.start_date).__unicode__()
+    kassir = gavnetso.getEmployerByRoleNameAndDate('Кассир',order.start_date).__unicode__()
+    director = gavnetso.getEmployerByRoleNameAndDate('Директор',order.start_date).__unicode__()
+    delt = order.end_date - order.start_date
+    days = delt.days + 1
+    rub = numeral.rubles(float(order.price), True)
+    tovar = 'Пут. сан.-кур. на '+str(days)+' дней c '+str(order.start_date)+' по '+str(order.end_date) + '№ '+ str(order.code)
+    tel = { 'NUMPAGES':1,'FULLNAME': fullname, 'NUMBER': order.code,
+            'FILENAME': 'rko-'+str(order.code),
+            'CLIENT': client,
+            'GBUH': gb,
+            'DIRECTOR':director,
+            'SUMMP':rub,
+            'KASSIR': kassir,
+            'PRICE': order.price,
+            'DATE':order.start_date.strftime('%d.%m.%Y'),
+            'DESCRIPTION':tovar}
     return fill_excel_template(template_filename, tel, request)
 
 @login_required
