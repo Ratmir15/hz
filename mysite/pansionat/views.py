@@ -1571,7 +1571,7 @@ def ill_history(request, order_id):
 @login_required
 def ill_history_head(request, order_id):
     order = Order.objects.get(id=order_id)
-    template_filename = 'history_br.xls'
+    template_filename = 'history_br4.xls'
     if not order.patient.birth_date is None:
         delt = datetime.date.today() - order.patient.birth_date
         years = int (delt.days / 365.25)
