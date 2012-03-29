@@ -445,3 +445,40 @@ class ActionLog(models.Model):
     def dt_cool(self):
         return self.dt.strftime('%Y.%m.%d %H:%M:%S')
 
+DOC_TYPE = (
+    ("N", "Накладная"),
+    ("S", "Счет-фактура"),
+    ("P","ПКО"),
+    ("R","РКО")
+    )
+
+class OrderDocument(models.Model):
+    ord = models.ForeignKey(Order)
+    code = models.IntegerField(verbose_name='Номер документа',max_length=8)
+    dt = models.DateField(verbose_name='Дата документа')
+    doc_type = models.CharField(verbose_name='Тип документа',max_length=1,choices=DOC_TYPE)
+    def dt_cool(self):
+        return self.dt.strftime('%Y.%d.%m')
+    def __unicode__(self):
+        return self.doc_type+" "+self.code+" "+self.dt_cool()
+
+class DocItem(models.Model):
+    name = models.CharField(verbose_name='Наименование',max_length=50)
+    def __unicode__(self):
+        return self.name
+
+class OrderDocumentItem(models.Model):
+    line = models.IntegerField(verbose_name="№")
+    order_document = models.ForeignKey(OrderDocument, verbose_name='Документ')
+    doc_item = models.ForeignKey(DocItem, verbose_name='Номенклатура')
+    quantity = models.IntegerField(verbose_name='Количество')
+    price = models.DecimalField(verbose_name='Цена',decimal_places=2,max_digits=7)
+    def __unicode__(self):
+        return str(self.line)+" "+self.doc_item.__unicode__()
+
+class ItemPrice(models.Model):
+    doc_item = models.ForeignKey(DocItem, verbose_name='Номенклатура')
+    price = models.DecimalField(verbose_name='Цена',decimal_places=2,max_digits=7)
+    effective_date = models.DateField(verbose_name='Дата')
+    def __unicode__(self):
+        return self.doc_item.__unicode__()+self.effective_date

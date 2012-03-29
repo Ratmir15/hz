@@ -1,0 +1,129 @@
+{% extends "pansionat/index.html" %}
+
+{% block title %} Накладная {%  endblock  %}
+
+{% block head %}
+    <style type="text/css">
+        @import "/static/dataTables/media/css/demo_page.css";
+        @import "/static/dataTables/media/css/demo_table.css";
+        @import "/static/jquery-ui/themes/base/jquery.ui.all.css";
+    </style>
+    <script src="/static/dataTables/media/js/jquery.js"></script>
+    <script src="/static/dataTables/media/js/jquery.dataTables.js"></script>
+    <script src="/static/jquery-ui/ui/jquery.ui.core.js"></script>
+    <script src="/static/jquery-ui/ui/jquery.ui.widget.js"></script>
+    <script src="/static/jquery-ui/ui/jquery.ui.position.js"></script>
+    <script src="/static/jquery-ui/ui/jquery.ui.autocomplete.js"></script>
+    <script src="/static/jquery-ui/ui/jquery.ui.datepicker.js"></script>
+    <script src="/static/jquery-ui/ui/i18n/jquery.ui.datepicker-ru.js"></script>
+    <script src="/static/jquery-ui/ui/jquery.ui.button.js"></script>
+    <style>
+        .odd {
+            background: #ccc;
+        }
+        table.display img {
+            width: 16px;
+            height: 16px;
+            border: 0;
+        }
+    </style>
+    <script type="text/javascript">
+        function change_ids(i, j) {
+            var t = $(i).val();
+            $(i).val($(j).val());
+            $(j).val(t);
+        }
+        function change_row(i, j) {
+            change_ids('#id_di_'+i,'#id_di_'+j);
+            change_ids('#id_q_'+i,'#id_q_'+j);
+            change_ids('#id_p_'+i,'#id_p_'+j);
+        }
+        function moveUp(i) {
+            if (i>1) {
+                change_row(i,i-1);
+            }
+        }
+        function moveDown(i) {
+            var nr = $('#occupied tr').length;
+            if (i< nr) {
+                change_row(i,i+1);
+            }
+        }
+        function d_row(i) {
+            var nr = $('#occupied tr').length;
+            for (var r=i+1;r<=nr;r++) {
+                change_row(r-1,r);
+            }
+            $('#occupied tr:last').remove();
+        }
+        function addRow(nv, qv, pv) {
+            var nr = $('#occupied tr').length;
+            //alert(nr);
+            var buttons = '<td><a href="#" onclick="moveUp('+nr+'); return false;"><img src="/static/up.png" width="10" height="10" alt="up"/></a><a href="#" onclick="moveDown('+nr+'); return false;"><img src="/static/down.png"/></a><a href="#" onclick="d_row('+nr+'); return false;"><img src="/static/delete.png"/></a></td>';
+            var idx = '<td>'+nr+'</td>';
+            var di = '<td><input type="text" value="'+nv+'" id="id_di_'+nr+'" name="id_di_'+nr+'" ></td>';
+            var q = '<td><input type="text" value="'+qv+'" id="id_q_'+nr+'" name="id_q_'+nr+'" ></td>';
+            var p = '<td><input type="text" value="'+pv+'" id="id_p_'+nr+'" name="id_p_'+nr+'" ></td>';
+            $("#occupied").append("<tr>"+buttons+idx+di+q+p+"</tr>");
+        }
+        function addEmptyRow() {
+            addRow('','','')
+        }
+        $(document).ready(function() {
+            $.datepicker.setDefaults($.datepicker.regional['ru']);
+            $('#dt').datepicker();
+            $('input:submit').button()
+            $(':button').button()
+            $("tr:odd").addClass("odd");
+            var availableTags = [
+                {% for docitem in docitems %}"{{ docitem }}",{% endfor %}
+            ];
+            {% for di in dis %}
+                addRow('{{ di.1 }}','{{ di.2 }}','{{ di.3 }}');
+            $( "#id_di_{{ di.0 }}" ).autocomplete({
+                source: availableTags
+            });
+            {% endfor %}
+
+        } );
+    </script>
+    <link rel="stylesheet" href="/static/Refresh.css" type="text/css" />
+{%  endblock  %}
+
+{% block allcontent %}
+    <h1>Накладная</h1>
+    <form action = "/nakl/{{ doc_id }}/save/" method="POST">
+        <div style="float: left;"><label for="code">Номер</label><input type="text" id="code" value="{{ code }}" /></div>
+        <div style="float: left;"><label for="dt">Дата</label><input type="text" id="dt" value="{{ dt }}" /></div>
+        {% csrf_token %}
+        <table>
+            {% for err in ves %}
+                <tr><td>{{ err }}</td></tr>
+            {% endfor %}
+        </table>
+        <table border="0" id = "occupied" class = "display">
+            <tr><th onclick="addEmptyRow()"><img src="/static/add.png"/></th><th>№</th><th>Номенклатура</th><th width="20">Кол-во</th><th>Цена</th><th></th></tr>
+            <input type="hidden" name="doc_id" value="{{ doc_id }}"/>
+  <!--          {% for di in dis %}
+                <tr>
+                <td><a href="#" onclick="moveUp({{ di.0 }})">up</a><a href="#" onclick="moveDown({{ di.0 }})">down</a></td>
+                    <th>
+                        {{ di.line }}
+                    </th>
+                    <td>
+                        <input type="text" value="{{ di.1 }}" id="id_di_{{ di.0 }}" name="id_di_{{ di.0 }}">
+                    </td>
+                    <td>
+                        <input type="text" value="{{ di.2 }}" id="id_q_{{ di.0 }}" name="id_q_{{ di.0 }}">
+                    </td>
+                    <td>
+                        <input type="text" value="{{ di.3 }}" id="id_p_{{ di.0 }}" name="id_p_{{ di.0 }}">
+                    </td>
+                    <td>
+                    </td>
+                </tr>
+            {% endfor %}-->
+        </table>
+        <div><input type="submit" value="Сохранить"></div>
+    </form>
+{%  endblock  %}

@@ -1,0 +1,91 @@
+{% extends "pansionat/index.html" %}
+
+{% block title %} Документы {%  endblock  %}
+
+{% block head %}
+    <style type="text/css">
+        @import "/static/dataTables/media/css/demo_page.css";
+        @import "/static/dataTables/media/css/demo_table.css";
+        @import "/static/jquery-ui/themes/base/jquery.ui.all.css";
+    </style>
+    <script src="/static/dataTables/media/js/jquery.js"></script>
+    <script src="/static/dataTables/media/js/jquery.dataTables.js"></script>
+    <script src="/static/jquery-ui/ui/jquery.ui.core.js"></script>
+    <script src="/static/jquery-ui/ui/jquery.ui.widget.js"></script>
+    <script src="/static/jquery-ui/ui/jquery.ui.mouse.js"></script>
+    <script src="/static/jquery-ui/ui/jquery.ui.draggable.js"></script>
+    <script src="/static/jquery-ui/ui/jquery.ui.position.js"></script>
+    <script src="/static/jquery-ui/ui/jquery.ui.autocomplete.js"></script>
+    <script src="/static/jquery-ui/ui/jquery.ui.resizable.js"></script>
+    <script src="/static/jquery-ui/ui/jquery.ui.dialog.js"></script>
+    <script src="/static/jquery-ui/ui/jquery.ui.datepicker.js"></script>
+    <script src="/static/jquery-ui/ui/i18n/jquery.ui.datepicker-ru.js"></script>
+    <script src="/static/jquery-ui/ui/jquery.ui.button.js"></script>
+
+    <link rel="stylesheet" href="/static/Refresh.css" type="text/css" />
+    <script type="text/javascript">
+        $(document).ready(function() {
+//            $('#occupied').dataTable();
+            $('#dl').dialog({ autoOpen: false });
+        } );
+        function update_links(id) {
+            ids = id.split("_")
+            id = ids[1]
+            $('#dl_code').html(ids[2]);
+            $('#dl_1').attr('href','/order/'+id);
+            $('#dl_2').attr('href','/orders/nakl/'+id);
+            $('#dl_3').attr('href','/orders/sf/'+id);
+            $('#dl_4').attr('href','/orders/pko/'+id);
+            $('#dl_11').attr('href','/orders/rko/'+id);
+            $('#dl_5').attr('href','/orders/rootik/'+id);
+            $('#dl_6').attr('href','/orders/zayava/'+id);
+            $('#dl_7').attr('href','/illhistory/'+id);
+            $('#dl_10').attr('href','/ih/'+id);
+            $('#dl_8').attr('href','/mp/'+id);
+            $('#dl_9').attr('href','/diet/'+id);
+            $('#dl').dialog('open');
+        }
+    </script>
+{%  endblock  %}
+
+{% block allcontent %}
+    <div id="dl" title="Подменю путевки">
+        <table width="100%"><tr><td colspan="2"><div id="dl_code"></div></td></tr>
+            <tr><td><a id="dl_1" href="/order/id/">Редактировать</a></td><td><a id="dl_2" href="/orders/nakl/id/">Накладная</a></td></tr>
+            <tr><td><a id="dl_3" href="/orders/sf/id/">Сч-ф</a></td><td><a id="dl_4" href="/orders/pko/id/">ПКО</a>&nbsp;<a id="dl_11" href="/orders/rko/id/">РКО</a></td></tr>
+            <tr><td><a id="dl_5" href="/orders/rootik/id/">Квиток</a></td><td><a id="dl_6" href="/orders/zayava/id/">Заявление</a></td></tr>
+            <tr><td colspan="2"><a id="dl_10" href="/ih/id/">Шапка истории болезни</a></td></tr>
+            <tr><td><a id="dl_7" href="/illhistory/id/">История болезни</a></td><td><a id="dl_8" href="/mp/id/">Процедуры</a></td></tr>
+            <tr><td colspan="2">{% if diet_en %}<a id="dl_9" href="/diet/id/">Диета</a>{% endif %}</td></tr>
+        </table>
+    </div>
+    <h1>Список документов. {{ msg }}</h1>
+    <div class="buttons"><a href="/order/{{ id }}/docs/new_nakl/">Создать накладную</a>&nbsp;
+        <a href="/order/{{ id }}/docs/new_sf/">Создать СФ</a>&nbsp;
+        <a href="/order/{{ id }}/docs/new_p/">Создать ПКО</a>&nbsp;
+        <a href="/order/{{ id }}/docs/new_r/">Создать РКО</a>&nbsp;</div>
+    <table border="0" id = "occupied" class = "display">
+        <thead>
+        <th>Номер</th>
+        <th>Дата</th>
+        <th>Тип</th>
+        <th></th>
+        </thead>
+        {% for doc in docs %}
+            <tr>
+                <td>
+                    {{ doc.code }}
+                </td>
+                <td>
+                    {{ doc.dt }}
+                </td>
+                <td>
+                    {{ doc.doc_type }}
+                </td>
+                <td>
+                        <a href="/order/{{ id }}/docs/{{ doc.id }}">Открыть</a>
+                </td>
+            </tr>
+        {% endfor %}
+    </table>
+{%  endblock  %}
