@@ -65,6 +65,8 @@
             {% for k,v in mai.items %} m_ai['{{ k }}'] = [{% for v1 in v %}"{{ v1 }}",{% endfor %}];{% endfor %}
             m_ai2 = [];
             {% for k,v in mai2.items %} m_ai2['{{ k }}'] = [{% for v1 in v %}"{{ v1 }}",{% endfor %}];{% endfor %}
+            m_ai3 = [];
+            {% for k,v in mai3.items %} m_ai3['{{ k }}'] = {{ v }};{% endfor %}
 
         });
         function getOpt(nr,ai) {
@@ -78,7 +80,7 @@
             //alert(opt);
             return opt;
         }
-        function addRow(nv, av, cv, zv, ai) {
+        function addRow(nv, av, cv, zv, ai, order) {
             var nr = $('#occupied tr').length;
             var buttons = '<td><a href="#" onclick="d_row('+nr+'); return false;"><img src="/static/delete.png"/></a></td>';
             var idx = '<td>'+nr+'</td>';
@@ -87,7 +89,7 @@
             var a = '<td><input class="id_a" type="text" value="'+av+'" id="id_a_'+nr+'" name="id_a_'+nr+'" ></td>';
             var c = '<td>'+cv+'</td>';
             var c_new = '<td><input type="text" class="c_new" value="'+cv+'" id="id_c_'+nr+'" name="id_c_'+nr+'" ></td>';
-            var z = '<td>'+zv+'</td>';
+            var z = '<td>'+zv+'</td><td><a href="/mp/{{ order_id }}/'+order+'"><img style="border:0px;" src="/static/admin/img/admin/icon_clock.gif" alt="Часики"/></a>';
             $("#occupied").append("<tr>"+buttons+idx+di+a+c+c_new+z+"</tr>");
             $( "#id_n_"+nr ).autocomplete({
                 source: availableTags,
@@ -98,7 +100,7 @@
             });
         }
         function addEmptyRow() {
-            addRow('','','','',[])
+            addRow('','','','',[],'')
         }
         $(document).ready(function() {
             $.datepicker.setDefaults($.datepicker.regional['ru']);
@@ -108,7 +110,7 @@
             $("tr:odd").addClass("odd");
         //
             {% for c in choosed %}
-                addRow('{{ c.0 }}','{{ c.1 }}','{{ c.2 }}','{{ c.3 }}', m_ai[{{ c.4 }}]);
+                addRow('{{ c.0 }}','{{ c.1 }}','{{ c.2 }}','{{ c.3 }}', m_ai[{{ c.4 }}], m_ai3[{{ c.4 }}]);
             {% endfor %}
 
         } );
@@ -133,7 +135,7 @@
             <tr><th onclick="addEmptyRow()"><img src="/static/add.png"/></th><th></th><th>Название</th><th>Доп. инфо</th><th width="20px;" >К-во</th><th width="20px;">К-во</th><th>Назначено</th><th></th></tr>
             <input type="hidden" name="order_id" value="{{ order_id }}"/>
         </table>
-    <div><label for="galka"></label><input id="galka" name="galka" type="checkbox" checked="true"></div>
+    <div><label for="galka">Создать ордер</label><input id="galka" name="galka" type="checkbox" checked="true"></div>
         <div><input type="submit" value="Сохранить"></div>
     </form>
 {%  endblock  %}

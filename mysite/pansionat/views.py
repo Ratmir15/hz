@@ -564,7 +564,8 @@ def medical_procedures_v2(request, order_id):
 def fill_order_scheduled(order_scheduled):
     os = dict()
     for o in order_scheduled:
-        os[o['mp_type'] + '/' + o['add_info']] = o['cnt']
+        #os[str(o['mp_type']) + '/' + str(o['add_info'])] = o['cnt']
+        os[str(o['mp_type']) + '/' + ''] = o['cnt']
     return os
 
 @login_required
@@ -573,12 +574,15 @@ def medical_procedures_v2_common(request, ord, order_id, choosed, nakls, val_ers
     all_mp = MedicalProcedureType.objects.all()
     m_ai = dict()
     m_ai2 = dict()
+    m_ai3= dict()
     for mp in all_mp:
         l = mp.optional.split(",")
         m_ai[mp.id] = l#map(str, l)
         m_ai2[mp.name] = l
+        m_ai3[mp.id] = mp.order
 
-    values = {'choosed': choosed, 'order_id': order_id, 'patient_name': ord.patient.fio(), 'all_mp': all_mp, "mai":m_ai,"mai2":m_ai2,"ves":val_ers, "ns":nakls}
+    values = {'choosed': choosed, 'order_id': order_id, 'patient_name': ord.patient.fio(), 'all_mp': all_mp,
+              "mai":m_ai,"mai2":m_ai2,"mai3":m_ai3,"ves":val_ers, "ns":nakls}
     user = request.user
     if user.has_perm('pansionat.add_ordermedicalprocedure'):
         return render_to_response('pansionat/mp_v2.html', MenuRequestContext(request, values))
