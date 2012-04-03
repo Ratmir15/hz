@@ -22,22 +22,35 @@ def n(request, n):
     dis = n.orderdocumentitem_set.order_by('line')
     items = []
     for di in dis:
-        items.append((di.line, di.docitem.name, di.qty, di.price))
+        items.append((di.line, di.doc_item.name, di.quantity, di.price))
     values = {"doc_id":n.id, "code":n.code, "dt":n.dt_cool(), "dis":items}
     return render_to_response('pansionat/nakl.html', MenuRequestContext(request, values))
 
-@login_required
-def new_nakl(request, order_id):
-    ord = Order.objects.get(id = order_id)
+#@login_required
+def createNakladnaya(order_id):
+    ord = Order.objects.get(id=order_id)
     dt = datetime.now()
-    code = OrderDocument.objects.filter(dt__year = dt.year, doc_type = "N").aggregate(Max("code"))
+    code = OrderDocument.objects.filter(dt__year=dt.year, doc_type="N").aggregate(Max("code"))
     mcode = code['code__max']
-
     if mcode is None:
         mcode = 0
-    od = OrderDocument(ord = ord, dt = dt,doc_type = "N", code = mcode + 1)
+    od = OrderDocument(ord=ord, dt=dt, doc_type="N", code=mcode + 1)
+    return od
+
+@login_required
+def new_nakl(request, order_id):
+    od = createNakladnaya(order_id)
     od.save()
     return open_doc(request, order_id, od.id)
+
+def getOrCreateDocItem(name):
+    dis = DocItem.objects.filter(name = name)
+    if len(dis):
+        return dis[0]
+    else:
+        di = DocItem(name = name)
+        di.save()
+        return di
 
 @login_required
 def nakl_save(request, doc_id):

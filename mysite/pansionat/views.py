@@ -22,7 +22,8 @@ from django.shortcuts import render_to_response
 from django.shortcuts import redirect 
 import logging
 from mysite.pansionat import gavnetso
-from mysite.pansionat.models import IllHistory, Customer, IllHistoryFieldType, IllHistoryFieldValue, IllHistoryRecord, OrderMedicalProcedure, MedicalProcedureType, OrderMedicalProcedureSchedule, Occupied, IllHistoryFieldTypeGroup, EmployerRoleHistory, Role, Employer, OrderDiet, Diet, OrderDay, OrderType, DietItems, Item, ItemPiece, Piece, MARRIAGE, EmployerCabinet
+from mysite.pansionat.documents import createNakladnaya, getOrCreateDocItem
+from mysite.pansionat.models import IllHistory, Customer, IllHistoryFieldType, IllHistoryFieldValue, IllHistoryRecord, OrderMedicalProcedure, MedicalProcedureType, OrderMedicalProcedureSchedule, Occupied, IllHistoryFieldTypeGroup, EmployerRoleHistory, Role, Employer, OrderDiet, Diet, OrderDay, OrderType, DietItems, Item, ItemPiece, Piece, MARRIAGE, EmployerCabinet, OrderDocumentItem
 from mysite.pansionat.orders import room_availability, fill_cust_list, return_orders_list
 from mysite.pansionat.proc import MenuRequestContext, MedicalPriceReport
 from mysite.pansionat.reports import DietForm, DateFilterForm, PFCondition, ElseCondition, SPCondition, PPCondition, RCondition, SzCondition, HzCondition, HzSzCondition
@@ -539,6 +540,51 @@ def medical_procedures(request, order_id):
     else:
         return render_to_response('pansionat/mpreadonly.html', MenuRequestContext(request, values))
 
+
+def medical_procedures_v2_(request, order_id, nakls):
+    ord = Order.objects.get(id=order_id)
+    order_scheduled = OrderMedicalProcedureSchedule.objects.filter(order=ord, p_date__gte=ord.start_date,
+        p_date__lte=ord.end_date).values('mp_type').annotate(cnt=Count('id'))
+    os = fill_order_scheduled(order_scheduled)
+    mps = OrderMedicalProcedure.objects.filter(order=ord)
+    choosed = list()
+    for mp in mps:
+        k1 = str(mp.mp_type.id)
+        k2 = mp.add_info
+        key = k1 + '/' + k2
+        choosed.append((mp.mp_type.name, mp.add_info, mp.times, os.get(key, ""), mp.mp_type.id))
+    return medical_procedures_v2_common(request, ord, order_id, choosed, nakls, [])
+
+
+@login_required
+def medical_procedures_v2(request, order_id):
+    return medical_procedures_v2_(request, order_id,[])
+
+
+def fill_order_scheduled(order_scheduled):
+    os = dict()
+    for o in order_scheduled:
+        os[o['mp_type'] + '/' + o['add_info']] = o['cnt']
+    return os
+
+@login_required
+def medical_procedures_v2_common(request, ord, order_id, choosed, nakls, val_ers):
+
+    all_mp = MedicalProcedureType.objects.all()
+    m_ai = dict()
+    m_ai2 = dict()
+    for mp in all_mp:
+        l = mp.optional.split(",")
+        m_ai[mp.id] = l#map(str, l)
+        m_ai2[mp.name] = l
+
+    values = {'choosed': choosed, 'order_id': order_id, 'patient_name': ord.patient.fio(), 'all_mp': all_mp, "mai":m_ai,"mai2":m_ai2,"ves":val_ers, "ns":nakls}
+    user = request.user
+    if user.has_perm('pansionat.add_ordermedicalprocedure'):
+        return render_to_response('pansionat/mp_v2.html', MenuRequestContext(request, values))
+    else:
+        return render_to_response('pansionat/mpreadonly.html', MenuRequestContext(request, values))
+
 @login_required
 def medical_procedures_print(request, order_id):
     ord = Order.objects.get(id = order_id)
@@ -565,6 +611,26 @@ def medical_procedures_print(request, order_id):
            'PATIENT': ord.patient.fio(),
     }
     template_filename = 'mp.xls'
+    return fill_excel_template(template_filename, tel, request)
+
+@login_required
+def medical_procedures_print2(request, order_id):
+    ord = Order.objects.get(id = order_id)
+
+    order_scheduled = OrderMedicalProcedure.objects.filter(order = ord)
+    p = []
+    for omp in order_scheduled:
+        entry = dict()
+        entry['DATE'] = omp.times
+        entry['TIME'] = omp.times
+        entry['NAME'] = omp.mp_type.name +" " +omp.add_info
+        p.append(entry)
+
+    tel = { 'P': p,
+            'FILENAME': 'procedures-'+str(ord.code),
+            'PATIENT': ord.patient.fio(),
+            }
+    template_filename = 'mp2.xls'
     return fill_excel_template(template_filename, tel, request)
 
 @login_required
@@ -599,6 +665,35 @@ def schedule_print(request):
             'DATE': p_date.strftime('%d.%m.%Y'),
            'FILENAME': 'procedures-'+str(mp_type_id)+"-"+p_date.strftime('%d-%m-%Y'),
     }
+    template_filename = 'mps.xls'
+    return fill_excel_template(template_filename, tel, request)
+
+@login_required
+def schedule_print(request):
+#def schedule_print(request, mp_type_id, year, month, day):
+    p_date = datetime.date(year, month, day)
+
+    order_scheduled = OrderMedicalProcedureSchedule.objects.filter(p_date = p_date, mp_type = mp_type_id).order_by('slot')
+    p = []
+    for slot in order_scheduled:
+        tdelta = datetime.timedelta(minutes=slot.mp_type.duration)
+        entry = dict()
+        entry['PATIENT'] = slot.order.patient.fio()
+        mp = OrderMedicalProcedure.objects.filter(order = slot.order, mp_type=slot.mp_type)
+        if len(mp)>0:
+            t = datetime.datetime.combine(slot.p_date,slot.mp_type.start_time)
+            time = t + (slot.slot-1)*tdelta
+            entry['TIME'] = time.strftime('%H:%M')
+            add_info = mp[0].add_info
+        else:
+            add_info = ""
+        entry['NAME'] = slot.mp_type.name +" " +add_info
+        p.append(entry)
+
+    tel = { 'P': p,
+            'DATE': p_date.strftime('%d.%m.%Y'),
+            'FILENAME': 'procedures-'+str(mp_type_id)+"-"+p_date.strftime('%d-%m-%Y'),
+            }
     template_filename = 'mps.xls'
     return fill_excel_template(template_filename, tel, request)
 
@@ -673,6 +768,84 @@ def mp_save(request):
                     objects[0].delete()
 
         return medical_procedures(request, order_id)
+    return ill_history_new(request) #if method is't post then show empty form
+
+@login_required
+@permission_required('pansionat.add_ordermedicalprocedure', login_url='/forbidden/')
+def mp_save2(request):
+    if request.method == 'POST':
+        order_id = request.POST.get('order_id')
+        if order_id is None:
+            return
+        else:
+            order = Order.objects.get(id = order_id)
+
+        ch = dict()
+        val_er = list()
+        for k,v in request.POST.items():
+            if k.startswith('id_n_'):
+                s = k.split('id_n_')
+                idx = s[1]
+                name = v
+                add_info = request.POST.get('id_a_'+idx)
+                count = request.POST.get('id_c_'+idx)
+                mpts = MedicalProcedureType.objects.filter(name = name)
+                ch[name+u"/"+add_info] = (name,add_info,count,mpts)
+                if not len(mpts):
+                    val_er.append(u'Не найдено медицинской процедуры '+name)
+
+        if len(val_er):
+            ord = order
+            order_scheduled = OrderMedicalProcedureSchedule.objects.filter(order = ord, p_date__gte = ord.start_date, p_date__lte = ord.end_date).values('mp_type').annotate(cnt = Count('id'))
+            os = dict()
+            for o in order_scheduled:
+                os[o['name'] + '/' + o['add_info']] = o['cnt']
+
+            choosed = list()
+            for key,(name,add_info,count,mpts) in ch.items():
+                choosed.append((name, add_info, count,os.get(key,""),0))
+            return medical_procedures_v2_common(request, ord, order_id, choosed,[], val_er)
+
+        omps = OrderMedicalProcedure.objects.filter(order = order)
+
+        balance = list()
+
+        for omp in omps:
+            key = omp.mp_type.name + u'/' + omp.add_info
+            if ch.has_key(key):
+                n,a,cnt,mpts = ch.pop(key)
+                c = int(cnt)
+                if omp.times!=c:
+                    balance.append((omp.mp_type, omp.add_info, c - omp.times))
+                    omp.times = cnt
+                    omp.save()
+            else:
+                balance.append((omp.mp_type, omp.add_info,  -omp.times))
+                omp.delete()
+
+        for k,(n,a,c,mpts) in ch.items():
+            omp = OrderMedicalProcedure(order = order, mp_type = mpts[0], add_info = a, times = c)
+            balance.append((omp.mp_type, omp.add_info, c))
+            omp.save()
+
+
+        nakls = list()
+        if request.POST.get("galka"):
+            idx = 0
+            if len(balance):
+                nakl = createNakladnaya(order_id)
+                nakl.save()
+                #val_er.append((u"Создана накладная. <a href=\\order\\"+order_id+u"\\docs\\"+str(nakl.id)+u"\\>открыть</a>")
+                nakls.append((u"Создана накладная.", order_id,  nakl.id))
+                for mp_type,add_info,times in balance:
+                    idx += 1
+                    di = getOrCreateDocItem(mp_type.name + " " +add_info)
+                    #TODO calculate price
+                    price = 0
+                    odi = OrderDocumentItem(line = idx, order_document = nakl, doc_item = di, quantity = times, price = price)
+                    odi.save()
+
+        return medical_procedures_v2_(request, order_id, nakls)
     return ill_history_new(request) #if method is't post then show empty form
 
 @login_required

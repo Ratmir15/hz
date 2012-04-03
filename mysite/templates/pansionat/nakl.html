@@ -104,25 +104,6 @@
         <table border="0" id = "occupied" class = "display">
             <tr><th onclick="addEmptyRow()"><img src="/static/add.png"/></th><th>№</th><th>Номенклатура</th><th width="20">Кол-во</th><th>Цена</th><th></th></tr>
             <input type="hidden" name="doc_id" value="{{ doc_id }}"/>
-  <!--          {% for di in dis %}
-                <tr>
-                <td><a href="#" onclick="moveUp({{ di.0 }})">up</a><a href="#" onclick="moveDown({{ di.0 }})">down</a></td>
-                    <th>
-                        {{ di.line }}
-                    </th>
-                    <td>
-                        <input type="text" value="{{ di.1 }}" id="id_di_{{ di.0 }}" name="id_di_{{ di.0 }}">
-                    </td>
-                    <td>
-                        <input type="text" value="{{ di.2 }}" id="id_q_{{ di.0 }}" name="id_q_{{ di.0 }}">
-                    </td>
-                    <td>
-                        <input type="text" value="{{ di.3 }}" id="id_p_{{ di.0 }}" name="id_p_{{ di.0 }}">
-                    </td>
-                    <td>
-                    </td>
-                </tr>
-            {% endfor %}-->
         </table>
         <div><input type="submit" value="Сохранить"></div>
     </form>

@@ -1,0 +1,139 @@
+{% extends "pansionat/index.html" %}
+
+{% block title %} Назначение списка процедур {%  endblock  %}
+
+{% block head %}
+    <style type="text/css">
+        @import "/static/dataTables/media/css/demo_page.css";
+        @import "/static/dataTables/media/css/demo_table.css";
+        @import "/static/jquery-ui/themes/base/jquery.ui.all.css";
+    </style>
+    <script src="/static/dataTables/media/js/jquery.js"></script>
+    <script src="/static/dataTables/media/js/jquery.dataTables.js"></script>
+    <script src="/static/jquery-ui/ui/jquery.ui.core.js"></script>
+    <script src="/static/jquery-ui/ui/jquery.ui.widget.js"></script>
+    <script src="/static/jquery-ui/ui/jquery.ui.position.js"></script>
+    <script src="/static/jquery-ui/ui/jquery.ui.autocomplete.js"></script>
+    <script src="/static/jquery-ui/ui/jquery.ui.datepicker.js"></script>
+    <script src="/static/jquery-ui/ui/i18n/jquery.ui.datepicker-ru.js"></script>
+    <script src="/static/jquery-ui/ui/jquery.ui.button.js"></script>
+    <style>
+        .odd {
+            background: #ccc;
+        }
+        .c_new {
+            width: 30px;
+        }
+        .id_n {
+            width: 300px;
+        }
+        .id_a {
+            width: 300px;
+        }
+        table.display img {
+            width: 10px;
+            height: 10px;
+            border: 0;
+        }
+    </style>
+    <script type="text/javascript">
+        function change_ids(i, j) {
+            var t = $(i).val();
+            $(i).val($(j).val());
+            $(j).val(t);
+        }
+        function change_row(i, j) {
+            change_ids('#id_n_'+i,'#id_n_'+j);
+            change_ids('#id_a_'+i,'#id_a_'+j);
+            change_ids('#id_c_'+i,'#id_c_'+j);
+        }
+        function d_row(i) {
+            var nr = $('#occupied tr').length;
+            for (var r=i+1;r<=nr;r++) {
+                change_row(r-1,r);
+            }
+            $('#occupied tr:last').remove();
+        }
+        $(document).ready(function() {
+            availableTags = [
+                {% for mp in all_mp %}"{{ mp }}",{% endfor %}
+            ];
+//            availableTags = [
+//                {% for mp in all_mp %}{value:"{{ mp }}",label:{{ mp.id }}},{% endfor %}
+//            ];
+            m_ai = [];
+            {% for k,v in mai.items %} m_ai['{{ k }}'] = [{% for v1 in v %}"{{ v1 }}",{% endfor %}];{% endfor %}
+            m_ai2 = [];
+            {% for k,v in mai2.items %} m_ai2['{{ k }}'] = [{% for v1 in v %}"{{ v1 }}",{% endfor %}];{% endfor %}
+
+        });
+        function getOpt(nr,ai) {
+            var opt = '';
+            //alert(ai.length);
+            if (ai!=undefined) {
+                for (var id=0;id<ai.length; id++) {
+                opt = opt + "<a href='#' onclick=\"$('#id_a_"+nr+"').val(this.innerHTML); return false;\">"+ai[id]+"</a>&nbsp;";
+                }
+            }
+            //alert(opt);
+            return opt;
+        }
+        function addRow(nv, av, cv, zv, ai) {
+            var nr = $('#occupied tr').length;
+            var buttons = '<td><a href="#" onclick="d_row('+nr+'); return false;"><img src="/static/delete.png"/></a></td>';
+            var idx = '<td>'+nr+'</td>';
+            var opt = getOpt(nr,ai);
+            var di = '<td><input class="id_n" type="text" value="'+nv+'" id="id_n_'+nr+'" name="id_n_'+nr+'" ><div id="id_ai_'+nr+'">'+opt+'</div></td>';
+            var a = '<td><input class="id_a" type="text" value="'+av+'" id="id_a_'+nr+'" name="id_a_'+nr+'" ></td>';
+            var c = '<td>'+cv+'</td>';
+            var c_new = '<td><input type="text" class="c_new" value="'+cv+'" id="id_c_'+nr+'" name="id_c_'+nr+'" ></td>';
+            var z = '<td>'+zv+'</td>';
+            $("#occupied").append("<tr>"+buttons+idx+di+a+c+c_new+z+"</tr>");
+            $( "#id_n_"+nr ).autocomplete({
+                source: availableTags,
+                select: function(event, ui) {
+                    //alert(ui.item.label);
+                    $('#id_ai_'+nr).html(getOpt(nr,m_ai2[ui.item.label]));
+                }
+            });
+        }
+        function addEmptyRow() {
+            addRow('','','','',[])
+        }
+        $(document).ready(function() {
+            $.datepicker.setDefaults($.datepicker.regional['ru']);
+            $('#id_birth_date').datepicker();
+            $('input:submit').button()
+            $(':button').button()
+            $("tr:odd").addClass("odd");
+        //
+            {% for c in choosed %}
+                addRow('{{ c.0 }}','{{ c.1 }}','{{ c.2 }}','{{ c.3 }}', m_ai[{{ c.4 }}]);
+            {% endfor %}
+
+        } );
+    </script>
+    <link rel="stylesheet" href="/static/Refresh.css" type="text/css" />
+{%  endblock  %}
+
+{% block allcontent %}
+    <h1>Медицинские процедуры</h1>
+    <form action = "/mp2/save/" method="POST">
+        {% csrf_token %}
+        <div>{{ patient_name }}</div><div><a href="/mp/{{ order_id }}/print2/">печать</a></div><div><input type="submit" value="Сохранить"></div>
+        <table>
+            {% for err in ves %}
+                <tr><td>{{ err }}</td></tr>
+            {% endfor %}
+            {% for text,oid,did in ns %}
+                <tr><td>{{ text }}<a href="/order/{{ oid }}/docs/{{ did }}">открыть</a></td></tr>
+            {% endfor %}
+        </table>
+       <table border="0" id = "occupied" class = "display">
+            <tr><th onclick="addEmptyRow()"><img src="/static/add.png"/></th><th></th><th>Название</th><th>Доп. инфо</th><th width="20px;" >К-во</th><th width="20px;">К-во</th><th>Назначено</th><th></th></tr>
+            <input type="hidden" name="order_id" value="{{ order_id }}"/>
+        </table>
+    <div><label for="galka"></label><input id="galka" name="galka" type="checkbox" checked="true"></div>
+        <div><input type="submit" value="Сохранить"></div>
+    </form>
+{%  endblock  %}
