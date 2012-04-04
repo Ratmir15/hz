@@ -69,6 +69,8 @@
         <th>Номер</th>
         <th>Дата</th>
         <th>Тип</th>
+        <th>Сумма</th>
+        <th>Статус</th>
         <th></th>
         </thead>
         {% for doc in docs %}
@@ -77,10 +79,16 @@
                     {{ doc.code }}
                 </td>
                 <td>
-                    {{ doc.dt }}
+                    {{ doc.dt_cool }}
                 </td>
                 <td>
                     {{ doc.doc_type }}
+                </td>
+                <td>
+                    {{ doc.all_amount }}
+                </td>
+                <td>
+                    {{ doc.status_text }}
                 </td>
                 <td>
                         <a href="/order/{{ id }}/docs/{{ doc.id }}">Открыть</a>

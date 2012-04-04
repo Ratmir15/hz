@@ -1,0 +1,112 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+        "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+    <title>Рабочее место врача</title>
+    <style type="text/css">
+        table.tch td {
+            border: 1px solid;
+        }
+        table.tch th {
+            border: 1px solid;
+            text-align: center;
+        }
+        table.tch {
+            border:0;
+            padding: 0;
+            border-spacing: 0;
+        }
+        a:visited {
+            color:blue;
+        }
+    </style>
+    <style type="text/css">
+        @import "/static/jquery-ui/themes/base/jquery.ui.all.css";
+    </style>
+    <script src="/static/dataTables/media/js/jquery.js"></script>
+    <script src="/static/dataTables/media/js/jquery.dataTables.js"></script>
+    <script src="/static/jquery-ui/ui/jquery.ui.core.js"></script>
+    <script src="/static/jquery-ui/ui/jquery.ui.widget.js"></script>
+    <script src="/static/jquery-ui/ui/jquery.ui.mouse.js"></script>
+    <script src="/static/jquery-ui/ui/jquery.ui.draggable.js"></script>
+    <script src="/static/jquery-ui/ui/jquery.ui.droppable.js"></script>
+    <script src="/static/jquery-ui/ui/jquery.ui.position.js"></script>
+    <script src="/static/jquery-ui/ui/jquery.ui.resizable.js"></script>
+    <script src="/static/jquery-ui/ui/jquery.ui.dialog.js"></script>
+    <script src="/static/jquery-ui/ui/jquery.ui.datepicker.js"></script>
+    <script src="/static/jquery-ui/ui/i18n/jquery.ui.datepicker-ru.js"></script>
+    <script src="/static/jquery-ui/ui/jquery.ui.button.js"></script>
+    <style>
+        #draggable { width: 100px; height: 100px; padding: 0.5em; float: left; margin: 10px 10px 10px 0; }
+        #droppable { width: 150px; height: 150px; padding: 0.5em; float: left; margin: 10px; }
+        table.tch div { float: left;}
+        table.tch img {
+            width: 16px;
+            height: 16px;
+            border: 0;
+        }
+        .ui-state-active { color: red; font: bold; }
+    </style>
+    <script type="text/javascript">
+        $(document).ready(function() {
+            $.datepicker.setDefaults($.datepicker.regional['ru']);
+            $('#dl').dialog({ autoOpen: false });
+            $('input:submit').button()
+            $(':button').button()
+        } );
+    </script>
+</head>
+<body>
+<div style="width: 100%;background-color: #eeeeee;border-bottom: 1px solid;" align="center">Рабочее место кассира&nbsp;
+    &nbsp;<a href="/reports/">Отчеты</a>&nbsp;</div>
+
+<table class="tch" width="100%">
+    <thead>
+    <th>Номер</th>
+    <th>Дата</th>
+    <th>Тип</th>
+    <th>Путевка</th>
+    <th>Пациент</th>
+    <th>Сумма</th>
+    <th>Статус</th>
+    <th></th>
+    <th></th>
+    </thead>
+    {% for doc in ods %}
+        <tr>
+            <td>
+                {{ doc.code }}
+            </td>
+            <td>
+                {{ doc.dt_cool }}
+            </td>
+            <td>
+                {{ doc.doc_type }}
+            </td>
+            <td>
+                {{ doc.ord.putevka }}
+            </td>
+            <td>
+                {{ doc.ord.patient }}
+            </td>
+            <td>
+                {{ doc.all_amount }}
+            </td>
+            <td>
+                {{ doc.status_text }}
+            </td>
+            <td>
+                {% if doc.c_d %}
+                <a href="/docs/{{ doc.id }}/done/">Провести</a>&nbsp;
+                {% endif %}
+            </td>
+            <td>
+                <a href="/order/{{ doc.ord.id }}/docs/{{ doc.id }}">Открыть</a>&nbsp;
+                <a href="/docs/{{ doc.id }}/print/">Печать</a>
+            </td>
+        </tr>
+    {% endfor %}
+</table>
+
+</body>
+</html>

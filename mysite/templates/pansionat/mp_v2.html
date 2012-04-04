@@ -35,6 +35,13 @@
             height: 10px;
             border: 0;
         }
+        div.l {
+            float: left;
+            padding: 2px;
+        }
+        div.r {
+            float: right;
+        }
     </style>
     <script type="text/javascript">
         function change_ids(i, j) {
@@ -122,7 +129,10 @@
     <h1>Медицинские процедуры</h1>
     <form action = "/mp2/save/" method="POST">
         {% csrf_token %}
-        <div>{{ patient_name }}</div><div><a href="/mp/{{ order_id }}/print2/">печать</a></div><div><input type="submit" value="Сохранить"></div>
+        <div class="l">{{ patient_name }}</div>
+        <div class="l"><a href="/mp/{{ order_id }}/print2/">печать</a></div>
+        <div class="l"><a href="/order/{{ order_id }}/docs/">документы</a></div>
+        <div class="r"><input type="submit" value="Сохранить"></div>
         <table>
             {% for err in ves %}
                 <tr><td>{{ err }}</td></tr>
@@ -135,7 +145,7 @@
             <tr><th onclick="addEmptyRow()"><img src="/static/add.png"/></th><th></th><th>Название</th><th>Доп. инфо</th><th width="20px;" >К-во</th><th width="20px;">К-во</th><th>Назначено</th><th></th></tr>
             <input type="hidden" name="order_id" value="{{ order_id }}"/>
         </table>
-    <div><label for="galka">Создать ордер</label><input id="galka" name="galka" type="checkbox" checked="true"></div>
-        <div><input type="submit" value="Сохранить"></div>
+    <div class="l"><label for="galka">Создать ордер</label></div><div class="l"><input id="galka" name="galka" type="checkbox" checked="true"></div>
+        <div class="r"><input type="submit" value="Сохранить"></div>
     </form>
 {%  endblock  %}

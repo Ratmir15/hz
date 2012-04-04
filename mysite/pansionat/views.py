@@ -22,8 +22,8 @@ from django.shortcuts import render_to_response
 from django.shortcuts import redirect 
 import logging
 from mysite.pansionat import gavnetso
-from mysite.pansionat.documents import createNakladnaya, getOrCreateDocItem
-from mysite.pansionat.models import IllHistory, Customer, IllHistoryFieldType, IllHistoryFieldValue, IllHistoryRecord, OrderMedicalProcedure, MedicalProcedureType, OrderMedicalProcedureSchedule, Occupied, IllHistoryFieldTypeGroup, EmployerRoleHistory, Role, Employer, OrderDiet, Diet, OrderDay, OrderType, DietItems, Item, ItemPiece, Piece, MARRIAGE, EmployerCabinet, OrderDocumentItem
+from mysite.pansionat.documents import getOrCreateDocItem, createDocument
+from mysite.pansionat.models import IllHistory, Customer, IllHistoryFieldType, IllHistoryFieldValue, IllHistoryRecord, OrderMedicalProcedure, MedicalProcedureType, OrderMedicalProcedureSchedule, Occupied, IllHistoryFieldTypeGroup, EmployerRoleHistory, Role, Employer, OrderDiet, Diet, OrderDay, OrderType, DietItems, Item, ItemPiece, Piece, MARRIAGE, EmployerCabinet, OrderDocumentItem, OrderDocument
 from mysite.pansionat.orders import room_availability, fill_cust_list, return_orders_list
 from mysite.pansionat.proc import MenuRequestContext, MedicalPriceReport
 from mysite.pansionat.reports import DietForm, DateFilterForm, PFCondition, ElseCondition, SPCondition, PPCondition, RCondition, SzCondition, HzCondition, HzSzCondition
@@ -833,23 +833,23 @@ def mp_save2(request):
             omp.save()
 
 
-        nakls = list()
+        pkos = list()
         if request.POST.get("galka"):
             idx = 0
             if len(balance):
-                nakl = createNakladnaya(order_id)
-                nakl.save()
+                pko = createDocument(order_id, "P")
+                pko.save()
                 #val_er.append((u"Создана накладная. <a href=\\order\\"+order_id+u"\\docs\\"+str(nakl.id)+u"\\>открыть</a>")
-                nakls.append((u"Создана накладная.", order_id,  nakl.id))
+                pkos.append((u"Создан ПКО.", order_id,  pko.id))
                 for mp_type,add_info,times in balance:
                     idx += 1
                     di = getOrCreateDocItem(mp_type.name + " " +add_info)
                     #TODO calculate price
-                    price = 0
-                    odi = OrderDocumentItem(line = idx, order_document = nakl, doc_item = di, quantity = times, price = price)
+                    price = 1
+                    odi = OrderDocumentItem(line = idx, order_document = pko, doc_item = di, quantity = times, price = price)
                     odi.save()
 
-        return medical_procedures_v2_(request, order_id, nakls)
+        return medical_procedures_v2_(request, order_id, pkos)
     return ill_history_new(request) #if method is't post then show empty form
 
 @login_required

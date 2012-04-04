@@ -457,10 +457,29 @@ class OrderDocument(models.Model):
     code = models.IntegerField(verbose_name='Номер документа',max_length=8)
     dt = models.DateField(verbose_name='Дата документа')
     doc_type = models.CharField(verbose_name='Тип документа',max_length=1,choices=DOC_TYPE)
+    status = models.IntegerField(verbose_name='Статус')
+    # 0 - pending
+    # 1 - cancelled
+    # 2 - done
     def dt_cool(self):
-        return self.dt.strftime('%Y.%d.%m')
+        return self.dt.strftime('%Y.%m.%d')
+    def c_c(self):
+        return self.status!=1
+    def c_d(self):
+        return self.status!=2
+    def status_text(self):
+        if self.status==1:
+            return "Отменена"
+        if self.status==2:
+            return "Проведена"
+        return "В ожидании"
     def __unicode__(self):
-        return self.doc_type+" "+self.code+" "+self.dt_cool()
+        return self.doc_type+" "+str(self.code)+" "+self.dt_cool()
+    def all_amount(self):
+        a = 0
+        for z in self.orderdocumentitem_set.all():
+            a += z.amount()
+        return a
 
 class DocItem(models.Model):
     name = models.CharField(verbose_name='Наименование',max_length=50)
@@ -475,6 +494,8 @@ class OrderDocumentItem(models.Model):
     price = models.DecimalField(verbose_name='Цена',decimal_places=2,max_digits=7)
     def __unicode__(self):
         return str(self.line)+" "+self.doc_item.__unicode__()
+    def amount(self):
+        return self.quantity * self.price
 
 class ItemPrice(models.Model):
     doc_item = models.ForeignKey(DocItem, verbose_name='Номенклатура')
