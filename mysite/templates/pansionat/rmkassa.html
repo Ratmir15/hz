@@ -59,6 +59,7 @@
 <body>
 <div style="width: 100%;background-color: #eeeeee;border-bottom: 1px solid;" align="center">Рабочее место кассира&nbsp;
     &nbsp;<a href="/reports/">Отчеты</a>&nbsp;</div>
+<div><a href="/rmkassa/">Ожидающие</a>&nbsp;<a href="/rmkassa/done/">Проведенные</a>&nbsp;<a href="/rmkassa/canceled/">Отмененные</a>&nbsp;</div>
 
 <table class="tch" width="100%">
     <thead>
@@ -98,6 +99,9 @@
             <td>
                 {% if doc.c_d %}
                 <a href="/docs/{{ doc.id }}/done/">Провести</a>&nbsp;
+                {% endif %}
+                {% if doc.c_c %}
+                <a href="/docs/{{ doc.id }}/cancel/">Отменить</a>&nbsp;
                 {% endif %}
             </td>
             <td>

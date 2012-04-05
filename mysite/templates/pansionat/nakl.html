@@ -1,6 +1,6 @@
 {% extends "pansionat/index.html" %}
 
-{% block title %} Накладная {%  endblock  %}
+{% block title %} {{ title }} {%  endblock  %}
 
 {% block head %}
     <style type="text/css">
@@ -91,8 +91,8 @@
 {%  endblock  %}
 
 {% block allcontent %}
-    <h1>Накладная</h1>
-    <form action = "/nakl/{{ doc_id }}/save/" method="POST">
+    <h1>{{ title }}</h1>
+    <form action = "/docs/{{ doc_id }}/save/" method="POST">
         <div style="float: left;"><label for="code">Номер</label><input type="text" id="code" value="{{ code }}" /></div>
         <div style="float: left;"><label for="dt">Дата</label><input type="text" id="dt" value="{{ dt }}" /></div>
         {% csrf_token %}

@@ -22,13 +22,13 @@ from django.shortcuts import render_to_response
 from django.shortcuts import redirect 
 import logging
 from mysite.pansionat import gavnetso
-from mysite.pansionat.documents import getOrCreateDocItem, createDocument
-from mysite.pansionat.models import IllHistory, Customer, IllHistoryFieldType, IllHistoryFieldValue, IllHistoryRecord, OrderMedicalProcedure, MedicalProcedureType, OrderMedicalProcedureSchedule, Occupied, IllHistoryFieldTypeGroup, EmployerRoleHistory, Role, Employer, OrderDiet, Diet, OrderDay, OrderType, DietItems, Item, ItemPiece, Piece, MARRIAGE, EmployerCabinet, OrderDocumentItem, OrderDocument
+from mysite.pansionat.documents import getOrCreateDocItem, createDocument, generateNakl
+from mysite.pansionat.models import IllHistory, Customer, IllHistoryFieldType, IllHistoryFieldValue, IllHistoryRecord, OrderMedicalProcedure, MedicalProcedureType, OrderMedicalProcedureSchedule, Occupied, IllHistoryFieldTypeGroup, EmployerRoleHistory, Role, Employer, OrderDiet, Diet, OrderDay, OrderType, DietItems, Item, ItemPiece, Piece, EmployerCabinet, OrderDocumentItem
 from mysite.pansionat.orders import room_availability, fill_cust_list, return_orders_list
-from mysite.pansionat.proc import MenuRequestContext, MedicalPriceReport
+from mysite.pansionat.proc import MenuRequestContext
 from mysite.pansionat.reports import DietForm, DateFilterForm, PFCondition, ElseCondition, SPCondition, PPCondition, RCondition, SzCondition, HzCondition, HzSzCondition
 from pytils import numeral
-from mysite.pansionat.gavnetso import monthlabel, nextmonthfirstday, initbase, initroles, initroomtypes, initp, initdiet, fillBookDays, fillOrderDays, inithistory, import_bron, import_proc, import_rooms, import_ordertypes, fillBookAllDays, getEmployersByRoleAndDate
+from mysite.pansionat.gavnetso import monthlabel, nextmonthfirstday, initroles, initroomtypes, initdiet, fillBookDays, fillOrderDays, inithistory, import_bron, import_proc, import_rooms, import_ordertypes, fillBookAllDays, getEmployersByRoleAndDate
 import datetime
 import time
 from django import forms
@@ -1680,32 +1680,15 @@ def movtp(request, year, month,tp):
 @login_required
 def nakl(request, occupied_id):
     order = Order.objects.get(id=occupied_id)
-    template_filename = 'torg12_0.xls'
-    fullname = str('ООО санаторий "Хопровские зори"')
-    vendor = str('КПП 581701001 ')+ fullname + str(' Пензенская обл., п.Колышлей, ул.Лесная 1а')
-    if order.patient.address is None:
-        client  = order.patient.fio()
-    else:
-        client  = order.patient.fio()+','+order.patient.address
     delt = order.end_date - order.start_date
     days = delt.days + 1
-    dir = gavnetso.getEmployerByRoleNameAndDate('Директор',order.start_date).__unicode__()
-    gb = gavnetso.getEmployerByRoleNameAndDate('Главный бухгалтер',order.start_date).__unicode__()
-    kassir = gavnetso.getEmployerByRoleNameAndDate('Кассир',order.start_date).__unicode__()
-    tovar = str('Пут. сан.-кур. на ')+str(days)+str(' дней c ')+str(order.start_date)+str(' по ')+str(order.end_date) + str('№ ')+ str(order.code)
-    price = order.price
-    rub = numeral.rubles(float(price), True)
-    tel = {'PORTRAIT':False, 'NUMPAGES':1, 'PIZDEZ': fullname, 'NUMBER': order.code,
-           'FILENAME': 'nakladnaya-'+str(order.code),
-           'CLIENT': client, 'VENDOR': vendor,
-           'DIRECTOR': dir,
-           'GBUH': gb,
-           'KASSIR': kassir,
-           'SP': rub,
-           'DATE':order.start_date.strftime('%d.%m.%Y'), 'QTYSUM':1, 'AMOUNTSUM':order.price, 'AMOUNTNDSSUM':order.price, 'ALLAMOUNTSUM':order.price,
-           'TOVAR': [{'ROWINDEX':1,'NAME':tovar,'QTY':1,'PRICE':order.price,'AMOUNT':order.price,
-                      'PNDS':0,'AMOUNTNDS':'-','ALLAMOUNT':order.price}]}
-    return fill_excel_template(template_filename, tel, request)
+    tovar = str('Пут. сан.-кур. на ')+str(days)+str(' дней c ')+str(order.start_date)+str(' по ')+\
+            str(order.end_date) + str('№ ')+ str(order.code)
+    t = [{'ROWINDEX': 1, 'NAME': tovar, 'QTY': 1, 'PRICE': order.price, 'AMOUNT': order.price, 'PNDS': 0,
+          'AMOUNTNDS': '-', 'ALLAMOUNT': order.price}]
+    order_price = order.price
+    order_date = order.start_date.strftime('%d.%m.%Y')
+    return generateNakl(order, order_date, order_price, request, t)
 
 @login_required
 @permission_required('pansionat.add_order', login_url='/forbidden/')

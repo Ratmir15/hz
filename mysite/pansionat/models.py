@@ -461,6 +461,15 @@ class OrderDocument(models.Model):
     # 0 - pending
     # 1 - cancelled
     # 2 - done
+    def title(self):
+        if self.doc_type == "N":
+            return "Накладная"
+        if self.doc_type == "P":
+            return "ПКО"
+        if self.doc_type == "R":
+            return "РКО"
+        if self.doc_type == "S":
+            return "Счет-фактура"
     def dt_cool(self):
         return self.dt.strftime('%Y.%m.%d')
     def c_c(self):

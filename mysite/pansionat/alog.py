@@ -13,6 +13,11 @@ def log_it(request):
         message = 'Печать отчета', dt = datetime.datetime.now())
     l.save()
 
+def log_message(request, message):
+    l = ActionLog(ip = request.META['REMOTE_ADDR'], user = request.user, path = request.path,
+        message = message, dt = datetime.datetime.now())
+    l.save()
+
 @login_required
 def lastlog(request):
     dt = datetime.date.today()
