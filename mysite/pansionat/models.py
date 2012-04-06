@@ -386,6 +386,13 @@ class IllHistoryRecord(models.Model):
         verbose_name = 'Запись истории болезни'
         verbose_name_plural = 'Записи историй болезни'
 
+class TemplateGroup(models.Model):
+    name = models.CharField(verbose_name='Название', max_length=30)
+
+class IllHistoryRecordTemplate(models.Model):
+    template_group = models.ForeignKey(TemplateGroup, verbose_name='Шаблон')
+    text = models.CharField(verbose_name='Текст', max_length=500)
+
 # Room book service
 #ROOM_TYPE = (
 #    ("L", "Lux"),

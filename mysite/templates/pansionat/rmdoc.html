@@ -46,6 +46,23 @@
             border: 0;
         }
         .ui-state-active { color: red; font: bold; }
+        .gray { color: #CCC; }
+        h1, h2, h3 {
+            font-family: Tahoma, Verdana, 'Trebuchet MS', Sans-serif;
+            font-weight: Bold;
+        }
+        h1 {
+            font-size: 120%;
+        }
+        h2 {
+            font-size: 110%;
+            text-transform: uppercase;
+            color: #88ac0b;
+        }
+        h3 {
+            font-size: 110%;
+            color: #666666;
+        }
     </style>
     <script type="text/javascript">
         $(document).ready(function() {
@@ -73,6 +90,10 @@
     </script>
 </head>
 <body>
+<div style="position: absolute;left: 10px; top: 10px;">
+
+    <h1 id="logo-text">Хопровские<span class="gray">зори</span></h1>
+    <h2 id="slogan">Пензенская область, г. Колышлей</h2></div>
 <div style="width: 100%;background-color: #eeeeee;border-bottom: 1px solid;" align="center">Рабочее место доктора&nbsp;<a href="/rmdoc/{{ pday }}">{{ pday }}</a>&nbsp;<a href="/rmdoc/{{ nday }}">{{ nday }}</a>&nbsp;<form action="/rmreg/" method="post" name="date_form">{% csrf_token %}<input type="text" id="diary_date" name="diary_date"/><a href="#" onclick="document.date_form.action = '/rmdoc/'+$('#diary_date').val()+'/'; document.date_form.submit(); return false;">Показать</a></form>
     &nbsp;<a href="/reports/">Отчеты</a>&nbsp;</div>
 
