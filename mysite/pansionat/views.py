@@ -794,7 +794,7 @@ def mp_save2(request):
                 add_info = request.POST.get('id_a_'+idx)
                 count = request.POST.get('id_c_'+idx)
                 try:
-                    cnt = int(count)
+                    int(count)
                 except ValueError:
                     val_er.append(u'Введено не числовое значение ('+count+u') для медицинской процедуры '+name)
                     count = 0
