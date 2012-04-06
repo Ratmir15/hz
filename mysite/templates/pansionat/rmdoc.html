@@ -84,7 +84,7 @@
     {% for l in patients %}
         <tr>
         {% for o in l %}
-            <td><div class="draggable" id="q_{{ o.id }}"><a href="/order/{{ o.id }}">{{ o.patient.fio }}</a></div>{% if o %}<div style="float:right;"><a href="/ih/{{ o.id }}"><img src="/static/xls.png" alt=""></a>&nbsp;&nbsp;<a href="/mp/{{ o.id }}"><img src="/static/mp.png" alt=""></a></div>{% endif %}</td>
+            <td><div class="draggable" id="q_{{ o.id }}"><a href="/order/{{ o.id }}">{{ o.patient.fio }}</a></div>{% if o %}<div style="float:right;"><a href="/ih/{{ o.id }}"><img src="/static/xls.png" alt=""></a>&nbsp;&nbsp;<a href="/mp/{{ o.id }}"><img src="/static/mp.png" alt=""></a>{{ o.pkos.0 }}&nbsp;{{ o.pkos.1 }}&nbsp;{{ o.pkos.2 }}</div>{% endif %}</td>
         {% endfor %}
         </tr>
     {% endfor %}

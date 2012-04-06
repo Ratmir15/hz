@@ -793,6 +793,12 @@ def mp_save2(request):
                 name = v
                 add_info = request.POST.get('id_a_'+idx)
                 count = request.POST.get('id_c_'+idx)
+                try:
+                    cnt = int(count)
+                except ValueError:
+                    val_er.append(u'Введено не числовое значение ('+count+u') для медицинской процедуры '+name)
+                    count = 0
+
                 mpts = MedicalProcedureType.objects.filter(name = name)
                 ch[name+u"/"+add_info] = (name,add_info,count,mpts)
                 if not len(mpts):

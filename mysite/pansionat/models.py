@@ -275,6 +275,18 @@ class Order(models.Model):
             return ""
         else:
             return self.patient.family
+    def pkos(self):
+        s1 = 0
+        s2 = 0
+        s3 = 0
+        for od in self.orderdocument_set.filter(doc_type = "P"):
+            if od.status == 1:
+                s2 += 1
+            if od.status == 0:
+                s1 += 1
+            if od.status == 2:
+                s3 += 1
+        return s1,s2,s3
 
     #create index idx_end_date on pansionat_order (end_date);
     #create index idx_start_date on pansionat_order (start_date);
