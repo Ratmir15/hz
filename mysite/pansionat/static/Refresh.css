@@ -153,7 +153,7 @@ form.search input.button {
 /* login */
 form.login {
 	position: absolute;
-	top: 35px; right: 25px;
+	top: 15px; right: 25px;
 	background: transparent;
 	border: none;
 }
@@ -183,22 +183,20 @@ form.login input.logoutbutton {
    LAYOUT
 ********************************************/ 
 #wrap {
-	width: 1000px;
+    width: 100%;
 	background: #CCC url(content.jpg) repeat-y center top;
 	margin: 0 auto;
 	text-align: left;
 }
 #content-wrap {
 	clear: both;
-	width: 940px;
-	padding: 0; 
+    width: 100%;
+	padding: 0;
 	margin: 0 auto;
 }
 #header {
-	width: 1000px;
+    width: 100%;
 	position: relative;
-	height: 106px;
-	background: #CCC url(header.jpg) no-repeat center top;
 	padding: 0;
 	font-size: 14px;
 	color: #FFF;
@@ -212,7 +210,7 @@ form.login input.logoutbutton {
 	text-transform: none;
 	
 	/* change the values of top and left to adjust the position of the logo*/
-	top: 28px; left: 50px;	
+	top: 3px; left: 50px;
 }
 #header h2#slogan {
 	position: absolute;
@@ -222,14 +220,13 @@ form.login input.logoutbutton {
 	color: #FFF;
 	
 	/* change the values of top and left to adjust the position of the slogan*/
-	top: 74px; left: 58px;		
+	top: 49px; left: 58px;
 }
 
 /* Menu */
 #menu {
 	clear: both;	
-	margin: 0; padding: 0 40px 0 0;
-	background: url(menu.jpg) repeat-y center top;	
+	margin: 0; padding: 0 0 0 0;
 	font: bold 12px/26px Verdana, Arial, Tahoma, Sans-serif;
 	height: 26px;
 }
@@ -255,6 +252,19 @@ form.login input.logoutbutton {
 #menu ul li#current a {	
 	background-color: #FFF;
 	color: #333;
+}
+div#h_c {
+    -moz-border-radius-topleft: 10px/*{cornerRadius}*/;
+    -webkit-border-top-left-radius: 10px/*{cornerRadius}*/;
+    -khtml-border-top-left-radius: 10px/*{cornerRadius}*/;
+    border-top-left-radius: 10px/*{cornerRadius}*/;
+    -moz-border-radius-topright: 10px/*{cornerRadius}*/;
+    -webkit-border-top-right-radius: 10px/*{cornerRadius}*/;
+    -khtml-border-top-right-radius: 10px/*{cornerRadius}*/;
+    border-top-right-radius: 10px/*{cornerRadius}*/;
+    -moz-user-select: none;-khtml-user-select: none;
+    user-select: none;
+    cursor: default;
 }
 
 /* Main Column */
@@ -330,9 +340,8 @@ form.login input.logoutbutton {
 /* Footer */	
 #footer {
 	color: #666666;
-	background: #CCC url(footer.jpg) no-repeat center top;
 	clear: both;
-	width: 1000px;
+	width: 100%;
 	height: 55px;
 	text-align: center;	
 	font-size: 92%;

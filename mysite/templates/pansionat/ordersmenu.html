@@ -28,11 +28,13 @@
 
 {% block allcontent %}
     <h1>Путевки за месяц</h1>
+    {% for year in years %}
     <h3>
     {% for month in months %}
         <a href="/orders/{{ year }}/{{ month }}">{{ year }}.{{ month }}</a>
     {% endfor %}
     </h3>
+    {% endfor %}
     <br/>
     <form action="/filterorders/" method="POST">
     <table>

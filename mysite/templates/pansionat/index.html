@@ -17,15 +17,14 @@
 	
 </head>
 
-<body>
-<!-- wrap starts here -->
-<div id="wrap">
-		
+<body style="background-color: #ffffff;text-align: left;">
 		<!--header -->
-		<div id="header">			
-				
-			<h1 id="logo-text">Хопровские<span class="gray">зори</span></h1>
-			<h2 id="slogan">Пензенская область, г. Колышлей</h2>
+        <div id="top" style="height:2px;"></div>
+	<div id="header">
+            <div id="h_l" style="width:10px; background-color: #ffffff;"></div>
+		<div id="bdy">
+                <div id="h_c" style="width:100%;background-color: blue;height: 70px;"><h1 id="logo-text">Хопровские<span class="gray">зори</span></h1>
+                    <h2 id="slogan">Пензенская область, г. Колышлей</h2></div>
 
             {% if user.is_authenticated %}
                 <form action="/logout/" method="post" class="login">
@@ -49,32 +48,21 @@
 
             {% endif %}
             </form>
-		    <!--<form class="search" method="post" action="#">
-				<p>
-	  			<input class="textbox" type="text" name="search_query" value="" />
-	 			<input class="button" type="submit" name="Submit" value="Поиск" />
-				</p>
-			</form>-->
-				
+
 		</div>
 		
 		<!-- menu -->	
-		<div  id="menu">
+		<div  id="menu"  style="width:100%;background-color: green;">
             {% block menu %}
                 <ul>
                 {% for item in menu_list %}
                     <li><a href="{{ item.href }}">{{ item.label }}</a></li>
                 {% endfor %}
                 </ul>
-       <!--     <ul>
-				<li><a href="/patients/">Пациенты</a></li>
-				<li><a href="/rooms/">Номера</a></li>
-				<li><a href="/orders/">Путевки</a></li>
-				<li><a href="/reports/">Отчеты</a></li>
-			</ul>-->
             {% endblock %}
 		</div>					
-			
+			</div>
+			</div>
 		<!-- content-wrap starts here -->
 		<div id="content-wrap">
             {%  block allcontent %}
@@ -90,9 +78,6 @@
 			&copy; 2011 <strong>Kesha&amp;LysiyH</strong>
 
 		</div>	
-
-<!-- wrap ends here -->
-</div>
 
 </body>
 </html>

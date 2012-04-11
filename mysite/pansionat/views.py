@@ -81,9 +81,10 @@ def return_order_menu(form, request):
     t = loader.get_template('pansionat/ordersmenu.html')
     months = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12']
     year = datetime.date.today().year
+    years = (year-1,year)
     c = MenuRequestContext(request, {
         "months": months,
-        "year": year,
+        "years": years,
         "today": datetime.date.today(),
         "form": form
     })
