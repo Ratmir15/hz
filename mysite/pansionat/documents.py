@@ -186,7 +186,7 @@ def cancel_doc(request, doc_id):
 @login_required
 def print_doc(request, doc_id):
     od = OrderDocument.objects.get(id = doc_id)
-    order = Order.objects.get(id=od.id)
+    order = ord #.orderOrder.objects.get(id=od.id)
     #delt = order.end_date - order.start_date
     #days = delt.days + 1
     idx = 0
