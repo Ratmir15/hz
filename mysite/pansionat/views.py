@@ -1690,7 +1690,7 @@ def nakl(request, occupied_id):
     delt = order.end_date - order.start_date
     days = delt.days + 1
     tovar = str('Пут. сан.-кур. на ')+str(days)+str(' дней c ')+str(order.start_date)+str(' по ')+\
-            str(order.end_date) + str('№ ')+ str(order.code)
+            str(order.end_date) + str('№ ')+ str(order.putevka)
     t = [{'ROWINDEX': 1, 'NAME': tovar, 'QTY': 1, 'PRICE': order.price, 'AMOUNT': order.price, 'PNDS': 0,
           'AMOUNTNDS': '-', 'ALLAMOUNT': order.price}]
     order_price = order.price
@@ -1803,7 +1803,7 @@ def pko(request, occupied_id):
     kassir = gavnetso.getEmployerByRoleNameAndDate('Кассир',order.start_date).__unicode__()
     delt = order.end_date - order.start_date
     days = delt.days + 1
-    tovar = 'Пут. сан.-кур. на '+str(days)+' дней c '+str(order.start_date)+' по '+str(order.end_date) + '№ '+ str(order.code)
+    tovar = 'Пут. сан.-кур. на '+str(days)+' дней c '+str(order.start_date)+' по '+str(order.end_date) + '№ '+ str(order.putevka)
     tel = { 'NUMPAGES':1,'FULLNAME': fullname, 'NUMBER': order.code,
            'FILENAME': 'pko-'+str(order.code),
            'CLIENT': client,
@@ -1826,7 +1826,7 @@ def rko(request, occupied_id):
     delt = order.end_date - order.start_date
     days = delt.days + 1
     rub = numeral.rubles(float(order.price), True)
-    tovar = 'Пут. сан.-кур. на '+str(days)+' дней c '+str(order.start_date)+' по '+str(order.end_date) + '№ '+ str(order.code)
+    tovar = 'Пут. сан.-кур. на '+str(days)+' дней c '+str(order.start_date)+' по '+str(order.end_date) + '№ '+ str(order.putevka)
     tel = { 'NUMPAGES':1,'FULLNAME': fullname, 'NUMBER': order.code,
             'FILENAME': 'rko-'+str(order.code),
             'CLIENT': client,
@@ -1893,7 +1893,7 @@ def schetfactura(request, occupied_id):
     kassir = gavnetso.getEmployerByRoleNameAndDate('Кассир',order.start_date).__unicode__()
     delt = order.end_date - order.start_date
     days = delt.days + 1
-    tovar = 'Пут. сан.-кур. на '+str(days)+' дней c '+str(order.start_date)+' по '+str(order.end_date) + '№ '+ str(order.code)
+    tovar = 'Пут. сан.-кур. на '+str(days)+' дней c '+str(order.start_date)+' по '+str(order.end_date) + '№ '+ str(order.putevka)
     tel = {'PORTRAIT':False, 'NUMPAGES':1,'SALER': fullname, 'NUMBER': order.code,
            'FILENAME': 'schetfaktura-'+str(order.code),
            'CLIENT': order.patient.fio(), 'CLIENTADDRESS': order.patient.address,
