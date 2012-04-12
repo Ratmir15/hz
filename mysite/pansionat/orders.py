@@ -69,7 +69,7 @@ def search(request):
         _orders = Order.objects.all().values("id","code","putevka","room__name","patient__family","patient__name","patient__sname","start_date","end_date","customer__name","price").order_by("id")
         orders = []
         for order in _orders:
-            if order["patient__family"].contains(fv):
+            if order["patient__family"].find(fv)>-1:
                 orders.append(order)
         msg  = u"Поиск по фамилии: "+fv
     if request.POST.has_key('family_search2'):
