@@ -42,5 +42,8 @@
                 <input type="hidden" name="instance_id" value="{{ instance_id }}"/>
             {% endif %}
         </table>
+    {% if instance_id %}
+        <a href="/books/{{ instance_id }}/bill">Выставить счет</a>
+ {% endif %}
     </form>
 {%  endblock  %}

@@ -134,6 +134,25 @@ def books(request):
     return resp
 
 @login_required
+def book_bill(request, instance_id):
+    instance = Book.objects.get(id = instance_id)
+
+    bill = instance.bill
+
+    if not bill:
+        m_bill = Book.objects.filter(start_date__year = start_date.year).aggregate(Max("bill"))
+
+        mcode = m_bill['code__max']
+
+        if mcode is None:
+            mcode = 0
+
+        instance.bill = mcode + 1
+        instance.save()
+
+    return print_bill(instance)
+
+@login_required
 def book_enable(request, instance_id):
     instance = Book.objects.get(id = instance_id)
     clearBookDays(instance)
@@ -1906,6 +1925,37 @@ def schetfactura(request, occupied_id):
            'DATE':order.start_date, 'QTYSUM':1, 'AMOUNTSUM':order.price, 'AMOUNTNDSSUM':order.price, 'ALLAMOUNTSUM':order.price,
            'TOVAR': [{'ROWINDEX':1,'NAME':tovar,'QTY':1,'PRICE':order.price,'AMOUNT':order.price,
                       'PNDS':0,'AMOUNTNDS':'-','ALLAMOUNT':order.price}]}
+    return fill_excel_template(template_filename, tel, request)
+
+@login_required
+def print_bill(request, book):
+    template_filename = 'todo.xls'
+    fullname = 'ООО санаторий "Хопровские зори"'
+    saleaddress = 'Пензенская обл., п.Колышлей, ул.Лесная 1а'
+    vendor = fullname + ' ' + saleaddress
+    #if order.patient.address:
+    #    a = order.patient.address
+    #else:
+    a = ""
+    client  = book.name+a
+    dir = gavnetso.getEmployerByRoleNameAndDate('Директор',book.start_date).__unicode__()
+    gb = gavnetso.getEmployerByRoleNameAndDate('Главный бухгалтер',book.start_date).__unicode__()
+    kassir = gavnetso.getEmployerByRoleNameAndDate('Кассир',book.start_date).__unicode__()
+    delt = book.end_date - book.start_date
+    days = delt.days + 1
+    tovar = 'Пут. сан.-кур. на '+str(days)+' дней c '+str(book.start_date)+' по '+str(book.end_date)
+    tel = {'PORTRAIT':False, 'NUMPAGES':1,'SALER': fullname, 'NUMBER': book.bill,
+           'FILENAME': 'schet-'+str(book.bill),
+           'CLIENT': book.name, 'CLIENTADDRESS': "",
+           'CLIENTALL': client, 'VENDOR': vendor,
+           'DIRECTOR': dir,
+           'GBUH': gb,
+           'KASSIR': kassir,
+           'INN': '5817000430 / 581701001',
+           'SALEADDRESS': saleaddress,
+           'DATE':book.start_date, 'QTYSUM':1, 'AMOUNTSUM':book.amount, 'AMOUNTNDSSUM':book.amount, 'ALLAMOUNTSUM':book.amount,
+           'TOVAR': [{'ROWINDEX':1,'NAME':tovar,'QTY':1,'PRICE':book.amount,'AMOUNT':book.amount,
+                      'PNDS':0,'AMOUNTNDS':'-','ALLAMOUNT':book.amount}]}
     return fill_excel_template(template_filename, tel, request)
 
 @login_required

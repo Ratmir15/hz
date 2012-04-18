@@ -419,6 +419,8 @@ class Book(models.Model):
     phone = models.CharField(max_length = 100, blank=True, verbose_name='Телефон')
     description = models.CharField(max_length = 10000, blank=True,verbose_name='Описание')
     status = models.IntegerField(verbose_name='Статус')
+    bill = models.IntegerField(verbose_name='Номер счета')
+    amount = models.DecimalField(verbose_name='Сумма',decimal_places=2)
     def __unicode__(self):
         return self.name
     def start_date_n(self):
