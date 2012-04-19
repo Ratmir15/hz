@@ -870,8 +870,7 @@ def mp_save2(request):
                 for mp_type,add_info,times in balance:
                     idx += 1
                     di = getOrCreateDocItem(mp_type.name + " " +add_info)
-                    #TODO calculate price
-                    price = 1
+                    price = di.price()
                     odi = OrderDocumentItem(line = idx, order_document = pko, doc_item = di, quantity = times, price = price)
                     odi.save()
 

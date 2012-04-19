@@ -515,6 +515,11 @@ class DocItem(models.Model):
     name = models.CharField(verbose_name='Наименование',max_length=50)
     def __unicode__(self):
         return self.name
+    def price(self):
+        prices = self.itemprice_set.order_by("-effective_date")
+        if len(prices):
+            return prices[0].price
+        return 0
 
 class OrderDocumentItem(models.Model):
     line = models.IntegerField(verbose_name="№")
