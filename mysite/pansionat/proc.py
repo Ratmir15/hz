@@ -12,6 +12,8 @@ __author__ = 'rpanov'
 def mpp(request):
     list = MedicalProcedureType.objects.all().order_by("name")
     values = {"occupied_list":list}
+    for mpt in list:
+        mpt.add_info_price()
     return render_to_response('pansionat/mplist.html', MenuRequestContext(request, values))
 
 class MedicalProcedureTypeForm(ModelForm):

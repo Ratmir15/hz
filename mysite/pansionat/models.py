@@ -153,7 +153,7 @@ class MedicalProcedureType(models.Model):
         list = MedicalProcedureTypePrice.objects.values("price").filter(mpt = self, add_info="", date_applied__lte = dt).order_by("-date_applied")
         if not len(list):
             return 0
-        print connection.queries
+        #print connection.queries
         return list[0]["price"]
     def add_info_price(self, dt, add_info):
         list = MedicalProcedureTypePrice.objects.values("price").filter(date_applied__lqe = dt, add_info = add_info).order_by("-date_applied")
@@ -420,7 +420,7 @@ class Book(models.Model):
     description = models.CharField(max_length = 10000, blank=True,verbose_name='Описание')
     status = models.IntegerField(verbose_name='Статус')
     bill = models.IntegerField(verbose_name='Номер счета')
-    amount = models.DecimalField(verbose_name='Сумма',decimal_places=2)
+    amount = models.DecimalField(verbose_name='Сумма',decimal_places=2, max_digits=6)
     def __unicode__(self):
         return self.name
     def start_date_n(self):

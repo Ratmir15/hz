@@ -871,6 +871,10 @@ def mp_save2(request):
                     idx += 1
                     di = getOrCreateDocItem(mp_type.name + " " +add_info)
                     price = di.price()
+                    if not price:
+                        price = mp_type.add_info_price(datetime.datetime.now(),add_info)
+                    if not price:
+                        price = mp_type.price(datetime.datetime.now())
                     odi = OrderDocumentItem(line = idx, order_document = pko, doc_item = di, quantity = times, price = price)
                     odi.save()
 
