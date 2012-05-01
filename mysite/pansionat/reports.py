@@ -49,7 +49,7 @@ class MedicalPriceForm(forms.Form):
 
 class LivingForm(forms.Form):
     report_date = forms.DateField(required=True, label='Дата формирования')
-    order_type = forms.ChoiceField([("1","СЗ/ХЗ"),("2","Прочие"),("3","Реабилитация"),("4","Пенза проф"),("5","Самара проф"),("6","Пенза фсс")], label = 'Тип путевки')
+    order_type = forms.ChoiceField([("1","СЗ/ХЗ"),("2","Прочие"),("3","Реабилитация"),("4","Пенза проф"),("5","Самара проф"),("6","Пенза фсс"),("7","Ульяновск проф")], label = 'Тип путевки')
     summ_type = forms.ChoiceField([("1","Общая сумма"),("2","Сумма за день")], label = 'Тип вывода')
 
 class LeavingReport():
@@ -112,17 +112,23 @@ class PFCondition():
         n_list = [u'ПЕНЗА ФСС']
         return upper(order.directive.name) in n_list
 
+class UPCondition():
+
+    def process(self, order):
+        n_list = [u'УЛЬЯНОВСК ПРОФ']
+        return upper(order.directive.name) in n_list
+
 class RCondition():
 
     def process(self, order):
-        n_list = [u'САНАТОРИЙ ХОПРОВСКИЕ ЗОРИ',u'СЕЛЬСКАЯ ЗДРАВНИЦА',u'ПЕНЗА ФСС',u'САМАРА ПРОФ',u'ПЕНЗА ПРОФ']
+        n_list = [u'САНАТОРИЙ ХОПРОВСКИЕ ЗОРИ',u'СЕЛЬСКАЯ ЗДРАВНИЦА',u'ПЕНЗА ФСС',u'САМАРА ПРОФ',u'ПЕНЗА ПРОФ',u'УЛЬЯНОВСК ПРОФ']
         return order.reab or ((not upper(order.directive.name) in n_list) and (order.price==26400 or (order.price>21607 and order.price<21608)))
 
 class ElseCondition():
 
     def process(self, order):
         b = order.price==26400 or (order.price>21607 and order.price<21608)
-        n_list = [u'САНАТОРИЙ ХОПРОВСКИЕ ЗОРИ',u'СЕЛЬСКАЯ ЗДРАВНИЦА',u'ПЕНЗА ФСС',u'САМАРА ПРОФ',u'ПЕНЗА ПРОФ']
+        n_list = [u'САНАТОРИЙ ХОПРОВСКИЕ ЗОРИ',u'СЕЛЬСКАЯ ЗДРАВНИЦА',u'ПЕНЗА ФСС',u'САМАРА ПРОФ',u'ПЕНЗА ПРОФ',u'УЛЬЯНОВСК ПРОФ']
         return not order.reab and not b and (not upper(order.directive.name) in n_list)
 
 tp_map = {
@@ -132,6 +138,7 @@ tp_map = {
     "4":('Пенза проф',"penzaprof",PPCondition()),
     "5":('Самара проф',"samaraprof",SPCondition()),
     "6":('Пенза фсс',"penzafss",PFCondition()),
+    "7":('Ульяновск проф',"ulprof",UPCondition()),
 }
 
 class LivingReport():

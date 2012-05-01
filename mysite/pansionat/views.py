@@ -1451,6 +1451,7 @@ tp_map = {
     "4":('Пенза проф',"penzaprof",PPCondition()),
     "5":('Самара проф',"samaraprof",SPCondition()),
     "6":('Пенза фсс',"penzafss",PFCondition()),
+    "7":('Ульяновск проф',"ulprof",UPCondition()),
 }
 
 tp2_map = {
@@ -1461,6 +1462,7 @@ tp2_map = {
     5:('Пенза проф',"penzaprof",PPCondition()),
     6:('Самара проф',"samaraprof",SPCondition()),
     7:('Пенза фсс',"penzafss",PFCondition()),
+    8:('Ульяновск проф',"ulprof",UPCondition()),
 }
 
 @login_required
