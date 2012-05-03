@@ -26,7 +26,7 @@ from mysite.pansionat.documents import getOrCreateDocItem, createDocument, gener
 from mysite.pansionat.models import IllHistory, Customer, IllHistoryFieldType, IllHistoryFieldValue, IllHistoryRecord, OrderMedicalProcedure, MedicalProcedureType, OrderMedicalProcedureSchedule, Occupied, IllHistoryFieldTypeGroup, EmployerRoleHistory, Role, Employer, OrderDiet, Diet, OrderDay, OrderType, DietItems, Item, ItemPiece, Piece, EmployerCabinet, OrderDocumentItem
 from mysite.pansionat.orders import room_availability, fill_cust_list, return_orders_list
 from mysite.pansionat.proc import MenuRequestContext
-from mysite.pansionat.reports import DietForm, DateFilterForm, PFCondition, ElseCondition, SPCondition, PPCondition, RCondition, SzCondition, HzCondition, HzSzCondition
+from mysite.pansionat.reports import DietForm, DateFilterForm, PFCondition, ElseCondition, SPCondition, PPCondition, RCondition, SzCondition, HzCondition, HzSzCondition, UPCondition
 from pytils import numeral
 from mysite.pansionat.gavnetso import monthlabel, nextmonthfirstday, initroles, initroomtypes, initdiet, fillBookDays, fillOrderDays, inithistory, import_bron, import_proc, import_rooms, import_ordertypes, fillBookAllDays, getEmployersByRoleAndDate
 import datetime
