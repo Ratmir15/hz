@@ -643,16 +643,26 @@ def medical_procedures_print2(request, order_id):
 
     order_scheduled = OrderMedicalProcedure.objects.filter(order = ord)
     p = []
+    allsum = 0;
     for omp in order_scheduled:
         entry = dict()
         entry['DATE'] = omp.times
         entry['TIME'] = omp.times
         entry['NAME'] = omp.mp_type.name +" " +omp.add_info
+
+        price = omp.mp_type.add_info_price(datetime.datetime.now(),omp.add_info)
+        if not price:
+            price = omp.mp_type.price(datetime.datetime.now())
+        csum = omp.times * price
+        entry['SUM'] = csum
+        allsum += csum
+
         p.append(entry)
 
     tel = { 'P': p,
             'FILENAME': 'procedures-'+str(ord.code),
             'PATIENT': ord.patient.fio(),
+            'ALLSUM': allsum
             }
     template_filename = 'mp2.xls'
     return fill_excel_template(template_filename, tel, request)

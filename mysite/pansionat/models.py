@@ -150,16 +150,17 @@ class MedicalProcedureType(models.Model):
     def actual_price(self):
         return self.price(datetime.date.today())
     def price(self, dt):
-        list = MedicalProcedureTypePrice.objects.values("price").filter(mpt = self, add_info="", date_applied__lte = dt).order_by("-date_applied")
-        if not len(list):
-            return 0
-        #print connection.queries
-        return list[0]["price"]
+        list = MedicalProcedureTypePrice.objects.values("price","date_applied").filter(mpt = self, add_info="").order_by("-date_applied")
+        for v in list:
+            if datetime.datetime.combine(v["date_applied"], datetime.time(0, 0))<dt:
+                return v["price"]
+        return 0
     def add_info_price(self, dt, add_info):
-        list = MedicalProcedureTypePrice.objects.values("price").filter(date_applied__lqe = dt, add_info = add_info).order_by("-date_applied")
-        if not len(list):
-            return 0
-        return list[0]["price"]
+        list = MedicalProcedureTypePrice.objects.values("price","date_applied").filter(mpt = self, add_info = add_info).order_by("-date_applied")
+        for v in list:
+            if datetime.datetime.combine(v["date_applied"], datetime.time(0, 0))<dt:
+                return v["price"]
+        return 0
 
     class Meta:
         verbose_name = 'Тип медицинской процедуры'
