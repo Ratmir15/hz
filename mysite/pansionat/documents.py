@@ -198,7 +198,14 @@ def print_doc(request, doc_id):
           'AMOUNTNDS': '-', 'ALLAMOUNT': dti.amount()})
     order_price = od.all_amount()
     order_date = order.start_date.strftime('%d.%m.%Y')
-    return generateNakl(order, order_date, order_price, request, t)
+    if od.doc_type=="N":
+        return generateNakl(order, order_date, order_price, request, t)
+    if od.doc_type=="S":
+        return s(request, od)
+    if od.doc_type=="P":
+        return generate_pko(request, order.patient.fio(),od.code,order.end_date,order_price,order.putevka,order.start_date)
+    if od.doc_type=="R":
+        return r(request, od)
 
 @login_required
 @permission_required('pansionat.add_orderdocument', login_url='/forbidden/')
@@ -216,6 +223,24 @@ def open_doc(request, order_id, doc_id):
     values = {"id":order.id,"docs":ds}
     return render_to_response('pansionat/nakl.html', MenuRequestContext(request, values))
 
+@login_required
+def generate_pko(request, client, code, ed, price, putevka, sd):
+    template_filename = 'prih_order1.xls'
+    fullname = 'ООО санаторий "Хопровские зори"'
+    gb = gavnetso.getEmployerByRoleNameAndDate('Главный бухгалтер', sd).__unicode__()
+    kassir = gavnetso.getEmployerByRoleNameAndDate('Кассир', sd).__unicode__()
+    delt = ed - sd
+    days = delt.days + 1
+    tovar = 'Пут. сан.-кур. на ' + str(days) + ' дней c ' + str(sd) + ' по ' + str(ed) + '№ ' + str(putevka)
+    tel = {'NUMPAGES': 1, 'FULLNAME': fullname, 'NUMBER': code,
+           'FILENAME': 'pko-' + str(code),
+           'CLIENT': client,
+           'GBUH': gb,
+           'KASSIR': kassir,
+           'PRICE': price,
+           'DATE': sd.strftime('%d.%m.%Y'),
+           'DESCRIPTION': tovar}
+    return fill_excel_template(template_filename, tel, request)
 
 def generateNakl(order, order_date, order_price, request, t):
     template_filename = 'torg12_0.xls'

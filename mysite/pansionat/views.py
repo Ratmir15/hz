@@ -22,7 +22,7 @@ from django.shortcuts import render_to_response
 from django.shortcuts import redirect 
 import logging
 from mysite.pansionat import gavnetso
-from mysite.pansionat.documents import getOrCreateDocItem, createDocument, generateNakl
+from mysite.pansionat.documents import getOrCreateDocItem, createDocument, generateNakl, generate_pko
 from mysite.pansionat.models import IllHistory, Customer, IllHistoryFieldType, IllHistoryFieldValue, IllHistoryRecord, OrderMedicalProcedure, MedicalProcedureType, OrderMedicalProcedureSchedule, Occupied, IllHistoryFieldTypeGroup, EmployerRoleHistory, Role, Employer, OrderDiet, Diet, OrderDay, OrderType, DietItems, Item, ItemPiece, Piece, EmployerCabinet, OrderDocumentItem
 from mysite.pansionat.orders import room_availability, fill_cust_list, return_orders_list
 from mysite.pansionat.proc import MenuRequestContext
@@ -1830,23 +1830,13 @@ def rootik(request, order_id):
 @login_required
 def pko(request, occupied_id):
     order = Order.objects.get(id=occupied_id)
-    template_filename = 'prih_order1.xls'
-    fullname = 'ООО санаторий "Хопровские зори"'
+    code = order.code
+    putevka = order.putevka
+    sd = order.start_date
+    ed = order.end_date
     client  = order.patient.fio()
-    gb = gavnetso.getEmployerByRoleNameAndDate('Главный бухгалтер',order.start_date).__unicode__()
-    kassir = gavnetso.getEmployerByRoleNameAndDate('Кассир',order.start_date).__unicode__()
-    delt = order.end_date - order.start_date
-    days = delt.days + 1
-    tovar = 'Пут. сан.-кур. на '+str(days)+' дней c '+str(order.start_date)+' по '+str(order.end_date) + '№ '+ str(order.putevka)
-    tel = { 'NUMPAGES':1,'FULLNAME': fullname, 'NUMBER': order.code,
-           'FILENAME': 'pko-'+str(order.code),
-           'CLIENT': client,
-           'GBUH': gb,
-           'KASSIR': kassir,
-           'PRICE': order.price,
-           'DATE':order.start_date.strftime('%d.%m.%Y'),
-           'DESCRIPTION':tovar}
-    return fill_excel_template(template_filename, tel, request)
+    price = order.price
+    return generate_pko(request, client, code, ed, price, putevka, sd)
 
 @login_required
 def rko(request, occupied_id):
